@@ -8,7 +8,7 @@ const LOG_LEVELS = {
 type LogLevel = keyof typeof LOG_LEVELS;
 
 class Logger {
-    private static formatMessage(level: LogLevel, message: string, _data?: any) {
+    private static formatMessage(level: LogLevel, message: string) {
         const timestamp = new Date().toISOString();
         return `[${timestamp}] [${level}] ${message}`;
     }
