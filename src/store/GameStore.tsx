@@ -828,14 +828,20 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 if (count >= maxCycles) {
                     clearInterval(interval);
                     setTimeout(() => {
-                        // Only Host (Player 0) generates the deal to prevent race conditions
-                        // This assumes everyone agrees who Player 0 is or names match.
-                        // Best robust check: Am I sitting in seat 0? (state.players[0].name === state.currentUser)
-                        if (state.players[0].name === state.currentUser) {
+                        // Determine who should generate the dealer
+                        // The first human player (lowest seat index) generates to avoid race conditions
+                        const firstHumanSeat = state.players.findIndex(p => p.name && !p.isComputer);
+                        const myPlayerIndex = state.players.findIndex(p => p.name === state.currentUser);
+                        const shouldIGenerate = myPlayerIndex !== -1 && (myPlayerIndex === firstHumanSeat || firstHumanSeat === -1);
+
+                        Logger.info(`Dealer selection: myIndex=${myPlayerIndex}, firstHuman=${firstHumanSeat}, shouldGenerate=${shouldIGenerate}`);
+
+                        if (shouldIGenerate) {
                             const deck = shuffleDeck(createDeck());
                             const { hands, kitty } = dealHands(deck);
                             const upcard = kitty[0];
 
+                            Logger.info(`Generating and broadcasting dealer selection: ${count % 4}`);
                             broadcastDispatch({
                                 type: 'SET_DEALER',
                                 payload: {
@@ -844,6 +850,8 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                                     upcard
                                 }
                             });
+                        } else {
+                            Logger.info(`Waiting for dealer selection from another player`);
                         }
                     }, 500);
                 }
