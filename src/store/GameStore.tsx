@@ -296,9 +296,35 @@ const gameReducer = (state: GameState, action: Action): GameState => {
             const upcard = action.payload.upcard;
 
             if (!hands || !upcard) {
-                // This should ideally not happen in strict mode, but safeguards old calls
-                // We will defer to a separate effect or assume payload is robust in new version
-                return state;
+                // Determine deck locally if not provided (fallback)
+                const deck = shuffleDeck(createDeck());
+                const { hands: h, kitty: k } = dealHands(deck);
+                return {
+                    ...state,
+                    // recursion or re-dispatch would be better but for now inline:
+                    players: state.players.map((p, i) => ({
+                        ...p,
+                        hand: p.name === state.currentViewPlayerName && !p.isComputer ? sortHand(h[i], null) : h[i]
+                    })),
+                    phase: 'bidding',
+                    dealerIndex: dealerIndex,
+                    displayDealerIndex: undefined,
+                    upcard: k[0],
+                    biddingRound: 1,
+                    trump: null,
+                    trumpCallerIndex: null,
+                    isLoner: false,
+                    currentTrick: [],
+                    tricksWon: state.players.reduce((acc, p) => ({ ...acc, [p.id]: 0 }), {}),
+                    currentPlayerIndex: (dealerIndex + 1) % 4,
+                    logs: [`${state.players[dealerIndex].name} is dealing. ${state.players[(dealerIndex + 1) % 4].name} to bid.`, ...state.logs],
+                    eventLog: [...state.eventLog, {
+                        type: 'dealer',
+                        dealerIndex,
+                        dealerName: state.players[dealerIndex].name || 'Bot',
+                        timestamp: Date.now()
+                    }]
+                };
             }
 
             const dealerEvent: GameEvent = {
@@ -680,12 +706,12 @@ const gameReducer = (state: GameState, action: Action): GameState => {
                 players: updatedPlayers,
                 scores: newScores,
                 dealerIndex: (state.dealerIndex + 1) % 4,
-                phase: isGameOver ? 'game_over' : 'playing',
+                phase: isGameOver ? 'game_over' : 'waiting_for_next_deal',
                 handsPlayed: state.handsPlayed + 1,
                 history: [handResult, ...state.history].slice(0, 10),
                 eventLog: newEventLog,
-                logs: [isGameOver ? 'GAME OVER!' : state.logs[0], ...state.logs],
-                overlayMessage: isGameOver ? 'GAME OVER!' : null,
+                logs: [isGameOver ? 'GAME OVER!' : 'Hand finished. Next deal in 4 seconds...', ...state.logs],
+                overlayMessage: isGameOver ? 'GAME OVER!' : `Hand Winner: ${newScores.team1 > state.scores.team1 ? state.teamNames.team1 : state.teamNames.team2}`,
             };
         }
 
@@ -695,29 +721,7 @@ const gameReducer = (state: GameState, action: Action): GameState => {
 };
 
 const gameReducerFixed = (state: GameState, action: Action): GameState => {
-    const newState = gameReducer(state, action);
-    if (action.type === 'FINISH_HAND' && newState.phase !== 'game_over') {
-        const deck = shuffleDeck(createDeck());
-        const { hands, kitty } = dealHands(deck);
-        const upcard = kitty[0];
-        return {
-            ...newState,
-            players: newState.players.map((p, i) => ({
-                ...p,
-                hand: p.name === state.currentViewPlayerName && !p.isComputer ? sortHand(hands[i], null) : hands[i]
-            })),
-            phase: 'bidding',
-            upcard,
-            biddingRound: 1,
-            trump: null,
-            trumpCallerIndex: null,
-            isLoner: false,
-            currentTrick: [],
-            tricksWon: newState.players.reduce((acc, p) => ({ ...acc, [p.id]: 0 }), {}),
-            currentPlayerIndex: (newState.dealerIndex + 1) % 4,
-        };
-    }
-    return newState;
+    return gameReducer(state, action);
 };
 
 // --- Context ---
@@ -825,11 +829,58 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 if (count >= maxCycles) {
                     clearInterval(interval);
                     setTimeout(() => {
-                        dispatch({ type: 'SET_DEALER', payload: { dealerIndex: count % 4 } });
+                        // Only Host (Player 0) generates the deal to prevent race conditions
+                        // This assumes everyone agrees who Player 0 is or names match.
+                        // Best robust check: Am I sitting in seat 0? (state.players[0].name === state.currentUser)
+                        if (state.players[0].name === state.currentUser) {
+                            const deck = shuffleDeck(createDeck());
+                            const { hands, kitty } = dealHands(deck);
+                            const upcard = kitty[0];
+
+                            dispatch({
+                                type: 'SET_DEALER',
+                                payload: {
+                                    dealerIndex: count % 4,
+                                    hands,
+                                    upcard
+                                }
+                            });
+                        }
                     }, 500);
                 }
             }, 100);
             return () => clearInterval(interval);
+        }
+    }, [state.phase]);
+
+    // Handle transition to next hand (Rotating Dealer)
+    useEffect(() => {
+        if (state.phase === 'waiting_for_next_deal') {
+            const timer = setTimeout(() => {
+                const nextDealer = state.players[state.dealerIndex];
+
+                // The new dealer is responsible for generating the cards
+                // If dealer is a bot, the Host (Player 0) takes responsibility
+                const isMyResponsibility =
+                    (nextDealer.name === state.currentUser) ||
+                    (nextDealer.isComputer && state.players[0].name === state.currentUser);
+
+                if (isMyResponsibility) {
+                    const deck = shuffleDeck(createDeck());
+                    const { hands, kitty } = dealHands(deck);
+                    const upcard = kitty[0];
+
+                    dispatch({
+                        type: 'SET_DEALER',
+                        payload: {
+                            dealerIndex: state.dealerIndex,
+                            hands,
+                            upcard
+                        }
+                    });
+                }
+            }, 4000);
+            return () => clearTimeout(timer);
         }
     }, [state.phase]);
 

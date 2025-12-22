@@ -34,7 +34,7 @@ export interface PlayerStats {
     swept: number; // Opponent took all 5
 }
 
-export type GamePhase = 'login' | 'landing' | 'lobby' | 'randomizing_dealer' | 'bidding' | 'discard' | 'playing' | 'waiting_for_trick' | 'scoring' | 'game_over';
+export type GamePhase = 'login' | 'landing' | 'lobby' | 'randomizing_dealer' | 'bidding' | 'discard' | 'playing' | 'waiting_for_trick' | 'scoring' | 'waiting_for_next_deal' | 'game_over';
 
 export interface HandResult {
     dealerIndex: number;
