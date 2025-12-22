@@ -31,7 +31,7 @@ type Action =
     | { type: 'EXIT_TO_LANDING' };
 
 // --- Constants ---
-export const BOT_NAMES_POOL = ['Josh', 'Jake', 'Jordan', 'Brien', 'Michael', 'Evan'];
+export const BOT_NAMES_POOL = ['Fizz', 'J-Bock', 'Huber', 'Moses', 'Wooden', 'Buff'];
 const TABLE_NAME_ADJECTIVES = ['Midnight', 'Emerald', 'Golden', 'Royal', 'Crimson', 'Azure', 'Silent', 'Dancing'];
 const TABLE_NAME_NOUNS = ['Bower', 'Trump', 'Dealer', 'Ace', 'Table', 'Lounge', 'Deck', 'Circle'];
 
@@ -143,8 +143,22 @@ const gameReducer = (state: GameState, action: Action): GameState => {
         case 'CLEAR_OVERLAY':
             return { ...state, overlayMessage: null };
 
-        case 'LOGIN':
-            return { ...state, currentUser: action.payload.userName, phase: 'landing' };
+        case 'LOGIN': {
+            // Case-insensitive login but preserve the entered capitalization
+            const enteredName = action.payload.userName;
+            const normalizedName = enteredName.toLowerCase();
+
+            // Check against known users (case-insensitive)
+            const knownUsers = ['aaron', 'polina', 'gray-gray', 'mimi', 'micah', 'cherrie'];
+            const matchedUser = knownUsers.find(u => u === normalizedName);
+
+            // Use the matched capitalization if found, otherwise use what was entered
+            const displayName = matchedUser
+                ? ['Aaron', 'Polina', 'Gray-Gray', 'Mimi', 'Micah', 'Cherrie'][knownUsers.indexOf(matchedUser)]
+                : enteredName;
+
+            return { ...state, currentUser: displayName, phase: 'landing' };
+        }
 
         case 'LOGOUT':
             return INITIAL_STATE_FUNC();
@@ -710,7 +724,7 @@ const gameReducer = (state: GameState, action: Action): GameState => {
                 history: [handResult, ...state.history].slice(0, 10),
                 eventLog: newEventLog,
                 logs: [isGameOver ? 'GAME OVER!' : 'Hand finished. Next deal in 4 seconds...', ...state.logs],
-                overlayMessage: isGameOver ? 'GAME OVER!' : `Hand Winner: ${newScores.team1 > state.scores.team1 ? state.teamNames.team1 : state.teamNames.team2}`,
+                overlayMessage: null,
             };
         }
 

@@ -849,6 +849,11 @@ const GameView = () => {
                                             <div className="text-center">
                                                 <div className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Your Turn to Bid</div>
                                                 <div className="text-xl font-black text-white italic tracking-tighter">What's the call?</div>
+                                                {state.upcard && state.dealerIndex !== -1 && (
+                                                    <div className="text-[10px] font-bold text-slate-400 mt-2">
+                                                        Your {(myIdx + 2) % 4 === state.dealerIndex ? 'teammate' : 'opponent'} {state.players[state.dealerIndex].name} is the dealer
+                                                    </div>
+                                                )}
                                             </div>
                                             {state.biddingRound === 1 ? (
                                                 <div className="flex gap-4">
