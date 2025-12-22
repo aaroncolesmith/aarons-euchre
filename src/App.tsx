@@ -145,6 +145,10 @@ const PlayerSeat = ({
                     {player.hand.length} CARDS
                 </motion.div>
             )}
+
+            <div className="absolute -bottom-6 text-[8px] font-black text-slate-600 uppercase tracking-widest opacity-50">
+                {position === 'bottom' ? 'South' : position === 'left' ? 'West' : position === 'top' ? 'North' : 'East'}
+            </div>
         </motion.div>
     );
 };
@@ -600,18 +604,34 @@ const GameView = () => {
             <div className="w-full h-full max-w-7xl max-h-screen flex p-4 md:p-6 gap-6 overflow-hidden">
                 {/* Table Commentary Log */}
                 <div className="w-72 bg-slate-900/90 rounded-[3rem] border border-slate-800/50 p-6 backdrop-blur-3xl flex flex-col shadow-2xl shrink-0">
-                    <div className="flex justify-between items-center mb-4">
-                        <h2 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                            Table Commentary
-                        </h2>
-                        {state.phase !== 'lobby' && (
-                            <button
-                                onClick={() => dispatch({ type: 'EXIT_TO_LANDING' })}
-                                className="text-[8px] font-black text-red-500/50 hover:text-red-500 uppercase tracking-widest"
+                    <div className="flex flex-col gap-4 mb-4">
+                        <div className="flex justify-between items-center">
+                            <h2 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                Table Commentary
+                            </h2>
+                            {state.phase !== 'lobby' && (
+                                <button
+                                    onClick={() => dispatch({ type: 'EXIT_TO_LANDING' })}
+                                    className="text-[8px] font-black text-red-500/50 hover:text-red-500 uppercase tracking-widest"
+                                >
+                                    Exit
+                                </button>
+                            )}
+                        </div>
+
+                        {state.tableCode && (
+                            <div className="bg-slate-950 rounded-2xl p-3 border border-slate-800 flex items-center justify-between group cursor-pointer hover:border-emerald-500/50 transition-all"
+                                onClick={() => navigator.clipboard.writeText(state.tableCode!)}
                             >
-                                Exit
-                            </button>
+                                <div>
+                                    <div className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-0.5">Table Code</div>
+                                    <div className="text-xl font-black text-white tracking-widest group-hover:text-emerald-400 transition-colors">{state.tableCode}</div>
+                                </div>
+                                <div className="text-[8px] font-black text-slate-600 uppercase tracking-widest bg-slate-900 px-2 py-1 rounded group-hover:bg-emerald-500/10 group-hover:text-emerald-500 transition-colors">
+                                    COPY
+                                </div>
+                            </div>
                         )}
                     </div>
                     <div className="flex-1 overflow-y-auto space-y-3 pr-2 scrollbar-thin scrollbar-thumb-slate-800">
