@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
-import { GameProvider, useGame, getEmptyStats, getSavedGames } from './store/GameStore';
+import { GameProvider, useGame, getEmptyStats, getSavedGames, BOT_NAMES_POOL } from './store/GameStore';
 import { getEffectiveSuit, isValidPlay } from './utils/rules';
 import { Card, HandResult } from './types/game';
 import { supabase } from './lib/supabase';
@@ -51,7 +51,12 @@ const PlayerSeat = ({
                         Sit Here
                     </button>
                     <button
-                        onClick={() => dispatch({ type: 'ADD_BOT', payload: { seatIndex: index } })}
+                        onClick={() => {
+                            const activeBotNames = state.players.map(p => p.name).filter(n => n && BOT_NAMES_POOL.includes(n));
+                            const availableBots = BOT_NAMES_POOL.filter(n => !activeBotNames.includes(n));
+                            const botName = availableBots[Math.floor(Math.random() * availableBots.length)] || 'Bot ' + Math.random().toString().substr(2, 3);
+                            dispatch({ type: 'ADD_BOT', payload: { seatIndex: index, botName } });
+                        }}
                         className="bg-slate-800 hover:bg-slate-700 text-slate-400 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border border-slate-700 transition-all"
                     >
                         Add Bot

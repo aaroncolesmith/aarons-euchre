@@ -13,7 +13,7 @@ type Action =
     | { type: 'LOGOUT' }
     | { type: 'LOAD_EXISTING_GAME'; payload: { gameState: GameState } }
     | { type: 'SIT_PLAYER'; payload: { seatIndex: number; name: string } }
-    | { type: 'ADD_BOT'; payload: { seatIndex: number; botName?: string } }
+    | { type: 'ADD_BOT'; payload: { seatIndex: number; botName: string } }
     | { type: 'REMOVE_PLAYER'; payload: { seatIndex: number } }
     | { type: 'START_MATCH' }
     | { type: 'UPDATE_ANIMATION_DEALER'; payload: { index: number } }
@@ -31,7 +31,7 @@ type Action =
     | { type: 'EXIT_TO_LANDING' };
 
 // --- Constants ---
-const BOT_NAMES_POOL = ['Josh', 'Jake', 'Jordan', 'Brien', 'Michael', 'Evan'];
+export const BOT_NAMES_POOL = ['Josh', 'Jake', 'Jordan', 'Brien', 'Michael', 'Evan'];
 const TABLE_NAME_ADJECTIVES = ['Midnight', 'Emerald', 'Golden', 'Royal', 'Crimson', 'Azure', 'Silent', 'Dancing'];
 const TABLE_NAME_NOUNS = ['Bower', 'Trump', 'Dealer', 'Ace', 'Table', 'Lounge', 'Deck', 'Circle'];
 
@@ -226,11 +226,6 @@ const gameReducer = (state: GameState, action: Action): GameState => {
 
         case 'ADD_BOT': {
             const globalStats = getGlobalStats();
-            const activeBotNames = state.players.map(p => p.name).filter(n => n && BOT_NAMES_POOL.includes(n));
-            const availableBots = BOT_NAMES_POOL.filter(n => !activeBotNames.includes(n));
-
-            if (availableBots.length === 0) return state;
-
             const botName = action.payload.botName;
 
             return {
