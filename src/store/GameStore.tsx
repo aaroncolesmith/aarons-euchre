@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useReducer, ReactNode, useRef } from 'react';
-import { GameState, Suit, HandResult, PlayerStats, Player, GameEvent } from '../types/game';
+import { GameState, Suit, HandResult, PlayerStats, Player, GameEvent, Card } from '../types/game';
 import { supabase } from '../lib/supabase';
 import { createDeck, dealHands, shuffleDeck } from '../utils/deck';
 import { getBestBid, getEffectiveSuit, determineWinner, shouldCallTrump, getBotMove, sortHand } from '../utils/rules';
@@ -16,8 +16,8 @@ type Action =
     | { type: 'ADD_BOT'; payload: { seatIndex: number; botName?: string } }
     | { type: 'REMOVE_PLAYER'; payload: { seatIndex: number } }
     | { type: 'START_MATCH' }
-    | { type: 'SET_DEALER'; payload: { dealerIndex: number } }
     | { type: 'UPDATE_ANIMATION_DEALER'; payload: { index: number } }
+    | { type: 'SET_DEALER'; payload: { dealerIndex: number; hands?: Card[][]; upcard?: Card } }
     | { type: 'MAKE_BID'; payload: { suit: Suit; callerIndex: number; isLoner: boolean } }
     | { type: 'PASS_BID'; payload: { playerIndex: number } }
     | { type: 'DISCARD_CARD'; payload: { playerIndex: number; cardId: string } }
@@ -231,7 +231,7 @@ const gameReducer = (state: GameState, action: Action): GameState => {
 
             if (availableBots.length === 0) return state;
 
-            const botName = action.payload.botName || availableBots[Math.floor(Math.random() * availableBots.length)];
+            const botName = action.payload.botName;
 
             return {
                 ...state,
@@ -291,9 +291,15 @@ const gameReducer = (state: GameState, action: Action): GameState => {
 
         case 'SET_DEALER': {
             const dealerIndex = action.payload.dealerIndex;
-            const deck = shuffleDeck(createDeck());
-            const { hands, kitty } = dealHands(deck);
-            const upcard = kitty[0];
+            // Use received hands/upcard if provided (Multiplayer/Deterministic), or generate if local host and valid
+            const hands = action.payload.hands;
+            const upcard = action.payload.upcard;
+
+            if (!hands || !upcard) {
+                // This should ideally not happen in strict mode, but safeguards old calls
+                // We will defer to a separate effect or assume payload is robust in new version
+                return state;
+            }
 
             const dealerEvent: GameEvent = {
                 type: 'dealer',
