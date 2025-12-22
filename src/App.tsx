@@ -469,10 +469,38 @@ const LandingPage = () => {
     const [showJoin, setShowJoin] = useState(false);
 
     const savedGamesRaw = getSavedGames();
-    const savedGames = Object.values(savedGamesRaw).filter(g =>
-        g.currentUser === state.currentUser ||
-        g.players.some(p => p.name === state.currentUser)
-    );
+    const savedGames = Object.values(savedGamesRaw)
+        .filter(g =>
+            g.currentUser === state.currentUser ||
+            g.players.some(p => p.name === state.currentUser)
+        )
+        .sort((a, b) => {
+            // Sort by most recent activity (assuming tableId contains timestamp or we use a heuristic)
+            // For now, we'll use phase progression as a proxy for activity
+            const phaseOrder = ['lobby', 'randomizing_dealer', 'bidding', 'discard', 'playing', 'waiting_for_trick', 'scoring', 'waiting_for_next_deal', 'game_over'];
+            return phaseOrder.indexOf(b.phase) - phaseOrder.indexOf(a.phase);
+        });
+
+    const getTimeAgo = (_game: any) => {
+        // Since we don't have timestamps, we'll use a placeholder
+        // In a real app, you'd store updated_at in the game state
+        return "Recently";
+    };
+
+    const handleCodeChange = (value: string) => {
+        // Remove any non-digit characters except dash
+        let cleaned = value.replace(/[^\d-]/g, '');
+
+        // Remove existing dashes
+        cleaned = cleaned.replace(/-/g, '');
+
+        // Add dash after 3 digits
+        if (cleaned.length > 3) {
+            cleaned = cleaned.slice(0, 3) + '-' + cleaned.slice(3, 6);
+        }
+
+        setCode(cleaned);
+    };
 
     const handleJoinTable = async () => {
         if (!code) return;
@@ -494,8 +522,8 @@ const LandingPage = () => {
     };
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-full w-full max-w-2xl p-8 animate-in fade-in zoom-in duration-700 overflow-y-auto pb-20">
-            <div className="flex justify-between items-center w-full mb-12">
+        <div className="flex flex-col items-center justify-start min-h-full w-full max-w-2xl p-8 animate-in fade-in zoom-in duration-700 overflow-y-auto pb-20">
+            <div className="flex justify-between items-center w-full mb-8">
                 <div>
                     <h1 className="text-5xl font-black bg-gradient-to-br from-emerald-400 via-cyan-400 to-blue-500 bg-clip-text text-transparent italic leading-none tracking-tighter">
                         EUCHRE
@@ -510,11 +538,64 @@ const LandingPage = () => {
                 </button>
             </div>
 
-            <div className="w-full space-y-10">
+            <div className="w-full space-y-6">
+                {/* Create/Join Buttons at Top */}
+                {!showJoin ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <button
+                            onClick={() => dispatch({ type: 'CREATE_TABLE', payload: { userName: state.currentUser! } })}
+                            className="bg-white text-slate-950 font-black py-10 rounded-[2.5rem] text-xl shadow-2xl hover:scale-105 active:scale-95 transition-all text-center flex flex-col items-center justify-center border-4 border-transparent hover:border-emerald-400"
+                        >
+                            <span className="text-[10px] opacity-40 mb-1 uppercase tracking-widest">Start New</span>
+                            CREATE GAME
+                        </button>
+                        <button
+                            onClick={() => setShowJoin(true)}
+                            className="bg-slate-900 text-white font-black py-10 rounded-[2.5rem] text-xl border-2 border-slate-800 hover:bg-slate-800 active:scale-95 transition-all flex flex-col items-center justify-center text-center hover:border-cyan-500/50"
+                        >
+                            <span className="text-[10px] text-slate-600 mb-1 uppercase tracking-widest">Private Table</span>
+                            JOIN EXISTING
+                        </button>
+                    </div>
+                ) : (
+                    <div className="space-y-6 animate-in slide-in-from-right-8 duration-500 bg-slate-900/50 p-8 rounded-[3rem] border-2 border-slate-800">
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-4">6-DIGIT CODE</label>
+                            <input
+                                autoFocus
+                                value={code}
+                                onChange={(e) => handleCodeChange(e.target.value)}
+                                maxLength={7}
+                                className="w-full bg-slate-950 border-2 border-slate-800 rounded-3xl px-8 py-5 text-4xl font-black text-white text-center focus:border-emerald-500 outline-none transition-all placeholder:text-slate-800"
+                                placeholder="000-000"
+                            />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <button
+                                onClick={() => { setShowJoin(false); setCode(''); }}
+                                className="bg-slate-800 text-white font-black py-6 rounded-3xl text-xl border-2 border-slate-700 hover:bg-slate-700 transition-all"
+                            >
+                                CANCEL
+                            </button>
+                            <button
+                                onClick={handleJoinTable}
+                                className="bg-emerald-500 text-white font-black py-6 rounded-3xl text-xl shadow-2xl hover:scale-105 active:scale-95 transition-all"
+                            >
+                                JOIN TABLE
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {/* Saved Games Section */}
                 {savedGames.length > 0 && (
                     <div className="space-y-4">
-                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-4">CONTINUE PROGRESS</label>
-                        <div className="grid grid-cols-1 gap-3">
+                        <div className="relative">
+                            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-800/50"></div></div>
+                            <div className="relative flex justify-center text-[10px] uppercase tracking-[0.3em] font-black text-slate-700 bg-slate-950 px-4">Continue Progress</div>
+                        </div>
+
+                        <div className="max-h-[400px] overflow-y-auto space-y-3 pr-2 scrollbar-thin scrollbar-thumb-slate-800 scrollbar-track-slate-950">
                             {savedGames.map(game => (
                                 <button
                                     key={game.tableId}
@@ -526,63 +607,15 @@ const LandingPage = () => {
                                         <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1 opacity-60">
                                             {game.phase} • Team A: {game.scores.team1} Team B: {game.scores.team2}
                                         </div>
+                                        <div className="text-[9px] font-bold text-slate-600 mt-1">
+                                            Last Activity: {getTimeAgo(game)}
+                                        </div>
                                     </div>
                                     <div className="bg-slate-800 text-[10px] font-black px-6 py-3 rounded-2xl text-slate-400 group-hover:bg-emerald-500 group-hover:text-white transition-all uppercase tracking-widest">
-                                        Resume Game
+                                        Resume
                                     </div>
                                 </button>
                             ))}
-                        </div>
-                    </div>
-                )}
-
-                <div className="relative">
-                    <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-800/50"></div></div>
-                    <div className="relative flex justify-center text-[10px] uppercase tracking-[0.3em] font-black text-slate-700 bg-slate-950 px-4">New Table</div>
-                </div>
-
-                {!showJoin ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <button
-                            onClick={() => dispatch({ type: 'CREATE_TABLE', payload: { userName: state.currentUser! } })}
-                            className="bg-white text-slate-950 font-black py-10 rounded-[2.5rem] text-xl shadow-2xl hover:scale-105 active:scale-95 transition-all text-center flex flex-col items-center justify-center border-4 border-transparent hover:border-emerald-400"
-                        >
-                            <span className="text-[10px] opacity-40 mb-1 uppercase tracking-widest">Start New</span>
-                            HOST GAME
-                        </button>
-                        <button
-                            onClick={() => setShowJoin(true)}
-                            className="bg-slate-900 text-white font-black py-10 rounded-[2.5rem] text-xl border-2 border-slate-800 hover:bg-slate-800 active:scale-95 transition-all flex flex-col items-center justify-center text-center hover:border-cyan-500/50"
-                        >
-                            <span className="text-[10px] text-slate-600 mb-1 uppercase tracking-widest">Private Table</span>
-                            JOIN CODE
-                        </button>
-                    </div>
-                ) : (
-                    <div className="space-y-6 animate-in slide-in-from-right-8 duration-500 bg-slate-900/50 p-8 rounded-[3rem] border-2 border-slate-800">
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-4">6-DIGIT CODE</label>
-                            <input
-                                autoFocus
-                                value={code}
-                                onChange={(e) => setCode(e.target.value)}
-                                className="w-full bg-slate-950 border-2 border-slate-800 rounded-3xl px-8 py-5 text-4xl font-black text-white text-center focus:border-emerald-500 outline-none transition-all placeholder:text-slate-800"
-                                placeholder="000-000"
-                            />
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                            <button
-                                onClick={() => setShowJoin(false)}
-                                className="bg-slate-800 text-white font-black py-6 rounded-3xl text-xl border-2 border-slate-700 hover:bg-slate-700 transition-all"
-                            >
-                                CANCEL
-                            </button>
-                            <button
-                                onClick={handleJoinTable}
-                                className="bg-emerald-500 text-white font-black py-6 rounded-3xl text-xl shadow-2xl hover:scale-105 active:scale-95 transition-all"
-                            >
-                                JOIN TABLE
-                            </button>
                         </div>
                     </div>
                 )}
