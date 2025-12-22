@@ -31,7 +31,7 @@ const PlayerSeat = ({
     const isTrumpCaller = state.trumpCallerIndex === index && state.phase !== 'lobby';
 
     const posClasses = {
-        bottom: "bottom-4 left-1/2 -translate-x-1/2",
+        bottom: "bottom-10 left-1/2 -translate-x-1/2",
         top: "top-4 left-1/2 -translate-x-1/2",
         left: "left-12 top-1/2 -translate-y-1/2 -rotate-90 origin-center",
         right: "right-12 top-1/2 -translate-y-1/2 rotate-90 origin-center"
@@ -56,6 +56,10 @@ const PlayerSeat = ({
                     >
                         Add Bot
                     </button>
+                </div>
+                {/* Seat Label (N/S/E/W) */}
+                <div className="absolute -bottom-8 text-[8px] font-black text-slate-600 uppercase tracking-widest opacity-30">
+                    {position === 'bottom' ? 'South' : position === 'left' ? 'West' : position === 'top' ? 'North' : 'East'}
                 </div>
             </div>
         );
