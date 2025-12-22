@@ -190,12 +190,16 @@ const gameReducer = (state: GameState, action: Action): GameState => {
         }
 
         case 'JOIN_TABLE': {
+            // Only update tableCode if not already set (prevents overwriting loaded state)
+            const isAlreadyLoaded = state.tableCode === action.payload.code;
+
             return {
                 ...state,
                 tableCode: action.payload.code,
-                tableName: 'The Royal Table',
+                // Preserve loaded table name and phase if already in this table
+                tableName: isAlreadyLoaded ? state.tableName : 'The Royal Table',
+                phase: isAlreadyLoaded ? state.phase : 'lobby',
                 currentViewPlayerName: action.payload.userName,
-                phase: 'lobby',
                 logs: [`Joined table ${action.payload.code} as ${action.payload.userName}.`, ...state.logs]
             };
         }
@@ -819,7 +823,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             const maxCycles = 15 + Math.floor(Math.random() * 5);
             const interval = setInterval(() => {
                 count++;
-                dispatch({ type: 'UPDATE_ANIMATION_DEALER', payload: { index: count % 4 } });
+                broadcastDispatch({ type: 'UPDATE_ANIMATION_DEALER', payload: { index: count % 4 } });
 
                 if (count >= maxCycles) {
                     clearInterval(interval);
@@ -832,7 +836,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                             const { hands, kitty } = dealHands(deck);
                             const upcard = kitty[0];
 
-                            dispatch({
+                            broadcastDispatch({
                                 type: 'SET_DEALER',
                                 payload: {
                                     dealerIndex: count % 4,
@@ -865,7 +869,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                     const { hands, kitty } = dealHands(deck);
                     const upcard = kitty[0];
 
-                    dispatch({
+                    broadcastDispatch({
                         type: 'SET_DEALER',
                         payload: {
                             dealerIndex: state.dealerIndex,
@@ -882,7 +886,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     useEffect(() => {
         if (state.phase === 'waiting_for_trick') {
             const timer = setTimeout(() => {
-                dispatch({ type: 'CLEAR_TRICK' });
+                broadcastDispatch({ type: 'CLEAR_TRICK' });
             }, 3000);
             return () => clearTimeout(timer);
         }
@@ -897,21 +901,21 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             if (state.phase === 'bidding') {
                 if (state.biddingRound === 1) {
                     if (state.upcard && shouldCallTrump(currentPlayer.hand, state.upcard.suit)) {
-                        dispatch({ type: 'MAKE_BID', payload: { suit: state.upcard.suit, callerIndex: state.currentPlayerIndex, isLoner: false } });
+                        broadcastDispatch({ type: 'MAKE_BID', payload: { suit: state.upcard.suit, callerIndex: state.currentPlayerIndex, isLoner: false } });
                     } else {
-                        dispatch({ type: 'PASS_BID', payload: { playerIndex: state.currentPlayerIndex } });
+                        broadcastDispatch({ type: 'PASS_BID', payload: { playerIndex: state.currentPlayerIndex } });
                     }
                 } else {
                     const bestBid = getBestBid(currentPlayer.hand.filter(c => state.upcard && c.suit !== state.upcard.suit));
                     if (bestBid) {
-                        dispatch({ type: 'MAKE_BID', payload: { suit: bestBid, callerIndex: state.currentPlayerIndex, isLoner: false } });
+                        broadcastDispatch({ type: 'MAKE_BID', payload: { suit: bestBid, callerIndex: state.currentPlayerIndex, isLoner: false } });
                     } else {
-                        dispatch({ type: 'PASS_BID', payload: { playerIndex: state.currentPlayerIndex } });
+                        broadcastDispatch({ type: 'PASS_BID', payload: { playerIndex: state.currentPlayerIndex } });
                     }
                 }
             } else if (state.phase === 'discard') {
                 const cardToDiscard = [...currentPlayer.hand].sort((a, b) => a.rank.localeCompare(b.rank))[0];
-                dispatch({ type: 'DISCARD_CARD', payload: { playerIndex: state.currentPlayerIndex, cardId: cardToDiscard.id } });
+                broadcastDispatch({ type: 'DISCARD_CARD', payload: { playerIndex: state.currentPlayerIndex, cardId: cardToDiscard.id } });
             } else if (state.phase === 'playing') {
                 const cardToPlay = getBotMove(
                     currentPlayer.hand,
@@ -920,7 +924,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                     state.players.map(p => p.id),
                     currentPlayer.id
                 );
-                dispatch({ type: 'PLAY_CARD', payload: { playerIndex: state.currentPlayerIndex, cardId: cardToPlay.id } });
+                broadcastDispatch({ type: 'PLAY_CARD', payload: { playerIndex: state.currentPlayerIndex, cardId: cardToPlay.id } });
             }
         }, 1200);
 
