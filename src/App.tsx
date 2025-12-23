@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
-import { GameProvider, useGame, getEmptyStats, getSavedGames, BOT_NAMES_POOL } from './store/GameStore';
+import { GameProvider, useGame, getEmptyStats, getSavedGames, BOT_NAMES_POOL, deleteActiveGame } from './store/GameStore';
 import { getEffectiveSuit, isValidPlay } from './utils/rules';
 import { Card, HandResult } from './types/game';
 import { supabase } from './lib/supabase';
@@ -467,6 +467,7 @@ const LandingPage = () => {
     const { state, dispatch } = useGame();
     const [code, setCode] = useState('');
     const [showJoin, setShowJoin] = useState(false);
+    const [_refreshKey, setRefreshKey] = useState(0);
 
     const savedGamesRaw = getSavedGames();
     const savedGames = Object.values(savedGamesRaw)
@@ -475,16 +476,21 @@ const LandingPage = () => {
             g.players.some(p => p.name === state.currentUser)
         )
         .sort((a, b) => {
-            // Sort by most recent activity (assuming tableId contains timestamp or we use a heuristic)
-            // For now, we'll use phase progression as a proxy for activity
+            if (a.lastActive && b.lastActive) return b.lastActive - a.lastActive;
             const phaseOrder = ['lobby', 'randomizing_dealer', 'bidding', 'discard', 'playing', 'waiting_for_trick', 'scoring', 'waiting_for_next_deal', 'game_over'];
             return phaseOrder.indexOf(b.phase) - phaseOrder.indexOf(a.phase);
         });
 
-    const getTimeAgo = (_game: any) => {
-        // Since we don't have timestamps, we'll use a placeholder
-        // In a real app, you'd store updated_at in the game state
-        return "Recently";
+    const getTimeAgo = (game: any) => {
+        if (!game.lastActive) return "Recently";
+        const diff = Date.now() - game.lastActive;
+        const minutes = Math.floor(diff / 60000);
+        if (minutes < 1) return "Just now";
+        if (minutes < 60) return `${minutes}m ago`;
+        const hours = Math.floor(minutes / 60);
+        if (hours < 24) return `${hours}h ago`;
+        const days = Math.floor(hours / 24);
+        return `${days}d ago`;
     };
 
     const handleCodeChange = (value: string) => {
@@ -518,6 +524,15 @@ const LandingPage = () => {
         } else {
             // Local join as fallback/init
             dispatch({ type: 'JOIN_TABLE', payload: { code, userName: state.currentUser! } });
+        }
+    };
+
+    // Helper to delete game
+    const handleDelete = (tableId: string | null) => {
+        if (!tableId) return;
+        if (confirm('Are you sure you want to delete this game?')) {
+            deleteActiveGame(tableId);
+            setRefreshKey(prev => prev + 1);
         }
     };
 
@@ -597,10 +612,10 @@ const LandingPage = () => {
 
                         <div className="max-h-[400px] overflow-y-auto space-y-3 pr-2 scrollbar-thin scrollbar-thumb-slate-800 scrollbar-track-slate-950">
                             {savedGames.map(game => (
-                                <button
+                                <div
                                     key={game.tableId}
+                                    className="group relative w-full bg-slate-900/40 hover:bg-emerald-500/10 border-2 border-slate-800 hover:border-emerald-500/50 rounded-[2rem] px-8 py-6 flex items-center justify-between transition-all shadow-xl cursor-pointer"
                                     onClick={() => dispatch({ type: 'LOAD_EXISTING_GAME', payload: { gameState: game } })}
-                                    className="group w-full bg-slate-900/40 hover:bg-emerald-500/10 border-2 border-slate-800 hover:border-emerald-500/50 rounded-[2rem] px-8 py-6 flex items-center justify-between transition-all shadow-xl"
                                 >
                                     <div className="text-left">
                                         <div className="text-xl font-black text-white group-hover:text-emerald-400 transition-colors uppercase italic tracking-tight">{game.tableName}</div>
@@ -611,10 +626,22 @@ const LandingPage = () => {
                                             Last Activity: {getTimeAgo(game)}
                                         </div>
                                     </div>
-                                    <div className="bg-slate-800 text-[10px] font-black px-6 py-3 rounded-2xl text-slate-400 group-hover:bg-emerald-500 group-hover:text-white transition-all uppercase tracking-widest">
-                                        Resume
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleDelete(game.tableId);
+                                            }}
+                                            className="bg-slate-800/50 hover:bg-red-500/80 hover:text-white p-3 rounded-xl transition-all z-10"
+                                            title="Delete Game"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /></svg>
+                                        </button>
+                                        <div className="bg-slate-800 text-[10px] font-black px-6 py-3 rounded-2xl text-slate-400 group-hover:bg-emerald-500 group-hover:text-white transition-all uppercase tracking-widest">
+                                            Resume
+                                        </div>
                                     </div>
-                                </button>
+                                </div>
                             ))}
                         </div>
                     </div>

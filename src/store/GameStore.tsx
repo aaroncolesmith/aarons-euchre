@@ -92,7 +92,7 @@ const saveActiveGame = (state: GameState) => {
     localStorage.setItem('euchre_active_games', JSON.stringify(games));
 };
 
-const deleteActiveGame = (tableId: string) => {
+export const deleteActiveGame = (tableId: string) => {
     const games = getSavedGames();
     delete games[tableId];
     localStorage.setItem('euchre_active_games', JSON.stringify(games));
@@ -131,6 +131,7 @@ const INITIAL_STATE_FUNC = (): GameState => ({
     eventLog: [],
     logs: ['Welcome to Euchre. Create or join a table to begin.'],
     overlayMessage: null,
+    lastActive: Date.now(),
 });
 
 const INITIAL_STATE = INITIAL_STATE_FUNC();
@@ -750,7 +751,11 @@ const gameReducer = (state: GameState, action: Action): GameState => {
 };
 
 const gameReducerFixed = (state: GameState, action: Action): GameState => {
-    return gameReducer(state, action);
+    const newState = gameReducer(state, action);
+    if (newState !== state && action.type !== 'UPDATE_ANIMATION_DEALER') {
+        return { ...newState, lastActive: Date.now() };
+    }
+    return newState;
 };
 
 // --- Context ---

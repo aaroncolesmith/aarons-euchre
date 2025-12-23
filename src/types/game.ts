@@ -80,5 +80,6 @@ export interface GameState {
     history: HandResult[];
     displayDealerIndex?: number; // For randomization animation
     logs: string[];
-    overlayMessage: string | null; // Added
+    overlayMessage: string | null;
+    lastActive: number; // Timestamp of last activity
 }
