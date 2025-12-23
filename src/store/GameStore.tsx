@@ -318,6 +318,9 @@ const gameReducer = (state: GameState, action: Action): GameState => {
             if (!isValidHands || !isValidUpcard) {
                 // Determine deck locally if not provided or invalid (fallback)
                 Logger.warn('Invalid hands or upcard received, generating locally');
+                Logger.warn('Hands valid:', isValidHands, 'Upcard valid:', isValidUpcard);
+                Logger.warn('Received hands:', JSON.stringify(hands));
+                Logger.warn('Received upcard:', JSON.stringify(upcard));
                 const deck = shuffleDeck(createDeck());
                 const { hands: h, kitty: k } = dealHands(deck);
                 return {

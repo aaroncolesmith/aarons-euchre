@@ -201,7 +201,10 @@ const SUIT_SORT_ORDER: Record<Suit, number> = {
 };
 
 export const sortHand = (hand: Card[], trump: Suit | null): Card[] => {
-    return [...hand].sort((a, b) => {
+    // Filter out any undefined or invalid cards
+    const validHand = hand.filter(card => card && card.suit && card.rank);
+
+    return [...validHand].sort((a, b) => {
         const suitA = getEffectiveSuit(a, trump);
         const suitB = getEffectiveSuit(b, trump);
 

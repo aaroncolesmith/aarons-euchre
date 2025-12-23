@@ -13,21 +13,21 @@ class Logger {
         return `[${timestamp}] [${level}] ${message}`;
     }
 
-    static info(message: string, data?: any) {
-        console.log(this.formatMessage('INFO', message), data || '');
+    static info(message: string, ...args: any[]) {
+        console.log(this.formatMessage('INFO', message), ...args);
     }
 
-    static warn(message: string, data?: any) {
-        console.warn(this.formatMessage('WARN', message), data || '');
+    static warn(message: string, ...args: any[]) {
+        console.warn(this.formatMessage('WARN', message), ...args);
     }
 
-    static error(message: string, error?: any) {
-        console.error(this.formatMessage('ERROR', message), error || '');
+    static error(message: string, ...args: any[]) {
+        console.error(this.formatMessage('ERROR', message), ...args);
     }
 
-    static debug(message: string, data?: any) {
+    static debug(message: string, ...args: any[]) {
         // In a real app, we might gate this behind an env var
-        console.debug(this.formatMessage('DEBUG', message), data || '');
+        console.debug(this.formatMessage('DEBUG', message), ...args);
     }
 }
 
