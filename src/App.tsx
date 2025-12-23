@@ -419,15 +419,17 @@ const LoginPage = () => {
     const [name, setName] = useState('');
     const [error, setError] = useState('');
 
-    const ALLOWED_USERS = ['Aaron', 'Polina'];
+    const ALLOWED_USERS = ['Aaron', 'Polina', 'Gray-Gray', 'Mimi', 'Micah', 'Cherrie'];
 
     const handleLogin = (e: React.FormEvent) => {
         e.preventDefault();
         const trimmed = name.trim();
-        if (ALLOWED_USERS.includes(trimmed)) {
-            dispatch({ type: 'LOGIN', payload: { userName: trimmed } });
+        const match = ALLOWED_USERS.find(u => u.toLowerCase() === trimmed.toLowerCase());
+
+        if (match) {
+            dispatch({ type: 'LOGIN', payload: { userName: match } });
         } else {
-            setError('Unauthorized. Only Aaron and Polina can enter.');
+            setError('Unauthorized access. Please use a recognized name.');
         }
     };
 
