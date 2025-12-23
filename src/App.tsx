@@ -925,9 +925,25 @@ const GameView = () => {
                                             <div className="text-center">
                                                 <div className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Your Turn to Bid</div>
                                                 <div className="text-xl font-black text-white italic tracking-tighter">What's the call?</div>
+
+                                                {/* Show Upcard Context */}
+                                                {state.biddingRound === 1 && state.upcard && (
+                                                    <div className="flex justify-center my-4">
+                                                        <div className="scale-75 origin-center">
+                                                            <CardComponent card={state.upcard} size="md" disabled />
+                                                        </div>
+                                                    </div>
+                                                )}
+
                                                 {state.upcard && state.dealerIndex !== -1 && (
                                                     <div className="text-[10px] font-bold text-slate-400 mt-2">
-                                                        Your {(myIdx + 2) % 4 === state.dealerIndex ? 'teammate' : 'opponent'} {state.players[state.dealerIndex].name} is the dealer
+                                                        {myIdx === state.dealerIndex ? (
+                                                            <span className="text-emerald-400">You are the dealer</span>
+                                                        ) : (
+                                                            <>
+                                                                Your {(myIdx + 2) % 4 === state.dealerIndex ? 'teammate' : 'opponent'} <span className="text-white">{state.players[state.dealerIndex].name}</span> is the dealer
+                                                            </>
+                                                        )}
                                                     </div>
                                                 )}
                                             </div>
