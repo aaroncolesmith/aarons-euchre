@@ -659,9 +659,117 @@ const LandingPage = () => {
     );
 };
 
+const StatsView = () => {
+    const { state } = useGame();
+    const [tab, setTab] = useState<'me' | 'league'>('me');
+    const mySeatIndex = state.players.findIndex(p => p.name === state.currentViewPlayerName);
+    const human = mySeatIndex !== -1 ? state.players[mySeatIndex] : {
+        name: state.currentViewPlayerName,
+        stats: getEmptyStats()
+    };
+
+    const globalStats = JSON.parse(localStorage.getItem('euchre_global_profiles') || '{}');
+    const leaguePlayers = Object.keys(globalStats).map(name => ({
+        name,
+        ...globalStats[name]
+    })).sort((a: any, b: any) => (b.gamesWon / Math.max(1, b.gamesPlayed)) - (a.gamesWon / Math.max(1, a.gamesPlayed)));
+
+    return (
+        <div className="md:hidden flex-1 bg-slate-900/95 rounded-[2rem] p-4 overflow-y-auto w-full h-full flex flex-col pt-20">
+            <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-black text-white italic tracking-tighter">Stats</h2>
+                <div className="flex gap-2 bg-slate-800/50 p-1 rounded-full">
+                    <button
+                        onClick={() => setTab('me')}
+                        className={`px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${tab === 'me' ? 'bg-emerald-500 text-white shadow-lg' : 'text-slate-500'}`}
+                    >
+                        Career
+                    </button>
+                    <button
+                        onClick={() => setTab('league')}
+                        className={`px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${tab === 'league' ? 'bg-emerald-500 text-white shadow-lg' : 'text-slate-500'}`}
+                    >
+                        League
+                    </button>
+                </div>
+            </div>
+
+            {tab === 'me' ? (
+                <div className="space-y-6 pb-20">
+                    <div className="grid grid-cols-2 gap-3">
+                        {[
+                            { label: 'Games Played', value: human.stats.gamesPlayed, color: 'text-slate-400' },
+                            { label: 'Win Rate', value: `${human.stats.gamesPlayed > 0 ? Math.round((human.stats.gamesWon / human.stats.gamesPlayed) * 100) : 0}%`, color: 'text-emerald-400' },
+                            { label: 'Hand Win %', value: `${human.stats.handsPlayed > 0 ? Math.round((human.stats.handsWon / human.stats.handsPlayed) * 100) : 0}%`, color: 'text-cyan-400' },
+                            { label: 'Sweeps', value: human.stats.sweeps, color: 'text-yellow-400' },
+                        ].map((stat, i) => (
+                            <div key={i} className="bg-slate-800/40 border border-slate-700/30 p-4 rounded-2xl">
+                                <div className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">{stat.label}</div>
+                                <div className={`text-xl font-black ${stat.color}`}>{stat.value}</div>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div>
+                        <h3 className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-3">Trick Taking</h3>
+                        <div className="grid grid-cols-2 gap-3">
+                            {[
+                                { label: 'Tricks Taken', value: human.stats.tricksTaken, color: 'text-purple-400' },
+                                { label: 'Euchres', value: human.stats.euchresMade, color: 'text-pink-400' },
+                            ].map((stat, i) => (
+                                <div key={i} className="bg-slate-800/40 border border-slate-700/30 p-4 rounded-2xl">
+                                    <div className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">{stat.label}</div>
+                                    <div className={`text-xl font-black ${stat.color}`}>{stat.value}</div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            ) : (
+                <div className="bg-slate-800/30 border border-slate-800 rounded-2xl overflow-hidden pb-20">
+                    <table className="w-full text-left">
+                        <thead className="bg-slate-800/50 text-[8px] font-black text-slate-500 uppercase tracking-widest">
+                            <tr>
+                                <th className="px-4 py-3">Player</th>
+                                <th className="px-4 py-3 text-right">Win %</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-800">
+                            {leaguePlayers.map((p: any, i: number) => (
+                                <tr key={i} className={`group ${p.name === human.name ? 'bg-emerald-500/5' : ''}`}>
+                                    <td className="px-4 py-3 font-black text-white flex items-center gap-3">
+                                        <span className="text-slate-600 text-[9px] tabular-nums">{i + 1}</span>
+                                        <span className="text-sm">{p.name}</span>
+                                    </td>
+                                    <td className="px-4 py-3 text-emerald-400 font-black text-sm tabular-nums text-right">
+                                        {p.gamesPlayed > 0 ? Math.round((p.gamesWon / p.gamesPlayed) * 100) : 0}%
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
+        </div>
+    );
+};
+
+const TabButton = ({ active, onClick, children }: any) => (
+    <button
+        onClick={onClick}
+        className={`flex-1 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${active
+            ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20'
+            : 'text-slate-500 hover:text-slate-300'
+            }`}
+    >
+        {children}
+    </button>
+);
+
 const GameView = () => {
     const { state, dispatch } = useGame();
     const [isStatsOpen, setIsStatsOpen] = useState(false);
+    const [activeTab, setActiveTab] = useState<'table' | 'commentary' | 'stats'>('table');
 
     const handleNextStep = () => {
         // AI execution is handled in GameStore useEffect hooks
@@ -672,9 +780,17 @@ const GameView = () => {
 
     return (
         <LayoutGroup>
-            <div className="w-full h-full max-w-7xl max-h-screen flex p-4 md:p-6 gap-6 overflow-hidden">
-                {/* Table Commentary Log */}
-                <div className="w-72 bg-slate-900/90 rounded-[3rem] border border-slate-800/50 p-6 backdrop-blur-3xl flex flex-col shadow-2xl shrink-0">
+            <div className="w-full h-full max-w-7xl max-h-screen flex flex-col md:flex-row p-2 md:p-6 gap-4 md:gap-6 overflow-hidden">
+
+                {/* Mobile Tabs */}
+                <div className="flex md:hidden w-full shrink-0 bg-slate-900/90 rounded-2xl p-1 mb-2 border border-slate-800">
+                    <TabButton active={activeTab === 'table'} onClick={() => setActiveTab('table')}>TABLE</TabButton>
+                    <TabButton active={activeTab === 'commentary'} onClick={() => setActiveTab('commentary')}>COMMENTARY</TabButton>
+                    <TabButton active={activeTab === 'stats'} onClick={() => setActiveTab('stats')}>STATS</TabButton>
+                </div>
+
+                {/* Table Commentary Log (Sidebar) */}
+                <div className={`md:w-72 bg-slate-900/90 rounded-[3rem] border border-slate-800/50 p-6 backdrop-blur-3xl flex flex-col shadow-2xl shrink-0 ${activeTab === 'commentary' ? 'flex flex-1 w-full order-last' : 'hidden md:flex'}`}>
                     <div className="flex flex-col gap-4 mb-4">
                         <div className="flex justify-between items-center">
                             <h2 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
@@ -721,7 +837,7 @@ const GameView = () => {
 
                 <StatsModal isOpen={isStatsOpen} onClose={() => setIsStatsOpen(false)} />
 
-                <div className="flex-1 bg-slate-900/95 rounded-[3rem] shadow-2xl border border-slate-800/50 p-8 backdrop-blur-3xl flex flex-col relative overflow-hidden">
+                <div className={`flex-1 bg-slate-900/95 rounded-[3rem] shadow-2xl border border-slate-800/50 p-8 backdrop-blur-3xl flex flex-col relative overflow-hidden ${activeTab === 'table' ? 'flex' : 'hidden md:flex'}`}>
 
                     <div className="flex justify-between items-center mb-4">
                         <div className="flex items-center gap-4">
@@ -735,9 +851,9 @@ const GameView = () => {
                             </div>
                             <button
                                 onClick={() => setIsStatsOpen(true)}
-                                className="bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border border-slate-700 transition-all shadow-sm"
+                                className="hidden md:block bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border border-slate-700 transition-all shadow-sm"
                             >
-                                Hof
+                                Stats
                             </button>
                             <button
                                 onClick={async () => {
@@ -1074,6 +1190,9 @@ const GameView = () => {
                         </div>
                     )}
                 </div>
+
+                {/* Mobile Stats View */}
+                {activeTab === 'stats' && <StatsView />}
             </div>
         </LayoutGroup>
     );
