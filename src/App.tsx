@@ -710,6 +710,20 @@ const GameView = () => {
                             >
                                 Hof
                             </button>
+                            <button
+                                onClick={async () => {
+                                    if (!state.tableCode) return;
+                                    const { data } = await supabase.from('games').select('state').eq('code', state.tableCode).single();
+                                    if (data && data.state) {
+                                        dispatch({ type: 'LOAD_EXISTING_GAME', payload: { gameState: data.state } });
+                                        // Preserve user view
+                                        dispatch({ type: 'JOIN_TABLE', payload: { code: state.tableCode, userName: state.currentUser! } });
+                                    }
+                                }}
+                                className="bg-slate-800 hover:bg-slate-700 text-cyan-300 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border border-slate-700 transition-all shadow-sm"
+                            >
+                                Sync
+                            </button>
                         </div>
 
                         <div className="flex gap-3">

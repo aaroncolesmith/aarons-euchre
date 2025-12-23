@@ -494,7 +494,12 @@ const gameReducer = (state: GameState, action: Action): GameState => {
         case 'PLAY_CARD': {
             const { playerIndex, cardId } = action.payload;
             const player = state.players[playerIndex];
-            const card = player.hand.find(c => c.id === cardId)!;
+            const card = player.hand.find(c => c.id === cardId);
+
+            if (!card) {
+                Logger.error(`Card ${cardId} not found in player ${playerIndex}'s hand. Hand:`, player.hand);
+                return state;
+            }
 
             const newTrick = [...state.currentTrick, { playerId: player.id, card }];
             const newPlayers = state.players.map((p, i) =>
@@ -761,14 +766,22 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const channelRef = useRef<any>(null);
 
     // Enhanced dispatch that broadcasts to others
-    const broadcastDispatch = (action: Action) => {
+    const broadcastDispatch = async (action: Action) => {
         dispatch(action);
         if (channelRef.current && state.tableCode) {
-            channelRef.current.send({
+            Logger.debug(`Broadcasting action: ${action.type}`);
+            const result = await channelRef.current.send({
                 type: 'broadcast',
                 event: 'game_action',
                 payload: action
             });
+            if (result !== 'ok') {
+                Logger.error('Failed to broadcast action', result);
+            } else {
+                Logger.debug('Broadcast success');
+            }
+        } else {
+            Logger.warn('Cannot broadcast: No channel or table code');
         }
     };
 
