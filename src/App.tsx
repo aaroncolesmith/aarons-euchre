@@ -538,6 +538,26 @@ const LandingPage = () => {
         }
     };
 
+    const downloadTrumpAnalysis = () => {
+        const data = JSON.parse(localStorage.getItem('euchre_trump_analysis') || '[]');
+        if (data.length === 0) {
+            alert("No analysis data available yet. Play some hands and make some bids!");
+            return;
+        }
+
+        const headers = Object.keys(data[0]).join(',');
+        const rows = data.map((row: any) => Object.values(row).join(','));
+        const csvContent = "data:text/csv;charset=utf-8," + [headers, ...rows].join('\n');
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "trump_call_analysis.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
     return (
         <div className="flex flex-col items-center justify-start min-h-full w-full max-w-2xl p-8 animate-in fade-in zoom-in duration-700 overflow-y-auto pb-20">
             <div className="flex justify-between items-center w-full mb-8">
@@ -648,6 +668,16 @@ const LandingPage = () => {
                         </div>
                     </div>
                 )}
+            </div>
+
+            <div className="mt-8 flex justify-center">
+                <button
+                    onClick={downloadTrumpAnalysis}
+                    className="text-[9px] font-black text-slate-600 uppercase tracking-widest hover:text-emerald-500 transition-colors flex items-center gap-2"
+                >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    Download Analysis Data
+                </button>
             </div>
 
             <div className="mt-16 flex items-center gap-4 text-slate-700">

@@ -106,6 +106,56 @@ const createEmptyPlayer = (index: number): Player => ({
     stats: getEmptyStats()
 });
 
+const getOppositeSuit = (suit: string) => {
+    if (suit === 'hearts') return 'diamonds';
+    if (suit === 'diamonds') return 'hearts';
+    if (suit === 'spades') return 'clubs';
+    if (suit === 'clubs') return 'spades';
+    return '';
+};
+
+const trackTrumpCall = (
+    caller: Player,
+    suit: Suit,
+    dealerName: string,
+    relationship: 'Self' | 'Teammate' | 'Opponent',
+    upcard: Card | null,
+    round: number
+) => {
+    try {
+        const isBot = caller.isComputer;
+        let trumpCount = 0;
+        let bowerCount = 0;
+        let suitCount = 0;
+        const leftSuit = getOppositeSuit(suit);
+
+        caller.hand.forEach(c => {
+            const isRight = c.suit === suit && c.rank === 'J';
+            const isLeft = c.suit === leftSuit && c.rank === 'J';
+            if (isRight || isLeft) bowerCount++;
+            if (c.suit === suit || isLeft) trumpCount++;
+            if (c.suit === suit) suitCount++;
+        });
+
+        const record = {
+            WHO_CALLED_TRUMP: caller.name,
+            USER_TYPE: isBot ? 'Bot' : 'Human',
+            DEALER: relationship === 'Self' ? 'Self' : `${relationship} - ${dealerName}`,
+            CARD_PICKED_UP: round === 1 && upcard ? `${upcard.rank} of ${upcard.suit}` : 'n/a',
+            BOWER_COUNT: bowerCount,
+            TRUMP_COUNT: trumpCount,
+            SUIT_COUNT: suitCount,
+            TIMESTAMP: new Date().toISOString()
+        };
+
+        const existing = JSON.parse(localStorage.getItem('euchre_trump_analysis') || '[]');
+        existing.push(record);
+        localStorage.setItem('euchre_trump_analysis', JSON.stringify(existing));
+    } catch (e) {
+        console.error("Failed to track trump call", e);
+    }
+};
+
 const INITIAL_STATE_FUNC = (): GameState => ({
     tableId: null,
     tableName: null,
@@ -385,6 +435,11 @@ const gameReducer = (state: GameState, action: Action): GameState => {
             const { suit, callerIndex, isLoner } = action.payload;
             const caller = state.players[callerIndex];
             const logMsg = `${caller.name} called ${suit}${isLoner ? ' (GOING ALONE!)' : ''}.`;
+
+            // Track Analysis
+            const dealerName = state.players[state.dealerIndex].name || 'Unknown';
+            const relationship = callerIndex === state.dealerIndex ? 'Self' : (Math.abs(callerIndex - state.dealerIndex) === 2 ? 'Teammate' : 'Opponent');
+            trackTrumpCall(caller, suit, dealerName, relationship, state.upcard, state.biddingRound);
 
             const bidEvent: GameEvent = {
                 type: 'bid',
