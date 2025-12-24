@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { GameProvider, useGame, getEmptyStats, getSavedGames, BOT_NAMES_POOL, deleteActiveGame } from './store/GameStore';
 import { getEffectiveSuit, isValidPlay } from './utils/rules';
-import { Card, HandResult } from './types/game';
+import { Card } from './types/game';
 import { supabase } from './lib/supabase';
 
 const getCardJitter = (id: string) => {
@@ -31,10 +31,10 @@ const PlayerSeat = ({
     const isTrumpCaller = state.trumpCallerIndex === index && state.phase !== 'lobby';
 
     const posClasses = {
-        bottom: "bottom-10 left-1/2 -translate-x-1/2",
-        top: "top-4 left-1/2 -translate-x-1/2",
-        left: "left-12 top-1/2 -translate-y-1/2 -rotate-90 origin-center",
-        right: "right-12 top-1/2 -translate-y-1/2 rotate-90 origin-center"
+        bottom: "bottom-4 md:bottom-10 left-1/2 -translate-x-1/2",
+        top: "top-2 md:top-4 left-1/2 -translate-x-1/2",
+        left: "left-2 md:left-12 top-1/2 -translate-y-1/2 -rotate-90 origin-center",
+        right: "right-2 md:right-12 top-1/2 -translate-y-1/2 rotate-90 origin-center"
     };
 
     if (!player.name && inLobby) {
@@ -46,7 +46,7 @@ const PlayerSeat = ({
                 <div className="flex flex-col gap-2">
                     <button
                         onClick={() => dispatch({ type: 'SIT_PLAYER', payload: { seatIndex: index, name: state.currentViewPlayerName! } })}
-                        className="bg-emerald-500/10 hover:bg-emerald-500 text-emerald-400 hover:text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border border-emerald-500/20 transition-all"
+                        className="bg-emerald-500/10 hover:bg-emerald-500 text-emerald-400 hover:text-white px-3 py-1 md:px-4 md:py-1.5 rounded-full text-[8px] md:text-[10px] font-black uppercase tracking-widest border border-emerald-500/20 transition-all"
                     >
                         Sit Here
                     </button>
@@ -57,7 +57,7 @@ const PlayerSeat = ({
                             const botName = availableBots[Math.floor(Math.random() * availableBots.length)] || 'Bot ' + Math.random().toString().substr(2, 3);
                             dispatch({ type: 'ADD_BOT', payload: { seatIndex: index, botName } });
                         }}
-                        className="bg-slate-800 hover:bg-slate-700 text-slate-400 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border border-slate-700 transition-all"
+                        className="bg-slate-800 hover:bg-slate-700 text-slate-400 px-3 py-1 md:px-4 md:py-1.5 rounded-full text-[8px] md:text-[10px] font-black uppercase tracking-widest border border-slate-700 transition-all"
                     >
                         Add Bot
                     </button>
@@ -872,7 +872,7 @@ const GameView = () => {
                     <div className="flex justify-between items-center mb-4">
                         <div className="flex items-center gap-4">
                             <div className="flex flex-col">
-                                <h1 className="text-2xl font-black bg-gradient-to-br from-emerald-400 to-blue-500 bg-clip-text text-transparent italic leading-none mb-1">
+                                <h1 className="text-xl md:text-2xl font-black bg-gradient-to-br from-emerald-400 to-blue-500 bg-clip-text text-transparent italic leading-none mb-1">
                                     {state.tableName || 'Euchre'}
                                 </h1>
                                 {state.tableCode && (
@@ -1197,22 +1197,7 @@ const GameView = () => {
                     </div>
                 </div>
 
-                <div className="w-56 flex flex-col gap-4 shrink-0">
-                    <div className="p-6 bg-slate-900/90 rounded-[2.5rem] border border-slate-800/50 flex flex-col shadow-xl">
-                        <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4">Hand History</div>
-                        <div className="space-y-3">
-                            {state.history.slice(0, 5).map((h: HandResult, i: number) => (
-                                <div key={h.timestamp} className="bg-slate-800/30 p-3 rounded-2xl border border-slate-700/50 flex flex-col gap-1 text-[10px]">
-                                    <div className="flex justify-between items-center">
-                                        <div className="font-black text-slate-600">#{state.history.length - i}</div>
-                                        <div className={`font-black uppercase px-2 py-0.5 rounded-full ${h.trump === 'hearts' || h.trump === 'diamonds' ? 'bg-red-500/10 text-red-500' : 'bg-slate-500/10 text-slate-300'}`}>{h.trump}</div>
-                                    </div>
-                                    <div className="font-black text-white text-base text-center tabular-nums">{h.pointsScored.team1} : {h.pointsScored.team2}</div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
+                <div className={`shrink-0 flex flex-col gap-4 transition-all ${state.stepMode ? 'w-56' : 'w-0 overflow-hidden'}`}>
                     {state.stepMode && (
                         <div className="p-6 bg-amber-500 text-white rounded-[2.5rem] shadow-xl text-center">
                             <div className="text-[10px] font-black uppercase tracking-widest opacity-80 mb-2">Step Mode</div>

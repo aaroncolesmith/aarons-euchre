@@ -2,7 +2,11 @@ import { test, expect, Page } from '@playwright/test';
 import path from 'path';
 import fs from 'fs';
 
+import { fileURLToPath } from 'url';
+
 // Configuration
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const BASE_URL = process.env.BASE_URL || 'http://localhost:5173';
 const SCREENSHOT_DIR = path.join(__dirname, 'screenshots');
 
@@ -40,13 +44,13 @@ async function login(page: Page, username: string, testName: string) {
 
     await captureStep(page, '01_login_page', testName);
 
-    const usernameInput = page.locator('input[type="text"]').first();
+    const usernameInput = page.getByPlaceholder('Enter Username');
     await usernameInput.fill(username);
     console.log(`✍️  Filled username: ${username}`);
 
     await captureStep(page, '02_username_filled', testName);
 
-    const loginButton = page.getByRole('button', { name: /log in/i });
+    const loginButton = page.getByRole('button', { name: /login/i });
     await loginButton.click();
     console.log(`🖱️  Clicked login button`);
 
@@ -60,7 +64,8 @@ async function login(page: Page, username: string, testName: string) {
 async function createTable(page: Page, testName: string): Promise<string> {
     console.log(`\n🏗️  Creating new table`);
 
-    const createButton = page.getByRole('button', { name: /create new table/i });
+    // Matches "Start New CREATE GAME"
+    const createButton = page.getByRole('button', { name: /create game|start new/i });
     await createButton.click();
     console.log(`🖱️  Clicked create table button`);
 
@@ -83,7 +88,14 @@ async function joinTable(page: Page, tableCode: string, testName: string) {
 
     await captureStep(page, '04_before_join', testName);
 
-    const joinInput = page.locator('input[placeholder*="table code" i]').first();
+    // First click "JOIN EXISTING" to reveal the input
+    const showJoinButton = page.getByRole('button', { name: /join existing|private table/i });
+    await showJoinButton.click();
+    console.log(`🖱️  Clicked 'Join Existing' button`);
+
+    await logAndWait('Waiting for join form', 500);
+
+    const joinInput = page.getByPlaceholder('000-000');
     await joinInput.fill(tableCode);
     console.log(`✍️  Filled table code: ${tableCode}`);
 
@@ -141,7 +153,7 @@ async function startMatch(page: Page, testName: string) {
 
     await captureStep(page, '11_before_start_match', testName);
 
-    const startButton = page.getByRole('button', { name: /start match/i });
+    const startButton = page.getByRole('button', { name: /start game/i }); // Button text is "START GAME"
     await startButton.click();
     console.log(`🖱️  Clicked start match button`);
 
