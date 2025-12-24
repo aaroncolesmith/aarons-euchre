@@ -533,7 +533,7 @@ const LandingPage = () => {
     };
 
     return (
-        <div className="flex flex-col items-center justify-start min-h-full w-full max-w-2xl p-6 md:p-8 animate-in fade-in zoom-in duration-700 overflow-y-auto pb-20">
+        <div className="flex flex-col items-center justify-start min-h-full w-full max-w-2xl p-6 md:p-8 pt-12 md:pt-8 animate-in fade-in zoom-in duration-700 overflow-y-auto pb-20">
             {/* Header with Branding */}
             <div className="w-full mb-8 md:mb-12">
                 <div className="flex justify-between items-start mb-6">
