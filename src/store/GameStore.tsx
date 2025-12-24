@@ -28,7 +28,8 @@ type Action =
     | { type: 'LOAD_GLOBAL_STATS'; payload: { [name: string]: PlayerStats } }
     | { type: 'CLEAR_OVERLAY' }
     | { type: 'ADD_LOG'; payload: string }
-    | { type: 'EXIT_TO_LANDING' };
+    | { type: 'EXIT_TO_LANDING' }
+    | { type: 'FORCE_PHASE'; payload: { phase: GameState['phase'] } };
 
 // --- Constants ---
 export const BOT_NAMES_POOL = ['Fizz', 'J-Bock', 'Huber', 'Moses', 'Wooden', 'Buff'];
@@ -819,6 +820,13 @@ const gameReducer = (state: GameState, action: Action): GameState => {
             };
         }
 
+        case 'FORCE_PHASE':
+            return {
+                ...state,
+                phase: action.payload.phase,
+                logs: [`(System) Auto-recovering stuck game state...`, ...state.logs]
+            };
+
         default:
             return state;
     }
@@ -903,6 +911,21 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             channelRef.current = null;
         };
     }, [state.tableCode]);
+
+    // Self-Healing: Detect and fix stuck "Playing" state
+    useEffect(() => {
+        if (state.phase === 'playing' && state.tableCode) {
+            const allHandsEmpty = state.players.every(p => p.hand.length === 0);
+            if (allHandsEmpty) {
+                const lastEvent = state.eventLog.length > 0 ? state.eventLog[state.eventLog.length - 1] : null;
+                // If the last event was a hand_result, we MUST be in 'waiting_for_next_deal'
+                if (lastEvent && lastEvent.type === 'hand_result') {
+                    Logger.warn('Self-Healing: Detected stuck state (Playing w/ Result). Forcing transition.');
+                    dispatch({ type: 'FORCE_PHASE', payload: { phase: 'waiting_for_next_deal' } });
+                }
+            }
+        }
+    }, [state.phase, state.players, state.eventLog, state.tableCode]);
 
     // Persist active game to cloud (Throttled)
     useEffect(() => {
