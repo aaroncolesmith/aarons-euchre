@@ -790,6 +790,69 @@ const GameView = () => {
     if (state.phase === 'login') return <LoginPage />;
     if (state.phase === 'landing') return <LandingPage />;
 
+    // Game Over Screen
+    if (state.phase === 'game_over') {
+        const winner = state.scores.team1 >= 10 ? state.teamNames.team1 : state.teamNames.team2;
+        return (
+            <div className="flex flex-col items-center justify-center h-full w-full max-w-2xl mx-auto p-8 animate-in fade-in zoom-in duration-700">
+                <motion.div
+                    initial={{ scale: 0, rotate: -10 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    className="w-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-10 md:p-16 rounded-[3rem] border-4 border-emerald-500 shadow-[0_0_80px_rgba(16,185,129,0.5)] relative overflow-hidden"
+                >
+                    <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent pointer-events-none" />
+
+                    <div className="relative z-10 space-y-8">
+                        <h1 className="text-6xl md:text-7xl font-black bg-gradient-to-r from-emerald-400 via-cyan-400 to-blue-500 bg-clip-text text-transparent text-center leading-none">
+                            GAME OVER!
+                        </h1>
+
+                        <div className="text-center space-y-2">
+                            <div className="text-2xl md:text-3xl font-black text-emerald-400 uppercase tracking-wide">
+                                🏆 {winner} Wins! 🏆
+                            </div>
+                            <div className="text-lg text-slate-400 font-bold">
+                                Final Score: {state.scores.team1} - {state.scores.team2}
+                            </div>
+                        </div>
+
+                        <div className="bg-slate-950/50 rounded-2xl p-6 border border-slate-700">
+                            <div className="grid grid-cols-2 gap-4 text-center">
+                                <div>
+                                    <div className="text-sm text-slate-500 font-black uppercase tracking-wider mb-2">{state.teamNames.team1}</div>
+                                    <div className={`text-5xl font-black ${state.scores.team1 >= 10 ? 'text-emerald-400' : 'text-slate-600'}`}>
+                                        {state.scores.team1}
+                                    </div>
+                                </div>
+                                <div>
+                                    <div className="text-sm text-slate-500 font-black uppercase tracking-wider mb-2">{state.teamNames.team2}</div>
+                                    <div className={`text-5xl font-black ${state.scores.team2 >= 10 ? 'text-emerald-400' : 'text-slate-600'}`}>
+                                        {state.scores.team2}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="flex flex-col gap-4">
+                            <button
+                                onClick={() => dispatch({ type: 'START_MATCH' })}
+                                className="w-full bg-emerald-500 hover:bg-emerald-400 text-white font-black py-6 rounded-2xl text-xl shadow-[0_0_30px_rgba(16,185,129,0.3)] transition-all active:scale-95"
+                            >
+                                PLAY AGAIN
+                            </button>
+                            <button
+                                onClick={() => dispatch({ type: 'EXIT_TO_LANDING' })}
+                                className="w-full bg-slate-700 hover:bg-slate-600 text-white font-black py-4 rounded-2xl shadow-xl transition-all active:scale-95"
+                            >
+                                RETURN TO LANDING
+                            </button>
+                        </div>
+                    </div>
+                </motion.div>
+            </div>
+        );
+    }
+
     return (
         <LayoutGroup>
             <div className="w-full h-full max-w-7xl max-h-screen flex flex-col md:flex-row p-2 md:p-6 gap-4 md:gap-6 overflow-hidden">
@@ -992,7 +1055,7 @@ const GameView = () => {
                                 })}
                             </AnimatePresence>
 
-                            {state.phase === 'bidding' && state.upcard && (
+                            {state.phase === 'bidding' && state.biddingRound === 1 && state.upcard && (
                                 (() => {
                                     const dealerIdx = state.dealerIndex;
                                     const myIdx = state.players.findIndex(p => p.name === state.currentViewPlayerName);
