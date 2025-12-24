@@ -470,6 +470,7 @@ const LandingPage = () => {
     const [code, setCode] = useState('');
     const [showJoin, setShowJoin] = useState(false);
     const [_refreshKey, setRefreshKey] = useState(0);
+    const [isStatsOpen, setIsStatsOpen] = useState(false);
 
     const savedGamesRaw = getSavedGames();
     const savedGames = Object.values(savedGamesRaw)
@@ -538,64 +539,51 @@ const LandingPage = () => {
         }
     };
 
-    const downloadTrumpAnalysis = () => {
-        const data = JSON.parse(localStorage.getItem('euchre_trump_analysis') || '[]');
-        if (data.length === 0) {
-            alert("No analysis data available yet. Play some hands and make some bids!");
-            return;
-        }
-
-        const headers = Object.keys(data[0]).join(',');
-        const rows = data.map((row: any) => Object.values(row).join(','));
-        const csvContent = "data:text/csv;charset=utf-8," + [headers, ...rows].join('\n');
-
-        const encodedUri = encodeURI(csvContent);
-        const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", "trump_call_analysis.csv");
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    };
-
     return (
-        <div className="flex flex-col items-center justify-start min-h-full w-full max-w-2xl p-8 animate-in fade-in zoom-in duration-700 overflow-y-auto pb-20">
-            <div className="flex justify-between items-center w-full mb-8">
-                <div>
-                    <h1 className="text-5xl font-black bg-gradient-to-br from-emerald-400 via-cyan-400 to-blue-500 bg-clip-text text-transparent italic leading-none tracking-tighter">
-                        EUCHRE
-                    </h1>
-                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-2 ml-1">Authenticated: {state.currentUser}</p>
+        <div className="flex flex-col items-center justify-start min-h-full w-full max-w-2xl p-6 md:p-8 animate-in fade-in zoom-in duration-700 overflow-y-auto pb-20">
+            {/* Header with Branding */}
+            <div className="w-full mb-8 md:mb-12">
+                <div className="flex justify-between items-start mb-6">
+                    <div>
+                        <h1 className="text-5xl md:text-6xl font-black bg-gradient-to-br from-emerald-400 via-cyan-400 to-blue-500 bg-clip-text text-transparent italic leading-none tracking-tighter">
+                            EUCHRE
+                        </h1>
+                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-2 ml-1">Authenticated: {state.currentUser}</p>
+                    </div>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => setIsStatsOpen(true)}
+                            className="text-[10px] font-black text-slate-300 hover:text-white hover:bg-slate-800 px-4 md:px-6 py-2 md:py-3 rounded-xl md:rounded-2xl border-2 border-slate-800/50 transition-all uppercase tracking-widest"
+                        >
+                            Stats
+                        </button>
+                        <button
+                            onClick={() => dispatch({ type: 'LOGOUT' })}
+                            className="text-[10px] font-black text-red-500 hover:text-white hover:bg-red-500 px-4 md:px-6 py-2 md:py-3 rounded-xl md:rounded-2xl border-2 border-red-500/20 transition-all uppercase tracking-widest"
+                        >
+                            Logout
+                        </button>
+                    </div>
                 </div>
-                <button
-                    onClick={() => dispatch({ type: 'LOGOUT' })}
-                    className="text-[10px] font-black text-red-500 hover:text-white hover:bg-red-500 px-6 py-3 rounded-2xl border-2 border-red-500/20 transition-all uppercase tracking-widest"
-                >
-                    Logout
-                </button>
-            </div>
 
-            <div className="w-full space-y-6">
-                {/* Create/Join Buttons at Top */}
+                {/* Main Action Buttons */}
                 {!showJoin ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 mb-8">
                         <button
                             onClick={() => dispatch({ type: 'CREATE_TABLE', payload: { userName: state.currentUser! } })}
-                            className="bg-white text-slate-950 font-black py-10 rounded-[2.5rem] text-xl shadow-2xl hover:scale-105 active:scale-95 transition-all text-center flex flex-col items-center justify-center border-4 border-transparent hover:border-emerald-400"
+                            className="bg-white text-slate-950 font-black py-8 md:py-10 rounded-2xl md:rounded-[2.5rem] text-base md:text-xl shadow-2xl hover:scale-105 active:scale-95 transition-all text-center uppercase tracking-tight"
                         >
-                            <span className="text-[10px] opacity-40 mb-1 uppercase tracking-widest">Start New</span>
                             CREATE GAME
                         </button>
                         <button
                             onClick={() => setShowJoin(true)}
-                            className="bg-slate-900 text-white font-black py-10 rounded-[2.5rem] text-xl border-2 border-slate-800 hover:bg-slate-800 active:scale-95 transition-all flex flex-col items-center justify-center text-center hover:border-cyan-500/50"
+                            className="bg-slate-900 text-white font-black py-8 md:py-10 rounded-2xl md:rounded-[2.5rem] text-base md:text-xl border-2 border-slate-800 hover:bg-slate-800 active:scale-95 transition-all uppercase tracking-tight"
                         >
-                            <span className="text-[10px] text-slate-600 mb-1 uppercase tracking-widest">Private Table</span>
-                            JOIN EXISTING
+                            JOIN TABLE
                         </button>
                     </div>
                 ) : (
-                    <div className="space-y-6 animate-in slide-in-from-right-8 duration-500 bg-slate-900/50 p-8 rounded-[3rem] border-2 border-slate-800">
+                    <div className="space-y-4 animate-in slide-in-from-right-8 duration-500 bg-slate-900/50 p-6 md:p-8 rounded-2xl md:rounded-[3rem] border-2 border-slate-800 mb-8">
                         <div className="space-y-2">
                             <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-4">6-DIGIT CODE</label>
                             <input
@@ -603,20 +591,20 @@ const LandingPage = () => {
                                 value={code}
                                 onChange={(e) => handleCodeChange(e.target.value)}
                                 maxLength={7}
-                                className="w-full bg-slate-950 border-2 border-slate-800 rounded-3xl px-8 py-5 text-4xl font-black text-white text-center focus:border-emerald-500 outline-none transition-all placeholder:text-slate-800"
+                                className="w-full bg-slate-950 border-2 border-slate-800 rounded-2xl md:rounded-3xl px-6 md:px-8 py-4 md:py-5 text-3xl md:text-4xl font-black text-white text-center focus:border-emerald-500 outline-none transition-all placeholder:text-slate-800"
                                 placeholder="000-000"
                             />
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-2 gap-3 md:gap-4">
                             <button
                                 onClick={() => { setShowJoin(false); setCode(''); }}
-                                className="bg-slate-800 text-white font-black py-6 rounded-3xl text-xl border-2 border-slate-700 hover:bg-slate-700 transition-all"
+                                className="bg-slate-800 text-white font-black py-4 md:py-6 rounded-2xl md:rounded-3xl text-base md:text-xl border-2 border-slate-700 hover:bg-slate-700 transition-all uppercase"
                             >
                                 CANCEL
                             </button>
                             <button
                                 onClick={handleJoinTable}
-                                className="bg-emerald-500 text-white font-black py-6 rounded-3xl text-xl shadow-2xl hover:scale-105 active:scale-95 transition-all"
+                                className="bg-emerald-500 text-white font-black py-4 md:py-6 rounded-2xl md:rounded-3xl text-base md:text-xl shadow-2xl hover:scale-105 active:scale-95 transition-all uppercase"
                             >
                                 JOIN TABLE
                             </button>
@@ -624,7 +612,7 @@ const LandingPage = () => {
                     </div>
                 )}
 
-                {/* Saved Games Section */}
+                {/* Continue Progress Section */}
                 {savedGames.length > 0 && (
                     <div className="space-y-4">
                         <div className="relative">
@@ -636,31 +624,39 @@ const LandingPage = () => {
                             {savedGames.map(game => (
                                 <div
                                     key={game.tableId}
-                                    className="group relative w-full bg-slate-900/40 hover:bg-emerald-500/10 border-2 border-slate-800 hover:border-emerald-500/50 rounded-[2rem] px-8 py-6 flex items-center justify-between transition-all shadow-xl cursor-pointer"
-                                    onClick={() => dispatch({ type: 'LOAD_EXISTING_GAME', payload: { gameState: game } })}
+                                    className="group relative w-full bg-slate-900/40 hover:bg-emerald-500/10 border-2 border-emerald-500/30 hover:border-emerald-500 rounded-2xl md:rounded-[2rem] px-6 md:px-8 py-5 md:py-6 transition-all shadow-xl"
                                 >
-                                    <div className="text-left">
-                                        <div className="text-xl font-black text-white group-hover:text-emerald-400 transition-colors uppercase italic tracking-tight">{game.tableName}</div>
-                                        <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1 opacity-60">
-                                            {game.phase} • Team A: {game.scores.team1} Team B: {game.scores.team2}
-                                        </div>
-                                        <div className="text-[9px] font-bold text-slate-600 mt-1">
-                                            Last Activity: {getTimeAgo(game)}
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleDelete(game.tableId);
-                                            }}
-                                            className="bg-slate-800/50 hover:bg-red-500/80 hover:text-white p-3 rounded-xl transition-all z-10"
-                                            title="Delete Game"
+                                    <div className="flex items-center justify-between">
+                                        <div
+                                            className="text-left flex-1 cursor-pointer"
+                                            onClick={() => dispatch({ type: 'LOAD_EXISTING_GAME', payload: { gameState: game } })}
                                         >
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /></svg>
-                                        </button>
-                                        <div className="bg-slate-800 text-[10px] font-black px-6 py-3 rounded-2xl text-slate-400 group-hover:bg-emerald-500 group-hover:text-white transition-all uppercase tracking-widest">
-                                            Resume
+                                            <div className="text-xl md:text-2xl font-black text-emerald-400 group-hover:text-emerald-300 transition-colors italic tracking-tight leading-tight">
+                                                {game.tableName}
+                                            </div>
+                                            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-1.5 opacity-80">
+                                                {game.phase} • Team A: {game.scores.team1} Team B: {game.scores.team2}
+                                            </div>
+                                            <div className="text-[9px] font-bold text-slate-600 mt-1">
+                                                Last Activity: {getTimeAgo(game)}
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); handleDelete(game.tableId); }}
+                                                className="text-slate-600 hover:text-red-500 transition-colors p-2"
+                                                title="Delete Game"
+                                            >
+                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                            </button>
+                                            <button
+                                                onClick={() => dispatch({ type: 'LOAD_EXISTING_GAME', payload: { gameState: game } })}
+                                                className="bg-emerald-500 hover:bg-emerald-400 text-white font-black px-4 md:px-6 py-2 md:py-3 rounded-xl md:rounded-2xl text-[10px] md:text-xs uppercase tracking-widest transition-all shadow-md"
+                                            >
+                                                Resume
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -670,21 +666,14 @@ const LandingPage = () => {
                 )}
             </div>
 
-            <div className="mt-8 flex justify-center">
-                <button
-                    onClick={downloadTrumpAnalysis}
-                    className="text-[9px] font-black text-slate-600 uppercase tracking-widest hover:text-emerald-500 transition-colors flex items-center gap-2"
-                >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                    Download Analysis Data
-                </button>
+            {/* Footer Version */}
+            <div className="mt-auto pt-12 text-center">
+                <div className="text-[10px] font-black text-slate-800 uppercase tracking-[0.3em]">
+                    Euchre Engine V2.5
+                </div>
             </div>
 
-            <div className="mt-16 flex items-center gap-4 text-slate-700">
-                <div className="h-px w-8 bg-slate-800"></div>
-                <p className="text-[10px] font-black uppercase tracking-[0.4em]">Euchre Engine v2.5</p>
-                <div className="h-px w-8 bg-slate-800"></div>
-            </div>
+            <StatsModal isOpen={isStatsOpen} onClose={() => setIsStatsOpen(false)} />
         </div>
     );
 };
