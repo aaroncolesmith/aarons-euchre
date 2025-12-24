@@ -419,7 +419,7 @@ const LoginPage = () => {
     const [name, setName] = useState('');
     const [error, setError] = useState('');
 
-    const ALLOWED_USERS = ['Aaron', 'Polina', 'Gray-Gray', 'Mimi', 'Micah', 'Cherrie'];
+    const ALLOWED_USERS = ['Aaron', 'Polina', 'Gray-Gray', 'Mimi', 'Micah', 'Cherrie', 'Peter-Playwright'];
 
     const handleLogin = (e: React.FormEvent) => {
         e.preventDefault();
