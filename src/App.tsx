@@ -75,7 +75,7 @@ const PlayerSeat = ({
     return (
         <motion.div
             layout
-            className={`absolute ${posClasses[position]} flex flex-col items-center gap-1 z-20`}
+            className={`absolute ${posClasses[position]} flex flex-col items-center gap-1 z-10`}
         >
             <motion.div
                 layout
@@ -86,10 +86,10 @@ const PlayerSeat = ({
                         : isCurrentTurn
                             ? 'bg-emerald-500 border-white shadow-[0_0_30px_rgba(16,185,129,0.8)] scale-125'
                             : isTrumpCaller
-                                ? 'bg-slate-800 border-cyan-500 shadow-[0_0_20px_rgba(34,211,238,0.3)]'
+                                ? 'bg-slate-800/80 border-cyan-500 shadow-[0_0_20px_rgba(34,211,238,0.3)]'
                                 : isDealer
-                                    ? 'bg-slate-800 border-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.3)]'
-                                    : 'bg-slate-800 border-slate-700 shadow-xl opacity-90'}
+                                    ? 'bg-slate-800/80 border-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.3)]'
+                                    : 'bg-slate-800/70 border-slate-700 shadow-xl opacity-90'}
                 `}
             >
                 {isDealer && !isAnimatingDealer && (
@@ -145,15 +145,7 @@ const PlayerSeat = ({
                     </div>
                 )}
             </motion.div>
-            {!inLobby && index !== 0 && state.phase !== 'randomizing_dealer' && (
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="text-[11px] font-black text-slate-400 bg-slate-900/80 px-3 py-1 rounded-full border border-slate-800 backdrop-blur-md mt-2"
-                >
-                    {player.hand.length} CARDS
-                </motion.div>
-            )}
+
 
             <div className="absolute -bottom-6 text-[8px] font-black text-slate-600 uppercase tracking-widest opacity-50">
                 {position === 'bottom' ? 'South' : position === 'left' ? 'West' : position === 'top' ? 'North' : 'East'}
@@ -174,7 +166,7 @@ const CardComponent = ({
     onClick?: () => void;
     disabled?: boolean;
     isValid?: boolean;
-    size?: 'sm' | 'md' | 'lg';
+    size?: 'sm' | 'md' | 'lg' | 'mobile';
     rotation?: number;
 }) => {
     const isRed = card.suit === 'hearts' || card.suit === 'diamonds';
@@ -183,7 +175,8 @@ const CardComponent = ({
     const sizes = {
         sm: 'w-16 h-24 text-base',
         md: 'w-20 h-28 text-xl',
-        lg: 'w-24 h-36 text-2xl'
+        lg: 'w-24 h-36 text-2xl',
+        mobile: 'w-[77px] h-[115px] text-xl'
     };
 
     const valClass = isRed ? 'text-red-600' : 'text-slate-900';
@@ -1162,8 +1155,8 @@ const GameView = () => {
                                             } else if (state.phase === 'bidding') isValid = true;
                                         }
 
-                                        // Calculate overlap - cards overlap by 60% on mobile, less on desktop
-                                        const overlapAmount = handSize > 1 ? -48 : 0; // -60% of card width (80px * 0.6)
+                                        // Calculate overlap - cards overlap by 60% (77px * 0.6 = ~46px)
+                                        const overlapAmount = handSize > 1 ? -46 : 0;
                                         const isFirstCard = index === 0;
 
                                         return (
@@ -1191,7 +1184,7 @@ const GameView = () => {
                                                 </AnimatePresence>
                                                 <CardComponent
                                                     card={card}
-                                                    size="lg"
+                                                    size="mobile"
                                                     isValid={isValid || state.phase === 'scoring'}
                                                     onClick={() => {
                                                         if (state.phase === 'discard' && isValid) dispatch({ type: 'DISCARD_CARD', payload: { playerIndex: myIdx, cardId: card.id } });
