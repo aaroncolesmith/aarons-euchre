@@ -147,7 +147,7 @@ const PlayerSeat = ({
             </motion.div>
 
 
-            <div className="absolute -bottom-6 text-[8px] font-black text-slate-600 uppercase tracking-widest opacity-50">
+            <div className="hidden">
                 {position === 'bottom' ? 'South' : position === 'left' ? 'West' : position === 'top' ? 'North' : 'East'}
             </div>
         </motion.div>
@@ -1132,7 +1132,7 @@ const GameView = () => {
                     </div>
 
 
-                    <div className="h-44 md:h-48 flex items-end justify-center relative mt-auto px-4 md:px-10 pt-4 bg-slate-800/10 rounded-t-[3rem]">
+                    <div className="h-32 md:h-36 flex items-end justify-center relative mt-auto px-4 md:px-10 pt-2 pb-2 bg-slate-800/10 rounded-t-[3rem]">
                         {(() => {
                             const myIdx = state.players.findIndex(p => p.name === state.currentViewPlayerName);
                             if (myIdx === -1 || ['scoring', 'randomizing_dealer', 'game_over', 'lobby'].includes(state.phase)) return null;
