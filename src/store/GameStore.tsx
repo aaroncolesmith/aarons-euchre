@@ -120,7 +120,8 @@ const trackTrumpCall = (
     dealerName: string,
     relationship: 'Self' | 'Teammate' | 'Opponent',
     upcard: Card | null,
-    round: number
+    round: number,
+    handOverride?: Card[]
 ) => {
     try {
         const isBot = caller.isComputer;
@@ -129,7 +130,9 @@ const trackTrumpCall = (
         let suitCount = 0;
         const leftSuit = getOppositeSuit(suit);
 
-        caller.hand.forEach(c => {
+        const handToAnalyze = handOverride || caller.hand;
+
+        handToAnalyze.forEach(c => {
             const isRight = c.suit === suit && c.rank === 'J';
             const isLeft = c.suit === leftSuit && c.rank === 'J';
             if (isRight || isLeft) bowerCount++;
@@ -137,14 +140,18 @@ const trackTrumpCall = (
             if (c.suit === suit) suitCount++;
         });
 
+        const handString = handToAnalyze.map(c => `${c.rank}${c.suit.charAt(0).toUpperCase()}`).join(', ');
+
         const record = {
             WHO_CALLED_TRUMP: caller.name,
             USER_TYPE: isBot ? 'Bot' : 'Human',
             DEALER: relationship === 'Self' ? 'Self' : `${relationship} - ${dealerName}`,
             CARD_PICKED_UP: round === 1 && upcard ? `${upcard.rank} of ${upcard.suit}` : 'n/a',
+            SUIT_CALLED: suit.charAt(0).toUpperCase() + suit.slice(1),
             BOWER_COUNT: bowerCount,
             TRUMP_COUNT: trumpCount,
             SUIT_COUNT: suitCount,
+            HAND_AFTER_DISCARD: handString,
             TIMESTAMP: new Date().toISOString()
         };
 
@@ -436,10 +443,14 @@ const gameReducer = (state: GameState, action: Action): GameState => {
             const caller = state.players[callerIndex];
             const logMsg = `${caller.name} called ${suit}${isLoner ? ' (GOING ALONE!)' : ''}.`;
 
-            // Track Analysis
+            // Track Analysis (Skip if Dealer Pickup - tracked in DISCARD_CARD)
             const dealerName = state.players[state.dealerIndex].name || 'Unknown';
             const relationship = callerIndex === state.dealerIndex ? 'Self' : (Math.abs(callerIndex - state.dealerIndex) === 2 ? 'Teammate' : 'Opponent');
-            trackTrumpCall(caller, suit, dealerName, relationship, state.upcard, state.biddingRound);
+            const isDealerPickup = state.biddingRound === 1 && callerIndex === state.dealerIndex;
+
+            if (!isDealerPickup) {
+                trackTrumpCall(caller, suit, dealerName, relationship, state.upcard, state.biddingRound);
+            }
 
             const bidEvent: GameEvent = {
                 type: 'bid',
@@ -537,10 +548,18 @@ const gameReducer = (state: GameState, action: Action): GameState => {
 
         case 'DISCARD_CARD': {
             const { playerIndex, cardId } = action.payload;
+            const newHand = state.players[playerIndex].hand.filter(c => c.id !== cardId);
+
+            // Track Analysis for Dealer Pickup
+            if (state.phase === 'discard' && state.trump) {
+                const caller = state.players[playerIndex];
+                trackTrumpCall(caller, state.trump, caller.name || 'Bot', 'Self', state.upcard, 1, newHand);
+            }
+
             return {
                 ...state,
                 players: state.players.map((p, i) =>
-                    i === playerIndex ? { ...p, hand: p.hand.filter(c => c.id !== cardId) } : p
+                    i === playerIndex ? { ...p, hand: newHand } : p
                 ),
                 phase: 'playing',
                 currentPlayerIndex: (state.dealerIndex + 1) % 4,
