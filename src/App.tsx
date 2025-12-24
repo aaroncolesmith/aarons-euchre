@@ -32,9 +32,9 @@ const PlayerSeat = ({
 
     const posClasses = {
         bottom: "bottom-4 md:bottom-10 left-1/2 -translate-x-1/2",
-        top: "top-2 md:top-4 left-1/2 -translate-x-1/2",
-        left: "left-2 md:left-12 top-1/2 -translate-y-1/2 -rotate-90 origin-center",
-        right: "right-2 md:right-12 top-1/2 -translate-y-1/2 rotate-90 origin-center"
+        top: "top-1 md:top-4 left-1/2 -translate-x-1/2",
+        left: "left-1 md:left-12 top-1/2 -translate-y-1/2 -rotate-90 origin-center",
+        right: "right-1 md:right-12 top-1/2 -translate-y-1/2 rotate-90 origin-center"
     };
 
     if (!player.name && inLobby) {
@@ -954,7 +954,7 @@ const GameView = () => {
                         </div>
                     )}
 
-                    <div className="flex-1 relative bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.05)_0%,transparent_70%)] rounded-[3rem] border border-slate-800/30 flex items-center justify-center overflow-hidden">
+                    <div className="flex-1 relative bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.05)_0%,transparent_70%)] rounded-[2rem] md:rounded-[3rem] border border-slate-800/30 flex items-center justify-center overflow-hidden scale-90 md:scale-100 origin-center">
 
                         <TableOverlay />
 
@@ -1191,7 +1191,7 @@ const GameView = () => {
                                                 </AnimatePresence>
                                                 <CardComponent
                                                     card={card}
-                                                    size="lg"
+                                                    size="md"
                                                     isValid={isValid || state.phase === 'scoring'}
                                                     onClick={() => {
                                                         if (state.phase === 'discard' && isValid) dispatch({ type: 'DISCARD_CARD', payload: { playerIndex: myIdx, cardId: card.id } });
