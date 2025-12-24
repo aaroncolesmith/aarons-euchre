@@ -81,5 +81,6 @@ export interface GameState {
     displayDealerIndex?: number; // For randomization animation
     logs: string[];
     overlayMessage: string | null;
+    overlayAcknowledged: { [playerName: string]: boolean }; // Track who has acknowledged the overlay
     lastActive: number; // Timestamp of last activity
 }

@@ -189,6 +189,7 @@ const INITIAL_STATE_FUNC = (): GameState => ({
     eventLog: [],
     logs: ['Welcome to Euchre. Create or join a table to begin.'],
     overlayMessage: null,
+    overlayAcknowledged: {},
     lastActive: Date.now(),
 });
 
@@ -200,7 +201,14 @@ const gameReducer = (state: GameState, action: Action): GameState => {
 
     switch (action.type) {
         case 'CLEAR_OVERLAY':
-            return { ...state, overlayMessage: null };
+            return {
+                ...state,
+                overlayMessage: null,
+                overlayAcknowledged: {
+                    ...state.overlayAcknowledged,
+                    [state.currentUser || '']: true
+                }
+            };
 
         case 'LOGIN': {
             // Case-insensitive login but preserve the entered capitalization
@@ -539,7 +547,8 @@ const gameReducer = (state: GameState, action: Action): GameState => {
                 currentPlayerIndex: (state.dealerIndex + 1) % 4,
                 logs: [logMsg, ...state.logs],
                 eventLog: [...state.eventLog, bidEvent],
-                overlayMessage: generateTrumpMessage()
+                overlayMessage: generateTrumpMessage(),
+                overlayAcknowledged: {} // Reset acknowledgments for new overlay
             };
         }
 
@@ -618,7 +627,8 @@ const gameReducer = (state: GameState, action: Action): GameState => {
                 ),
                 phase: 'playing',
                 currentPlayerIndex: (state.dealerIndex + 1) % 4,
-                overlayMessage: generateDealerPickupMessage()
+                overlayMessage: generateDealerPickupMessage(),
+                overlayAcknowledged: {} // Reset acknowledgments for new overlay
             };
         }
 
@@ -1099,6 +1109,15 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const currentPlayer = state.players[state.currentPlayerIndex];
         if (!currentPlayer || !currentPlayer.isComputer || ['game_over', 'scoring', 'waiting_for_trick', 'randomizing_dealer', 'landing', 'lobby'].includes(state.phase)) return;
         if (state.stepMode) return;
+
+        // Don't let bots play if there's an overlay and not all humans have acknowledged it
+        if (state.overlayMessage) {
+            const humanPlayers = state.players.filter(p => p.name && !p.isComputer);
+            const allHumansAcknowledged = humanPlayers.every(p => state.overlayAcknowledged[p.name || '']);
+            if (!allHumansAcknowledged) {
+                return; // Wait for all humans to acknowledge the overlay
+            }
+        }
 
         const timer = setTimeout(() => {
             if (state.phase === 'bidding') {
