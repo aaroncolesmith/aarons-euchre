@@ -12,6 +12,14 @@ This directory contains end-to-end tests for the Euchre game using Playwright.
   - Two players in multiplayer mode
   - Loading saved games
   - Error handling (invalid table codes)
+  - Mobile UI validation (iPhone XS emulation)
+
+## 👤 Test User
+
+All automated tests use the **Peter-Playwright** user account. This is a designated test user that:
+- Is automatically recognized by the system
+- Maintains consistent capitalization ("Peter-Playwright")
+- Is separate from real user accounts for testing purposes
 
 ## 🚀 Quick Start
 
@@ -96,6 +104,18 @@ The test configuration is in `playwright.config.ts`:
 - **Workers**: 1 (sequential execution for game state consistency)
 - **Browsers**: Chromium (Firefox and WebKit available but commented out)
 - **Auto-start dev server**: Yes (runs `npm run dev` automatically)
+
+### 📱 Mobile Testing (iPhone XS Emulation)
+
+The `landing-redesign.spec.ts` tests are configured to emulate an iPhone XS:
+- **Viewport**: 375x812 pixels (iPhone XS dimensions)
+- **User Agent**: iPhone iOS 15 Safari
+- **Purpose**: Validate mobile-first design changes
+
+Run mobile tests specifically:
+```bash
+npx playwright test tests/landing-redesign.spec.ts --headed
+```
 
 ## 📝 Test Structure
 

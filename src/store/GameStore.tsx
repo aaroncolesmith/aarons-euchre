@@ -208,12 +208,12 @@ const gameReducer = (state: GameState, action: Action): GameState => {
             const normalizedName = enteredName.toLowerCase();
 
             // Check against known users (case-insensitive)
-            const knownUsers = ['aaron', 'polina', 'gray-gray', 'mimi', 'micah', 'cherrie'];
+            const knownUsers = ['aaron', 'polina', 'gray-gray', 'mimi', 'micah', 'cherrie', 'peter-playwright'];
             const matchedUser = knownUsers.find(u => u === normalizedName);
 
             // Use the matched capitalization if found, otherwise use what was entered
             const displayName = matchedUser
-                ? ['Aaron', 'Polina', 'Gray-Gray', 'Mimi', 'Micah', 'Cherrie'][knownUsers.indexOf(matchedUser)]
+                ? ['Aaron', 'Polina', 'Gray-Gray', 'Mimi', 'Micah', 'Cherrie', 'Peter-Playwright'][knownUsers.indexOf(matchedUser)]
                 : enteredName;
 
             return { ...state, currentUser: displayName, phase: 'landing' };
