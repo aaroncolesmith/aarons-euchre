@@ -577,7 +577,7 @@ const gameReducer = (state: GameState, action: Action): GameState => {
                 return state;
             }
 
-            const newTrick = [...state.currentTrick, { playerId: player.id, card }];
+            const newTrick = [...state.currentTrick, { playerId: player.id, playerIndex, card }];
             const newPlayers = state.players.map((p, i) =>
                 i === playerIndex ? { ...p, hand: p.hand.filter(c => c.id !== cardId) } : p
             );
