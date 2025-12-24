@@ -504,6 +504,31 @@ const gameReducer = (state: GameState, action: Action): GameState => {
                 };
             }
 
+            // Generate trump announcement message
+            const generateTrumpMessage = () => {
+                const currentViewer = state.currentViewPlayerName;
+                const viewerIndex = state.players.findIndex(p => p.name === currentViewer);
+                const callerName = caller.name || 'Bot';
+                const firstPlayerIndex = (state.dealerIndex + 1) % 4;
+                const firstPlayerName = state.players[firstPlayerIndex].name || 'Bot';
+
+                // Determine relationships from viewer's perspective
+                const isTeam1 = (idx: number) => idx === 0 || idx === 2;
+                const viewerTeam1 = isTeam1(viewerIndex);
+                const callerTeam1 = isTeam1(callerIndex);
+                const firstPlayerTeam1 = isTeam1(firstPlayerIndex);
+
+                const callerRelationship = viewerTeam1 === callerTeam1 ? 'teammate' : 'opponent';
+                const firstPlayerRelationship = viewerTeam1 === firstPlayerTeam1 ? 'teammate' : 'opponent';
+
+                const callerPrefix = callerIndex === viewerIndex ? 'You have' : `Your ${callerRelationship} ${callerName} has`;
+                const firstPlayerPrefix = firstPlayerIndex === viewerIndex ? 'You play' : `Your ${firstPlayerRelationship} ${firstPlayerName} plays`;
+
+                const suitName = suit.charAt(0).toUpperCase() + suit.slice(1);
+
+                return `${callerPrefix} called ${suitName} as trump${isLoner ? ' and is going alone!' : '.'} ${firstPlayerPrefix} first.`;
+            };
+
             return {
                 ...state,
                 players: newPlayers,
@@ -513,7 +538,8 @@ const gameReducer = (state: GameState, action: Action): GameState => {
                 phase: 'playing',
                 currentPlayerIndex: (state.dealerIndex + 1) % 4,
                 logs: [logMsg, ...state.logs],
-                eventLog: [...state.eventLog, bidEvent]
+                eventLog: [...state.eventLog, bidEvent],
+                overlayMessage: generateTrumpMessage()
             };
         }
 
@@ -557,6 +583,34 @@ const gameReducer = (state: GameState, action: Action): GameState => {
                 trackTrumpCall(caller, state.trump, caller.name || 'Bot', 'Self', state.upcard, 1, newHand);
             }
 
+            // Generate trump announcement message for dealer pickup
+            const generateDealerPickupMessage = () => {
+                const currentViewer = state.currentViewPlayerName;
+                const viewerIndex = state.players.findIndex(p => p.name === currentViewer);
+                const dealerName = state.players[state.dealerIndex].name || 'Bot';
+                const callerName = state.players[state.trumpCallerIndex!].name || 'Bot';
+                const firstPlayerIndex = (state.dealerIndex + 1) % 4;
+                const firstPlayerName = state.players[firstPlayerIndex].name || 'Bot';
+
+                // Determine relationships from viewer's perspective
+                const isTeam1 = (idx: number) => idx === 0 || idx === 2;
+                const viewerTeam1 = isTeam1(viewerIndex);
+                const callerTeam1 = isTeam1(state.trumpCallerIndex!);
+                const firstPlayerTeam1 = isTeam1(firstPlayerIndex);
+
+                const callerRelationship = viewerTeam1 === callerTeam1 ? 'teammate' : 'opponent';
+                const firstPlayerRelationship = viewerTeam1 === firstPlayerTeam1 ? 'teammate' : 'opponent';
+
+                const callerPrefix = state.trumpCallerIndex === viewerIndex ? 'You have' : `Your ${callerRelationship} ${callerName} has`;
+                const dealerPrefix = state.dealerIndex === viewerIndex ? 'you' : `the dealer ${dealerName}`;
+                const firstPlayerPrefix = firstPlayerIndex === viewerIndex ? 'You play' : `Your ${firstPlayerRelationship} ${firstPlayerName} plays`;
+
+                const upcardRank = state.upcard?.rank || '?';
+                const suitName = state.trump!.charAt(0).toUpperCase() + state.trump!.slice(1);
+
+                return `${callerPrefix} ordered up the ${upcardRank} of ${suitName} to ${dealerPrefix}. ${suitName} is trump${state.isLoner ? ' and they are going alone!' : '.'} ${firstPlayerPrefix} first.`;
+            };
+
             return {
                 ...state,
                 players: state.players.map((p, i) =>
@@ -564,6 +618,7 @@ const gameReducer = (state: GameState, action: Action): GameState => {
                 ),
                 phase: 'playing',
                 currentPlayerIndex: (state.dealerIndex + 1) % 4,
+                overlayMessage: generateDealerPickupMessage()
             };
         }
 
