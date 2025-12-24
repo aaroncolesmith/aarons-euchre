@@ -1056,7 +1056,7 @@ const GameView = () => {
                         </div>
                     </div>
 
-                    <div className="absolute top-[15%] md:bottom-[28%] md:top-auto left-1/2 -translate-x-1/2 z-50 pointer-events-none">
+                    <div className="absolute top-20 md:bottom-[28%] md:top-auto left-1/2 -translate-x-1/2 z-50 pointer-events-none w-full px-4 md:w-auto md:px-0">
                         <AnimatePresence>
                             {(() => {
                                 const myIdx = state.players.findIndex(p => p.name === state.currentViewPlayerName);
@@ -1066,49 +1066,55 @@ const GameView = () => {
                                             initial={{ opacity: 0, y: 50 }}
                                             animate={{ opacity: 1, y: 0 }}
                                             exit={{ opacity: 0, scale: 0.8 }}
-                                            className="pointer-events-auto p-4 md:p-6 bg-slate-900/80 rounded-[2rem] md:rounded-[3rem] border-2 border-emerald-500 shadow-2xl flex flex-col gap-4 md:gap-6 backdrop-blur-md"
+                                            className="pointer-events-auto p-4 md:p-6 bg-slate-900/90 rounded-[2rem] md:rounded-[3rem] border-2 border-emerald-500 shadow-2xl flex flex-col gap-3 md:gap-6 backdrop-blur-md w-full max-w-xs mx-auto"
                                         >
                                             <div className="text-center">
-                                                <div className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Your Turn to Bid</div>
-                                                <div className="text-xl font-black text-white italic tracking-tighter">What's the call?</div>
+                                                <div className="text-xl font-black text-white italic tracking-tighter mb-2">What's the call?</div>
 
-                                                {/* Show Upcard Context */}
+                                                {/* Scoreboard */}
+                                                <div className="flex justify-center gap-8 mb-4 bg-slate-800/50 py-2 rounded-xl">
+                                                    <div className="text-center">
+                                                        <div className="text-[7px] font-black text-emerald-500 uppercase tracking-widest mb-0.5">{state.teamNames.team1}</div>
+                                                        <div className="text-lg font-black text-white leading-none">{state.scores.team1}</div>
+                                                    </div>
+                                                    <div className="text-center">
+                                                        <div className="text-[7px] font-black text-emerald-500 uppercase tracking-widest mb-0.5">{state.teamNames.team2}</div>
+                                                        <div className="text-lg font-black text-white leading-none">{state.scores.team2}</div>
+                                                    </div>
+                                                </div>
+
+                                                <div className="text-[10px] font-bold text-slate-400 mb-4">
+                                                    Your {myIdx === state.dealerIndex ? <span className="text-emerald-400">self</span> : ((myIdx + 2) % 4 === state.dealerIndex ? 'teammate' : 'opponent')} <span className="text-white">{state.players[state.dealerIndex].name}</span> is the dealer
+                                                </div>
+
                                                 {state.biddingRound === 1 && state.upcard && (
-                                                    <div className="flex justify-center my-4">
-                                                        <div className="scale-75 origin-center">
+                                                    <div className="flex justify-center mb-4">
+                                                        <div className="scale-90 origin-center">
                                                             <CardComponent card={state.upcard} size="md" disabled />
                                                         </div>
                                                     </div>
                                                 )}
-
-                                                {state.upcard && state.dealerIndex !== -1 && (
-                                                    <div className="text-[10px] font-bold text-slate-400 mt-2">
-                                                        {myIdx === state.dealerIndex ? (
-                                                            <span className="text-emerald-400">You are the dealer</span>
-                                                        ) : (
-                                                            <>
-                                                                Your {(myIdx + 2) % 4 === state.dealerIndex ? 'teammate' : 'opponent'} <span className="text-white">{state.players[state.dealerIndex].name}</span> is the dealer
-                                                            </>
-                                                        )}
-                                                    </div>
-                                                )}
                                             </div>
+
                                             {state.biddingRound === 1 ? (
-                                                <div className="flex gap-4">
-                                                    <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit: state.upcard!.suit, callerIndex: myIdx, isLoner: false } })} className="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-3 md:px-10 md:py-5 rounded-3xl font-black text-sm md:text-lg uppercase transition-all hover:scale-105 active:scale-95 shadow-xl shadow-emerald-500/20">Order It Up</button>
-                                                    <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit: state.upcard!.suit, callerIndex: myIdx, isLoner: true } })} className="bg-pink-600 hover:bg-pink-500 text-white px-6 py-3 md:px-8 md:py-5 rounded-3xl font-black text-sm md:text-lg uppercase transition-all hover:scale-105 active:scale-95 shadow-xl shadow-pink-500/20">Go Alone</button>
+                                                <div className="flex gap-3 justify-center">
+                                                    <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit: state.upcard!.suit, callerIndex: myIdx, isLoner: false } })} className="bg-emerald-600 hover:bg-emerald-500 text-white flex-1 py-4 rounded-xl font-black text-[11px] md:text-sm uppercase shadow-lg shadow-emerald-500/20 leading-tight transition-transform active:scale-95">Order<br />Up</button>
+                                                    <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit: state.upcard!.suit, callerIndex: myIdx, isLoner: true } })} className="bg-amber-500 hover:bg-amber-400 text-white flex-1 py-4 rounded-xl font-black text-[11px] md:text-sm uppercase shadow-lg shadow-amber-500/20 leading-tight transition-transform active:scale-95">Go<br />Alone</button>
+                                                    <button onClick={() => dispatch({ type: 'PASS_BID', payload: { playerIndex: myIdx } })} className="bg-pink-600 hover:bg-pink-500 text-white flex-1 py-4 rounded-xl font-black text-[11px] md:text-sm uppercase shadow-lg shadow-pink-500/20 leading-tight transition-transform active:scale-95 flex items-center justify-center">Pass</button>
                                                 </div>
                                             ) : (
-                                                <div className="flex flex-wrap justify-center gap-4">
-                                                    {(['hearts', 'diamonds', 'clubs', 'spades'] as const).filter(s => s !== state.upcard!.suit).map(suit => (
-                                                        <div key={suit} className="flex flex-col gap-2">
-                                                            <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit, callerIndex: myIdx, isLoner: false } })} className="bg-slate-800 hover:bg-slate-700 text-white px-4 py-3 md:px-8 md:py-4 rounded-2xl font-black text-sm uppercase border border-slate-700 transition-all hover:scale-110 active:scale-95 shadow-md">{suit}</button>
-                                                            <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit, callerIndex: myIdx, isLoner: true } })} className="bg-pink-900/40 hover:bg-pink-800 text-pink-300 px-4 py-2 md:px-8 rounded-2xl font-black text-[10px] uppercase border border-pink-700/20 transition-all hover:scale-110 active:scale-95">Alone</button>
-                                                        </div>
-                                                    ))}
+                                                <div className="flex flex-col gap-3">
+                                                    <div className="flex flex-wrap justify-center gap-2">
+                                                        {(['hearts', 'diamonds', 'clubs', 'spades'] as const).filter(s => s !== state.upcard!.suit).map(suit => (
+                                                            <div key={suit} className="flex flex-col gap-1">
+                                                                <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit, callerIndex: myIdx, isLoner: false } })} className="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-xl font-black text-[10px] uppercase border border-slate-700 transition-all hover:scale-105 active:scale-95">{suit}</button>
+                                                                <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit, callerIndex: myIdx, isLoner: true } })} className="bg-slate-800/50 hover:bg-amber-500/20 text-amber-500/50 hover:text-amber-500 px-2 py-1 rounded text-[8px] font-black uppercase transition-all">Alone</button>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                    <button onClick={() => dispatch({ type: 'PASS_BID', payload: { playerIndex: myIdx } })} className="w-full bg-pink-600 hover:bg-pink-500 text-white py-3 rounded-xl font-black text-xs uppercase shadow-lg transition-transform active:scale-95">Pass</button>
                                                 </div>
                                             )}
-                                            <button onClick={() => dispatch({ type: 'PASS_BID', payload: { playerIndex: myIdx } })} className="bg-red-500/10 hover:bg-red-500/20 text-red-500 px-6 py-3 md:px-10 md:py-4 rounded-3xl font-black text-sm md:text-lg border-2 border-red-500/30 uppercase tracking-widest transition-all">Pass</button>
                                         </motion.div>
                                     );
                                 }
