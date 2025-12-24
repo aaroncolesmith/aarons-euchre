@@ -999,7 +999,7 @@ const GameView = () => {
                                 })}
                             </AnimatePresence>
 
-                            {['bidding', 'discard'].includes(state.phase) && state.upcard && (
+                            {state.phase === 'bidding' && state.upcard && (
                                 (() => {
                                     const dealerIdx = state.dealerIndex;
                                     const myIdx = state.players.findIndex(p => p.name === state.currentViewPlayerName);
