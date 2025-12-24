@@ -1138,15 +1138,18 @@ const GameView = () => {
                         </AnimatePresence>
                     </div>
 
-                    <div className="h-44 flex items-center justify-center relative mt-auto px-10 pt-4 bg-slate-800/10 rounded-t-[3rem]">
+
+                    <div className="h-44 md:h-48 flex items-end justify-center relative mt-auto px-4 md:px-10 pt-4 bg-slate-800/10 rounded-t-[3rem]">
                         {(() => {
                             const myIdx = state.players.findIndex(p => p.name === state.currentViewPlayerName);
                             if (myIdx === -1 || ['scoring', 'randomizing_dealer', 'game_over', 'lobby'].includes(state.phase)) return null;
 
                             const myPlayer = state.players[myIdx];
+                            const handSize = myPlayer.hand.length;
+
                             return (
-                                <div className="flex gap-4 justify-center items-end">
-                                    {myPlayer.hand.map((card: Card) => {
+                                <div className="flex justify-center items-end relative" style={{ width: '100%', maxWidth: '400px' }}>
+                                    {myPlayer.hand.map((card: Card, index: number) => {
                                         let isValid = false;
                                         const isPickedUpCard = state.phase === 'discard' && card.id === state.upcard?.id;
 
@@ -1159,13 +1162,21 @@ const GameView = () => {
                                             } else if (state.phase === 'bidding') isValid = true;
                                         }
 
+                                        // Calculate overlap - cards overlap by 60% on mobile, less on desktop
+                                        const overlapAmount = handSize > 1 ? -48 : 0; // -60% of card width (80px * 0.6)
+                                        const isFirstCard = index === 0;
+
                                         return (
                                             <motion.div
                                                 key={card.id}
                                                 layoutId={card.id}
-                                                initial={{ y: 150, rotate: 10, opacity: 0 }}
-                                                animate={{ y: 0, rotate: 0, opacity: 1 }}
+                                                initial={{ y: 150, opacity: 0 }}
+                                                animate={{ y: 0, opacity: 1 }}
                                                 className="relative"
+                                                style={{
+                                                    marginLeft: isFirstCard ? 0 : `${overlapAmount}px`,
+                                                    zIndex: index + 1
+                                                }}
                                             >
                                                 <AnimatePresence>
                                                     {isPickedUpCard && (
@@ -1180,7 +1191,7 @@ const GameView = () => {
                                                 </AnimatePresence>
                                                 <CardComponent
                                                     card={card}
-                                                    size="md"
+                                                    size="lg"
                                                     isValid={isValid || state.phase === 'scoring'}
                                                     onClick={() => {
                                                         if (state.phase === 'discard' && isValid) dispatch({ type: 'DISCARD_CARD', payload: { playerIndex: myIdx, cardId: card.id } });
