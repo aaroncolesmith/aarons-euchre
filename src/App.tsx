@@ -867,16 +867,19 @@ const GameView = () => {
 
                 <StatsModal isOpen={isStatsOpen} onClose={() => setIsStatsOpen(false)} />
 
-                <div className={`flex-1 bg-slate-900/95 rounded-[3rem] shadow-2xl border border-slate-800/50 p-8 backdrop-blur-3xl flex flex-col relative overflow-hidden ${activeTab === 'table' ? 'flex' : 'hidden md:flex'}`}>
+                <div className={`flex-1 bg-slate-900/95 rounded-[2rem] md:rounded-[3rem] shadow-2xl border border-slate-800/50 p-3 md:p-8 backdrop-blur-3xl flex flex-col relative overflow-hidden ${activeTab === 'table' ? 'flex' : 'hidden md:flex'}`}>
 
-                    <div className="flex justify-between items-center mb-4">
+                    <div className="flex justify-between items-start md:items-center mb-2 md:mb-4">
                         <div className="flex items-center gap-4">
                             <div className="flex flex-col">
-                                <h1 className="text-xl md:text-2xl font-black bg-gradient-to-br from-emerald-400 to-blue-500 bg-clip-text text-transparent italic leading-none mb-1">
+                                <h1 className="text-lg md:text-2xl font-black bg-gradient-to-br from-emerald-400 to-blue-500 bg-clip-text text-transparent italic leading-none">
                                     {state.tableName || 'Euchre'}
                                 </h1>
                                 {state.tableCode && (
-                                    <div className="text-[10px] font-black text-slate-500 tracking-[0.2em]">CODE: {state.tableCode}</div>
+                                    <>
+                                        <div className="hidden md:block text-[10px] font-black text-slate-500 tracking-[0.2em] mt-1">CODE: {state.tableCode}</div>
+                                        <div className="md:hidden text-[8px] font-bold text-slate-600 tracking-wider mt-0.5">{state.tableCode}</div>
+                                    </>
                                 )}
                             </div>
                             <button
@@ -885,6 +888,9 @@ const GameView = () => {
                             >
                                 Stats
                             </button>
+                        </div>
+
+                        <div className="flex gap-2">
                             <button
                                 onClick={async () => {
                                     if (!state.tableCode) return;
@@ -895,32 +901,30 @@ const GameView = () => {
                                         dispatch({ type: 'JOIN_TABLE', payload: { code: state.tableCode, userName: state.currentUser! } });
                                     }
                                 }}
-                                className="bg-slate-800 hover:bg-slate-700 text-cyan-300 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border border-slate-700 transition-all shadow-sm"
+                                className="bg-slate-800 hover:bg-slate-700 text-cyan-300 px-3 py-1 md:px-4 md:py-2 rounded-lg md:rounded-xl text-[8px] md:text-[10px] font-black uppercase tracking-widest border border-slate-700 transition-all shadow-sm"
                             >
                                 Sync
                             </button>
-                        </div>
 
-                        <div className="flex gap-3">
                             {state.phase === 'lobby' ? (
                                 <button
                                     onClick={() => dispatch({ type: 'START_MATCH' })}
-                                    className="bg-emerald-600 hover:bg-emerald-500 text-white font-black py-2 px-10 rounded-xl transition transform active:scale-95 text-sm shadow-lg shadow-emerald-500/20 animate-pulse"
+                                    className="bg-emerald-600 hover:bg-emerald-500 text-white font-black py-1 px-4 md:py-2 md:px-10 rounded-lg md:rounded-xl transition transform active:scale-95 text-[10px] md:text-sm shadow-lg shadow-emerald-500/20 animate-pulse"
                                 >
-                                    START GAME
+                                    START
                                 </button>
                             ) : (
                                 <button
                                     onClick={() => dispatch({ type: 'TOGGLE_STEP_MODE' })}
-                                    className={`font-black py-2 px-6 rounded-xl transition border text-[10px] flex items-center gap-2
+                                    className={`font-black py-1 px-3 md:py-2 md:px-6 rounded-lg md:rounded-xl transition border text-[8px] md:text-[10px] flex items-center gap-2
                                         ${state.stepMode ? 'bg-amber-500 text-white border-white/20' : 'bg-slate-800 text-slate-500 border-slate-700'}`}
                                 >
-                                    STEP MODE: {state.stepMode ? 'ON' : 'OFF'}
+                                    {state.stepMode ? 'Step: ON' : 'Step'}
                                 </button>
                             )}
                             <button
                                 onClick={() => dispatch({ type: 'EXIT_TO_LANDING' })}
-                                className="bg-slate-800 hover:bg-red-500 text-slate-400 hover:text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase border border-slate-700 transition-all"
+                                className="bg-slate-800 hover:bg-red-500 text-slate-400 hover:text-white px-3 py-1 md:px-4 md:py-2 rounded-lg md:rounded-xl text-[8px] md:text-[10px] font-black uppercase border border-slate-700 transition-all"
                             >
                                 Leave
                             </button>
@@ -928,24 +932,24 @@ const GameView = () => {
                     </div>
 
                     {state.phase !== 'lobby' && (
-                        <div className="flex justify-center items-center gap-12 mb-4">
+                        <div className="flex justify-center items-center gap-4 md:gap-12 mb-1 md:mb-4">
                             <div className="text-center">
-                                <div className="text-[10px] font-black text-cyan-500 uppercase tracking-widest mb-1">{state.teamNames.team1}</div>
-                                <div className="text-3xl font-black text-white table-nums leading-none">{state.scores.team1}</div>
+                                <div className="text-[8px] md:text-[10px] font-black text-cyan-500 uppercase tracking-widest mb-0.5 md:mb-1">{state.teamNames.team1}</div>
+                                <div className="text-xl md:text-3xl font-black text-white table-nums leading-none">{state.scores.team1}</div>
                             </div>
 
                             {state.trump && (
-                                <div className="flex flex-col items-center bg-slate-800/80 px-4 py-2 rounded-2xl border border-slate-700/50">
-                                    <div className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-0.5">TRUMP</div>
-                                    <div className={`text-2xl font-black leading-none ${state.trump === 'hearts' || state.trump === 'diamonds' ? 'text-red-500' : 'text-white'}`}>
+                                <div className="flex flex-col items-center bg-slate-800/80 px-2 py-1 md:px-4 md:py-2 rounded-xl md:rounded-2xl border border-slate-700/50">
+                                    <div className="hidden md:block text-[8px] font-black text-slate-500 uppercase tracking-widest mb-0.5">TRUMP</div>
+                                    <div className={`text-lg md:text-2xl font-black leading-none ${state.trump === 'hearts' || state.trump === 'diamonds' ? 'text-red-500' : 'text-white'}`}>
                                         {state.trump === 'hearts' ? '♥' : state.trump === 'diamonds' ? '♦' : state.trump === 'clubs' ? '♣' : '♠'}
                                     </div>
                                 </div>
                             )}
 
                             <div className="text-center">
-                                <div className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-1">{state.teamNames.team2}</div>
-                                <div className="text-3xl font-black text-white table-nums leading-none">{state.scores.team2}</div>
+                                <div className="text-[8px] md:text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-0.5 md:mb-1">{state.teamNames.team2}</div>
+                                <div className="text-xl md:text-3xl font-black text-white table-nums leading-none">{state.scores.team2}</div>
                             </div>
                         </div>
                     )}
@@ -984,10 +988,10 @@ const GameView = () => {
                                     const relativePos = (pIdx - rIdx + 4) % 4;
 
                                     const offsets = [
-                                        { y: 80, r: 0 },   // Bottom
-                                        { x: -80, r: 90 }, // Left
-                                        { y: -80, r: 180 },  // Top
-                                        { x: 80, r: -90 }, // Right
+                                        { y: 50, r: 0 },   // Bottom
+                                        { x: -50, r: 90 }, // Left
+                                        { y: -50, r: 180 },  // Top
+                                        { x: 50, r: -90 }, // Right
                                     ];
                                     const { x = 0, y = 0, r = 0 } = offsets[relativePos] || {};
 
@@ -1000,7 +1004,7 @@ const GameView = () => {
                                             exit={{ scale: 0, opacity: 0 }}
                                             className="absolute"
                                         >
-                                            <CardComponent card={t.card} size="md" rotation={0} disabled />
+                                            <CardComponent card={t.card} size="sm" rotation={0} disabled />
                                         </motion.div>
                                     );
                                 })}
