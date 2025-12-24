@@ -1035,11 +1035,13 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                     setTimeout(() => {
                         // Determine who should generate the dealer
                         // The first human player (lowest seat index) generates to avoid race conditions
+                        // If all players are bots, the game creator (viewer) generates
                         const firstHumanSeat = state.players.findIndex(p => p.name && !p.isComputer);
                         const myPlayerIndex = state.players.findIndex(p => p.name === state.currentUser);
-                        const shouldIGenerate = myPlayerIndex !== -1 && (myPlayerIndex === firstHumanSeat || firstHumanSeat === -1);
+                        const allBotsGame = state.players.every(p => p.isComputer);
+                        const shouldIGenerate = allBotsGame ? true : (myPlayerIndex !== -1 && (myPlayerIndex === firstHumanSeat || firstHumanSeat === -1));
 
-                        Logger.info(`Dealer selection: myIndex=${myPlayerIndex}, firstHuman=${firstHumanSeat}, shouldGenerate=${shouldIGenerate}`);
+                        Logger.info(`Dealer selection: myIndex=${myPlayerIndex}, firstHuman=${firstHumanSeat}, allBots=${allBotsGame}, shouldGenerate=${shouldIGenerate}`);
 
                         if (shouldIGenerate) {
                             const deck = shuffleDeck(createDeck());
