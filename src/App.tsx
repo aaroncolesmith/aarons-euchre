@@ -1056,7 +1056,7 @@ const GameView = () => {
                         </div>
                     </div>
 
-                    <div className="absolute bottom-[28%] left-1/2 -translate-x-1/2 z-50 pointer-events-none">
+                    <div className="absolute top-[15%] md:bottom-[28%] md:top-auto left-1/2 -translate-x-1/2 z-50 pointer-events-none">
                         <AnimatePresence>
                             {(() => {
                                 const myIdx = state.players.findIndex(p => p.name === state.currentViewPlayerName);
@@ -1066,7 +1066,7 @@ const GameView = () => {
                                             initial={{ opacity: 0, y: 50 }}
                                             animate={{ opacity: 1, y: 0 }}
                                             exit={{ opacity: 0, scale: 0.8 }}
-                                            className="pointer-events-auto p-6 bg-slate-900/95 rounded-[3rem] border-2 border-emerald-500 shadow-2xl flex flex-col gap-6 backdrop-blur-3xl"
+                                            className="pointer-events-auto p-4 md:p-6 bg-slate-900/80 rounded-[2rem] md:rounded-[3rem] border-2 border-emerald-500 shadow-2xl flex flex-col gap-4 md:gap-6 backdrop-blur-md"
                                         >
                                             <div className="text-center">
                                                 <div className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Your Turn to Bid</div>
@@ -1095,20 +1095,20 @@ const GameView = () => {
                                             </div>
                                             {state.biddingRound === 1 ? (
                                                 <div className="flex gap-4">
-                                                    <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit: state.upcard!.suit, callerIndex: myIdx, isLoner: false } })} className="bg-emerald-600 hover:bg-emerald-500 text-white px-10 py-5 rounded-3xl font-black text-lg uppercase transition-all hover:scale-105 active:scale-95 shadow-xl shadow-emerald-500/20">Order It Up</button>
-                                                    <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit: state.upcard!.suit, callerIndex: myIdx, isLoner: true } })} className="bg-pink-600 hover:bg-pink-500 text-white px-8 py-5 rounded-3xl font-black text-lg uppercase transition-all hover:scale-105 active:scale-95 shadow-xl shadow-pink-500/20">Go Alone</button>
+                                                    <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit: state.upcard!.suit, callerIndex: myIdx, isLoner: false } })} className="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-3 md:px-10 md:py-5 rounded-3xl font-black text-sm md:text-lg uppercase transition-all hover:scale-105 active:scale-95 shadow-xl shadow-emerald-500/20">Order It Up</button>
+                                                    <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit: state.upcard!.suit, callerIndex: myIdx, isLoner: true } })} className="bg-pink-600 hover:bg-pink-500 text-white px-6 py-3 md:px-8 md:py-5 rounded-3xl font-black text-sm md:text-lg uppercase transition-all hover:scale-105 active:scale-95 shadow-xl shadow-pink-500/20">Go Alone</button>
                                                 </div>
                                             ) : (
                                                 <div className="flex flex-wrap justify-center gap-4">
                                                     {(['hearts', 'diamonds', 'clubs', 'spades'] as const).filter(s => s !== state.upcard!.suit).map(suit => (
                                                         <div key={suit} className="flex flex-col gap-2">
-                                                            <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit, callerIndex: myIdx, isLoner: false } })} className="bg-slate-800 hover:bg-slate-700 text-white px-8 py-4 rounded-2xl font-black text-sm uppercase border border-slate-700 transition-all hover:scale-110 active:scale-95 shadow-md">{suit}</button>
-                                                            <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit, callerIndex: myIdx, isLoner: true } })} className="bg-pink-900/40 hover:bg-pink-800 text-pink-300 px-8 py-2 rounded-2xl font-black text-[10px] uppercase border border-pink-700/20 transition-all hover:scale-110 active:scale-95">Alone</button>
+                                                            <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit, callerIndex: myIdx, isLoner: false } })} className="bg-slate-800 hover:bg-slate-700 text-white px-4 py-3 md:px-8 md:py-4 rounded-2xl font-black text-sm uppercase border border-slate-700 transition-all hover:scale-110 active:scale-95 shadow-md">{suit}</button>
+                                                            <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit, callerIndex: myIdx, isLoner: true } })} className="bg-pink-900/40 hover:bg-pink-800 text-pink-300 px-4 py-2 md:px-8 rounded-2xl font-black text-[10px] uppercase border border-pink-700/20 transition-all hover:scale-110 active:scale-95">Alone</button>
                                                         </div>
                                                     ))}
                                                 </div>
                                             )}
-                                            <button onClick={() => dispatch({ type: 'PASS_BID', payload: { playerIndex: myIdx } })} className="bg-red-500/10 hover:bg-red-500/20 text-red-500 px-10 py-4 rounded-3xl font-black text-lg border-2 border-red-500/30 uppercase tracking-widest transition-all">Pass</button>
+                                            <button onClick={() => dispatch({ type: 'PASS_BID', payload: { playerIndex: myIdx } })} className="bg-red-500/10 hover:bg-red-500/20 text-red-500 px-6 py-3 md:px-10 md:py-4 rounded-3xl font-black text-sm md:text-lg border-2 border-red-500/30 uppercase tracking-widest transition-all">Pass</button>
                                         </motion.div>
                                     );
                                 }
