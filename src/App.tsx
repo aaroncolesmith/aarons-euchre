@@ -213,15 +213,19 @@ const CardComponent = ({
 const StatsModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
     const { state } = useGame();
     const [tab, setTab] = useState<'me' | 'league'>('me');
-    const mySeatIndex = state.players.findIndex(p => p.name === state.currentViewPlayerName);
-    const human = mySeatIndex !== -1 ? state.players[mySeatIndex] : {
+
+    // Load global stats from localStorage
+    const globalStats = JSON.parse(localStorage.getItem('euchre_global_profiles') || '{}');
+
+    // Get my stats - prioritize global stats over current game stats
+    const myGlobalStats = globalStats[state.currentViewPlayerName || ''] || getEmptyStats();
+    const human = {
         name: state.currentViewPlayerName,
-        stats: getEmptyStats()
+        stats: myGlobalStats
     };
 
     if (!isOpen) return null;
 
-    const globalStats = JSON.parse(localStorage.getItem('euchre_global_profiles') || '{}');
     const leaguePlayers = Object.keys(globalStats).map(name => ({
         name,
         ...globalStats[name]
