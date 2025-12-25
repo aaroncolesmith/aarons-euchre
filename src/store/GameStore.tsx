@@ -1155,6 +1155,34 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         return () => clearTimeout(timer);
     }, [state.currentPlayerIndex, state.phase, state.players, state.trump, state.currentTrick, state.stepMode, state.biddingRound, state.upcard]);
 
+    // Bot Watchdog - Detect stuck bots and auto-sync
+    useEffect(() => {
+        const currentPlayer = state.players[state.currentPlayerIndex];
+        if (!currentPlayer || !currentPlayer.isComputer || ['game_over', 'scoring', 'waiting_for_trick', 'randomizing_dealer', 'landing', 'lobby'].includes(state.phase)) return;
+        if (state.stepMode) return;
+
+        // If a bot should have played but hasn't after 10 seconds, force a sync
+        const watchdogTimer = setTimeout(async () => {
+            Logger.warn(`Bot watchdog triggered: Bot ${currentPlayer.name} at position ${state.currentPlayerIndex} hasn't played. Forcing sync...`);
+
+            // Try to reload game state from Supabase
+            if (state.tableCode) {
+                const { data } = await supabase
+                    .from('games')
+                    .select('state')
+                    .eq('code', state.tableCode)
+                    .single();
+
+                if (data && data.state) {
+                    Logger.info('Bot watchdog: Reloading state from server');
+                    dispatch({ type: 'LOAD_EXISTING_GAME', payload: { gameState: data.state } });
+                }
+            }
+        }, 10000); // 10 second watchdog
+
+        return () => clearTimeout(watchdogTimer);
+    }, [state.currentPlayerIndex, state.phase, state.tableCode]);
+
     return (
         <GameContext.Provider value={{ state, dispatch: broadcastDispatch }}>
             {children}
