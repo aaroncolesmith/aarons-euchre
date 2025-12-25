@@ -537,6 +537,11 @@ const gameReducer = (state: GameState, action: Action): GameState => {
                 return `${callerPrefix} called ${suitName} as trump${isLoner ? ' and is going alone!' : '.'} ${firstPlayerPrefix} first.`;
             };
 
+            // Pre-acknowledge all bots (they don't need to read the overlay)
+            const botAcknowledgments = state.players
+                .filter(p => p.isComputer && p.name)
+                .reduce((acc, p) => ({ ...acc, [p.name!]: true }), {});
+
             return {
                 ...state,
                 players: newPlayers,
@@ -548,7 +553,7 @@ const gameReducer = (state: GameState, action: Action): GameState => {
                 logs: [logMsg, ...state.logs],
                 eventLog: [...state.eventLog, bidEvent],
                 overlayMessage: generateTrumpMessage(),
-                overlayAcknowledged: {} // Reset acknowledgments for new overlay
+                overlayAcknowledged: botAcknowledgments // Bots pre-acknowledged
             };
         }
 
@@ -620,6 +625,11 @@ const gameReducer = (state: GameState, action: Action): GameState => {
                 return `${callerPrefix} ordered up the ${upcardRank} of ${suitName} to ${dealerPrefix}. ${suitName} is trump${state.isLoner ? ' and they are going alone!' : '.'} ${firstPlayerPrefix} first.`;
             };
 
+            // Pre-acknowledge all bots (they don't need to read the overlay)
+            const botAcknowledgments = state.players
+                .filter(p => p.isComputer && p.name)
+                .reduce((acc, p) => ({ ...acc, [p.name!]: true }), {});
+
             return {
                 ...state,
                 players: state.players.map((p, i) =>
@@ -628,7 +638,7 @@ const gameReducer = (state: GameState, action: Action): GameState => {
                 phase: 'playing',
                 currentPlayerIndex: (state.dealerIndex + 1) % 4,
                 overlayMessage: generateDealerPickupMessage(),
-                overlayAcknowledged: {} // Reset acknowledgments for new overlay
+                overlayAcknowledged: botAcknowledgments // Bots pre-acknowledged
             };
         }
 
