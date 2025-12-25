@@ -396,12 +396,12 @@ const TableOverlay = () => {
     return (
         <div
             onClick={() => dispatch({ type: 'CLEAR_OVERLAY' })}
-            className="absolute inset-0 z-[60] flex items-center justify-center p-8 bg-slate-950/40 backdrop-blur-sm animate-in fade-in duration-300 cursor-pointer"
+            className="absolute inset-0 z-[60] flex items-center justify-center p-4 md:p-8 bg-slate-950/40 backdrop-blur-sm animate-in fade-in duration-300 cursor-pointer"
         >
-            <div className="bg-emerald-500 text-white px-12 py-8 rounded-[3rem] shadow-[0_0_100px_rgba(16,185,129,0.4)] border-4 border-white animate-in zoom-in slide-in-from-bottom-12 duration-500">
-                <div className="text-[10px] font-black uppercase tracking-[0.4em] mb-2 opacity-80 text-center">Event Notification</div>
-                <div className="text-4xl font-black italic tracking-tighter text-center whitespace-pre-wrap">{state.overlayMessage}</div>
-                <div className="mt-6 text-[8px] font-black uppercase tracking-widest opacity-60 text-center animate-pulse">Click to continue</div>
+            <div className="bg-emerald-500 text-white px-6 md:px-12 py-6 md:py-8 rounded-2xl md:rounded-[3rem] shadow-[0_0_100px_rgba(16,185,129,0.4)] border-4 border-white animate-in zoom-in slide-in-from-bottom-12 duration-500 max-w-lg w-full max-h-[80vh] flex flex-col">
+                <div className="text-[10px] font-black uppercase tracking-[0.4em] mb-3 md:mb-2 opacity-80 text-center shrink-0">Event Notification</div>
+                <div className="text-lg md:text-2xl font-black italic tracking-tight text-center overflow-y-auto flex-1 px-2">{state.overlayMessage}</div>
+                <div className="mt-4 md:mt-6 text-[8px] font-black uppercase tracking-widest opacity-60 text-center animate-pulse shrink-0">Click to continue</div>
             </div>
         </div>
     );
