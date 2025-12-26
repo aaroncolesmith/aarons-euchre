@@ -230,6 +230,7 @@ const INITIAL_STATE_FUNC = (): GameState => ({
     stepMode: false,
     history: [],
     eventLog: [],
+    trumpCallLogs: [],
     logs: ['Welcome to Euchre. Create or join a table to begin.'],
     overlayMessage: null,
     overlayAcknowledged: {},

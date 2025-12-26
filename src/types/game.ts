@@ -55,6 +55,20 @@ export type GameEvent =
     | { type: 'hand_result'; result: HandResult; timestamp: number }
     | { type: 'game_over'; scores: { team1: number; team2: number }; winner: string; timestamp: number };
 
+export interface TrumpCallLog {
+    whoCalled: string;
+    userType: 'Human' | 'Bot';
+    dealer: string;
+    cardPickedUp: string; // "n/a" if called in second round
+    suitCalled: string;
+    bowerCount: number;
+    trumpCount: number;
+    suitCount: number;
+    handAfterDiscard: string; // Comma-separated card codes
+    timestamp: number;
+    gameId: string;
+}
+
 export interface GameState {
     tableId: string | null;
     tableName: string | null;
@@ -62,6 +76,7 @@ export interface GameState {
     currentViewPlayerName: string | null;
     currentUser: string | null;
     eventLog: GameEvent[]; // Normalized event history
+    trumpCallLogs: TrumpCallLog[]; // Trump calling analytics
     players: Player[];
     currentPlayerIndex: number;
     dealerIndex: number;

@@ -20,20 +20,20 @@ export interface TrumpCallLog {
 export function countBowers(hand: Card[], trumpSuit: string): number {
     let count = 0;
     const suitMap: Record<string, string> = {
-        'Hearts': 'Diamonds',
-        'Diamonds': 'Hearts',
-        'Clubs': 'Spades',
-        'Spades': 'Clubs'
+        'hearts': 'diamonds',
+        'diamonds': 'hearts',
+        'clubs': 'spades',
+        'spades': 'clubs'
     };
-    const oppositeSuit = suitMap[trumpSuit];
+    const oppositeSuit = suitMap[trumpSuit.toLowerCase()];
 
     hand.forEach(card => {
         // Right bower (Jack of trump suit)
-        if (card.rank === 'Jack' && card.suit === trumpSuit) {
+        if (card.rank === 'J' && card.suit.toLowerCase() === trumpSuit.toLowerCase()) {
             count++;
         }
         // Left bower (Jack of same color)
-        if (card.rank === 'Jack' && card.suit === oppositeSuit) {
+        if (card.rank === 'J' && card.suit.toLowerCase() === oppositeSuit) {
             count++;
         }
     });
@@ -46,18 +46,18 @@ export function countBowers(hand: Card[], trumpSuit: string): number {
  */
 export function countTrump(hand: Card[], trumpSuit: string): number {
     const suitMap: Record<string, string> = {
-        'Hearts': 'Diamonds',
-        'Diamonds': 'Hearts',
-        'Clubs': 'Spades',
-        'Spades': 'Clubs'
+        'hearts': 'diamonds',
+        'diamonds': 'hearts',
+        'clubs': 'spades',
+        'spades': 'clubs'
     };
-    const oppositeSuit = suitMap[trumpSuit];
+    const oppositeSuit = suitMap[trumpSuit.toLowerCase()];
 
     return hand.filter(card => {
         // Card is trump suit (but not left bower)
-        if (card.suit === trumpSuit) return true;
+        if (card.suit.toLowerCase() === trumpSuit.toLowerCase()) return true;
         // Left bower
-        if (card.rank === 'Jack' && card.suit === oppositeSuit) return true;
+        if (card.rank === 'J' && card.suit.toLowerCase() === oppositeSuit) return true;
         return false;
     }).length;
 }
@@ -66,28 +66,21 @@ export function countTrump(hand: Card[], trumpSuit: string): number {
  * Count cards of the called suit (before trump is established)
  */
 export function countSuit(hand: Card[], suit: string): number {
-    return hand.filter(card => card.suit === suit).length;
+    return hand.filter(card => card.suit.toLowerCase() === suit.toLowerCase()).length;
 }
 
 /**
  * Format a card for display (e.g., "JD" for Jack of Diamonds)
  */
 export function formatCard(card: Card): string {
-    const rankMap: Record<string, string> = {
-        'Ace': 'A',
-        'King': 'K',
-        'Queen': 'Q',
-        'Jack': 'J',
-        '10': '10',
-        '9': '9'
-    };
     const suitMap: Record<string, string> = {
-        'Hearts': 'H',
-        'Diamonds': 'D',
-        'Clubs': 'C',
-        'Spades': 'S'
+        'hearts': 'H',
+        'diamonds': 'D',
+        'clubs': 'C',
+        'spades': 'S'
     };
-    return `${rankMap[card.rank]}${suitMap[card.suit]}`;
+    // card.rank is already 'J', 'Q', 'K', 'A', '10', '9' - just use it directly
+    return `${card.rank}${suitMap[card.suit.toLowerCase()]}`;
 }
 
 /**
@@ -154,3 +147,53 @@ export function saveTrumpCallLog(log: TrumpCallLog): void {
 export function clearTrumpCallLogs(): void {
     localStorage.removeItem('euchre_trump_calls');
 }
+
+/**
+ * Create a trump call log entry from game state
+ */
+export function createTrumpCallLog(
+    caller: any, // Player who called trump
+    suit: string,
+    dealerName: string,
+    dealerRelationship: string,
+    upcard: any | null,
+    biddingRound: 1 | 2,
+    gameId: string
+): TrumpCallLog {
+    const callerName = caller.name || 'Bot';
+    const userType: 'Human' | 'Bot' = caller.isComputer ? 'Bot' : 'Human';
+
+    // Card picked up (only in round 1)
+    const cardPickedUp = biddingRound === 1 && upcard
+        ? formatCard(upcard)
+        : 'n/a';
+
+    // Get caller's hand before any modifications
+    const hand = caller.hand || [];
+
+    // Count stats
+    const bowerCount = countBowers(hand, suit);
+    const trumpCount = countTrump(hand, suit);
+    const suitCount = countSuit(hand, suit);
+
+    // Format hand
+    const handAfterDiscard = formatHand(hand);
+
+    // Dealer string with relationship
+    const dealer = `${dealerRelationship} - ${dealerName}`;
+
+    return {
+        whoCalled: callerName,
+        userType,
+        dealer,
+        cardPickedUp,
+        suitCalled: (suit.charAt(0).toUpperCase() + suit.slice(1)) as 'Hearts' | 'Diamonds' | 'Clubs' | 'Spades',
+        bowerCount,
+        trumpCount,
+        suitCount,
+        handAfterDiscard,
+        timestamp: Date.now(),
+        gameId
+    };
+}
+
