@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { GameProvider, useGame, getEmptyStats, getSavedGames, BOT_NAMES_POOL, deleteActiveGame } from './store/GameStore';
 import { getEffectiveSuit, isValidPlay } from './utils/rules';
@@ -694,7 +694,7 @@ const LandingPage = () => {
                     Logout from {state.currentUser}
                 </button>
                 <div className="text-[10px] font-black text-slate-800 uppercase tracking-[0.3em]">
-                    Euchre Engine V2.7
+                    Euchre Engine V2.8
                 </div>
             </div>
 
@@ -1312,8 +1312,67 @@ const GameView = () => {
 };
 
 function App() {
+    const [pullDistance, setPullDistance] = useState(0);
+    const [isPulling, setIsPulling] = useState(false);
+    const startY = useRef(0);
+    const currentY = useRef(0);
+
+    const handleTouchStart = (e: React.TouchEvent) => {
+        // Only activate if at the top of the page
+        if (window.scrollY === 0) {
+            startY.current = e.touches[0].clientY;
+            setIsPulling(true);
+        }
+    };
+
+    const handleTouchMove = (e: React.TouchEvent) => {
+        if (!isPulling) return;
+
+        currentY.current = e.touches[0].clientY;
+        const distance = currentY.current - startY.current;
+
+        // Only track downward pulls
+        if (distance > 0) {
+            setPullDistance(Math.min(distance / 2, 80)); // Cap at 80px
+        }
+    };
+
+    const handleTouchEnd = () => {
+        if (pullDistance > 60) {
+            // Threshold reached - reload
+            window.location.reload();
+        }
+
+        setIsPulling(false);
+        setPullDistance(0);
+    };
+
     return (
-        <div className="w-screen h-screen bg-slate-950 text-white flex items-center justify-center selection:bg-emerald-500 overflow-hidden">
+        <div
+            className="w-screen h-screen bg-slate-950 text-white flex items-center justify-center selection:bg-emerald-500 overflow-hidden"
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+        >
+            {/* Pull to refresh indicator */}
+            {pullDistance > 0 && (
+                <div
+                    className="fixed top-0 left-0 right-0 z-[200] flex items-center justify-center transition-all"
+                    style={{ height: `${pullDistance}px`, opacity: Math.min(pullDistance / 60, 1) }}
+                >
+                    <div className="bg-emerald-500/20 backdrop-blur-sm rounded-full p-2">
+                        <svg
+                            className={`w-6 h-6 text-emerald-400 ${pullDistance > 60 ? 'animate-spin' : ''}`}
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                    </div>
+                </div>
+            )}
+
             <GameProvider>
                 <GameView />
             </GameProvider>
