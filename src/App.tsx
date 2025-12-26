@@ -714,7 +714,7 @@ const LandingPage = () => {
                     Logout from {state.currentUser}
                 </button>
                 <div className="text-[10px] font-black text-slate-800 uppercase tracking-[0.3em]">
-                    Euchre Engine V3.2
+                    Euchre Engine V3.3
                 </div>
             </div>
 
@@ -779,6 +779,11 @@ const StatsView = () => {
                         <div className="grid grid-cols-2 gap-3">
                             {[
                                 { label: 'Tricks Taken', value: human.stats.tricksTaken, color: 'text-purple-400' },
+                                {
+                                    label: 'Tricks %',
+                                    value: `${human.stats.handsPlayed > 0 ? Math.round((human.stats.tricksTaken / (human.stats.handsPlayed * 5)) * 100) : 0}%`,
+                                    color: 'text-purple-300'
+                                },
                                 { label: 'Euchres', value: human.stats.euchresMade, color: 'text-pink-400' },
                             ].map((stat, i) => (
                                 <div key={i} className="bg-slate-800/40 border border-slate-700/30 p-4 rounded-2xl">
@@ -796,20 +801,33 @@ const StatsView = () => {
                             <tr>
                                 <th className="px-4 py-3">Player</th>
                                 <th className="px-4 py-3 text-right">Win %</th>
+                                <th className="px-4 py-3 text-right">Tricks %</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-800">
-                            {leaguePlayers.map((p: any, i: number) => (
-                                <tr key={i} className={`group ${p.name === human.name ? 'bg-emerald-500/5' : ''}`}>
-                                    <td className="px-4 py-3 font-black text-white flex items-center gap-3">
-                                        <span className="text-slate-600 text-[9px] tabular-nums">{i + 1}</span>
-                                        <span className="text-sm">{p.name}</span>
-                                    </td>
-                                    <td className="px-4 py-3 text-emerald-400 font-black text-sm tabular-nums text-right">
-                                        {p.gamesPlayed > 0 ? Math.round((p.gamesWon / p.gamesPlayed) * 100) : 0}%
-                                    </td>
-                                </tr>
-                            ))}
+                            {leaguePlayers.map((p: any, i: number) => {
+                                // Calculate tricks taken percentage
+                                // Each hand has 5 tricks, so total possible = handsPlayed * 5
+                                const totalPossibleTricks = p.handsPlayed * 5;
+                                const tricksPercent = totalPossibleTricks > 0
+                                    ? Math.round((p.tricksTaken / totalPossibleTricks) * 100)
+                                    : 0;
+
+                                return (
+                                    <tr key={i} className={`group ${p.name === human.name ? 'bg-emerald-500/5' : ''}`}>
+                                        <td className="px-4 py-3 font-black text-white flex items-center gap-3">
+                                            <span className="text-slate-600 text-[9px] tabular-nums">{i + 1}</span>
+                                            <span className="text-sm">{p.name}</span>
+                                        </td>
+                                        <td className="px-4 py-3 text-emerald-400 font-black text-sm tabular-nums text-right">
+                                            {p.gamesPlayed > 0 ? Math.round((p.gamesWon / p.gamesPlayed) * 100) : 0}%
+                                        </td>
+                                        <td className="px-4 py-3 text-purple-400 font-black text-sm tabular-nums text-right">
+                                            {tricksPercent}%
+                                        </td>
+                                    </tr>
+                                );
+                            })}
                         </tbody>
                     </table>
                 </div>
