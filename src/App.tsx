@@ -93,7 +93,7 @@ const PlayerSeat = ({
                     <motion.div
                         initial={{ opacity: 0, scale: 0 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="absolute -top-2 -left-2 bg-cyan-500/20 backdrop-blur-sm text-cyan-300 text-[9px] font-black px-4 py-1.5 rounded-full uppercase tracking-wider border-2 border-cyan-500"
+                        className="absolute -top-3 -left-3 bg-cyan-500/20 backdrop-blur-sm text-cyan-300 text-[9px] font-black px-4 py-1.5 rounded-full uppercase tracking-wider border-2 border-cyan-500"
                     >
                         Caller
                     </motion.div>
