@@ -80,7 +80,7 @@ const PlayerSeat = ({
             <motion.div
                 layout
                 className={`
-                    relative w-36 h-18 rounded-3xl border-4 transition-all duration-300 flex flex-col items-center justify-center
+                    relative w-48 h-24 rounded-3xl border-4 transition-all duration-300 flex flex-col items-center justify-center
                     ${isAnimatingDealer
                         ? 'bg-slate-900/95 border-amber-500 shadow-[0_0_40px_rgba(245,158,11,1)]'
                         : isCurrentTurn
@@ -121,20 +121,20 @@ const PlayerSeat = ({
                 )}
 
                 {/* Player Name */}
-                <div className={`font-black text-[10px] uppercase tracking-tight ${isCurrentTurn || isAnimatingDealer ? 'text-white' : 'text-slate-200'} truncate max-w-full px-2`}>
+                <div className={`font-black text-xs uppercase tracking-tight ${isCurrentTurn || isAnimatingDealer ? 'text-white' : 'text-slate-200'} truncate max-w-full px-2`}>
                     {player.name}
                 </div>
 
                 {/* CARDS LEFT - 5 rectangles showing hand size */}
                 {!inLobby && index !== 0 && state.phase !== 'randomizing_dealer' && (
-                    <div className="flex gap-0.5 justify-center mb-0.5">
+                    <div className="flex gap-1 justify-center mb-1">
                         {[0, 1, 2, 3, 4].map((i) => {
                             const hasCard = i < player.hand.length;
                             return (
                                 <div
                                     key={i}
                                     className={`
-                                        w-2.5 h-4 rounded-sm border transition-all
+                                        w-3 h-5 rounded-sm border transition-all
                                         ${hasCard
                                             ? 'bg-slate-600 border-slate-500'
                                             : 'bg-slate-800/50 border-slate-700/50'}
