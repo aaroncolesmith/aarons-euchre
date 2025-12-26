@@ -441,6 +441,11 @@ const shouldIGenerate = myPlayerIndex === firstHumanSeat;
    - Check status at vercel.com
    - Live in ~60 seconds
 
+**IMPORTANT:** Always push changes to Vercel when testing on mobile devices! Mobile phones access the Vercel deployment (aarons-euchre.vercel.app), not your local dev server. After making changes, always:
+1. Commit and push to GitHub
+2. Wait ~60 seconds for Vercel to deploy
+3. Then test on your mobile device
+
 ### Testing Multiplayer
 
 1. **Open two browser windows**
