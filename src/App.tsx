@@ -72,18 +72,15 @@ const PlayerSeat = ({
 
     if (!player.name) return null;
 
-    // Determine rotation for mobile - left and right cards face center
-    const mobileRotation = position === 'left' ? '-rotate-90' : position === 'right' ? 'rotate-90' : '';
-
     return (
         <motion.div
             layout
-            className={`absolute ${posClasses[position]} flex flex-col items-center gap-1 z-10 ${mobileRotation} md:rotate-0`}
+            className={`absolute ${posClasses[position]} flex flex-col items-center gap-1 z-10`}
         >
             <motion.div
                 layout
                 className={`
-                    relative w-48 md:w-56 h-32 md:h-36 rounded-3xl border-4 transition-all duration-300 flex flex-col items-center justify-center
+                    relative w-64 h-24 rounded-3xl border-4 transition-all duration-300 flex flex-col items-center justify-center
                     ${isAnimatingDealer
                         ? 'bg-slate-900/95 border-amber-500 shadow-[0_0_40px_rgba(245,158,11,1)]'
                         : isCurrentTurn
@@ -124,13 +121,13 @@ const PlayerSeat = ({
                 )}
 
                 {/* Player Name */}
-                <div className={`font-black text-lg md:text-xl uppercase tracking-tight ${isCurrentTurn || isAnimatingDealer ? 'text-white' : 'text-slate-200'} mb-1`}>
+                <div className={`font-black text-sm uppercase tracking-tight ${isCurrentTurn || isAnimatingDealer ? 'text-white' : 'text-slate-200'} mb-1`}>
                     {player.name}
                 </div>
 
                 {/* Tricks Won - 5 Card Icons */}
                 {!inLobby && state.phase !== 'randomizing_dealer' && (
-                    <div className="flex gap-1.5 justify-center">
+                    <div className="flex gap-1 justify-center">
                         {[0, 1, 2, 3, 4].map((i) => {
                             const won = i < (state.tricksWon[player.id] || 0);
                             return (
@@ -140,9 +137,9 @@ const PlayerSeat = ({
                                     animate={{ opacity: 1, scale: 1 }}
                                     transition={{ delay: i * 0.05 }}
                                     className={`
-                                        w-4 h-6 rounded-sm border-2 transition-all
+                                        w-3 h-5 rounded-sm border transition-all
                                         ${won
-                                            ? 'bg-slate-600 border-slate-500 shadow-inner'
+                                            ? 'bg-slate-600 border-slate-500'
                                             : 'bg-slate-800/50 border-slate-700/50'}
                                     `}
                                 />
@@ -156,7 +153,7 @@ const PlayerSeat = ({
                     <motion.div
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
-                        className="absolute -bottom-3 -right-3 bg-cyan-400 text-slate-900 text-lg font-black w-10 h-10 rounded-full flex items-center justify-center border-4 border-slate-900 shadow-lg"
+                        className="absolute -bottom-3 -right-3 bg-cyan-400 text-slate-900 text-base font-black w-9 h-9 rounded-full flex items-center justify-center border-3 border-slate-900 shadow-lg"
                     >
                         {player.hand.length}
                     </motion.div>
