@@ -36,35 +36,36 @@ export async function fetchUserCloudGames(currentUser: string): Promise<GameStat
 
 export function mergeLocalAndCloudGames(localGames: GameState[], cloudGames: GameState[]): GameState[] {
     // Merge cloud and local games, preferring the most recently updated version
+    // Use tableCode as the unique key since that's the primary key in Supabase
     const gamesMap = new Map<string, GameState>();
 
     // Add local games first
     localGames.forEach(g => {
-        if (g.tableId) {
-            gamesMap.set(g.tableId, g);
+        if (g.tableCode) {
+            gamesMap.set(g.tableCode, g);
         }
     });
 
     // Add/update with cloud games - cloud is always the source of truth
     // Only keep local if cloud doesn't have it OR local is more recent
     cloudGames.forEach(g => {
-        if (g.tableId) {
-            const existing = gamesMap.get(g.tableId);
+        if (g.tableCode) {
+            const existing = gamesMap.get(g.tableCode);
 
             // Always use cloud if:
             // 1. Local doesn't exist
             // 2. Cloud is more recent (higher lastActive)
             // 3. Neither has lastActive (cloud is source of truth)
             if (!existing) {
-                gamesMap.set(g.tableId, g);
+                gamesMap.set(g.tableCode, g);
             } else if (g.lastActive && existing.lastActive) {
                 // Both have timestamps - use the more recent one
                 if (g.lastActive >= existing.lastActive) {
-                    gamesMap.set(g.tableId, g);
+                    gamesMap.set(g.tableCode, g);
                 }
             } else if (g.lastActive && !existing.lastActive) {
                 // Cloud has timestamp, local doesn't - use cloud
-                gamesMap.set(g.tableId, g);
+                gamesMap.set(g.tableCode, g);
             }
             // else: local has timestamp but cloud doesn't - keep local
         }
