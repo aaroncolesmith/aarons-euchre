@@ -365,32 +365,44 @@ const StatsModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
                                         <th className="px-6 py-4">Game Win %</th>
                                         <th className="px-6 py-4">Hand Win %</th>
                                         <th className="px-6 py-4">Tricks Taken</th>
+                                        <th className="px-6 py-4">Tricks %</th>
                                         <th className="px-6 py-4 text-right">Euchres Made</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-800">
-                                    {leaguePlayers.map((p: any, i: number) => (
-                                        <tr key={i} className={`group hover:bg-slate-800/50 transition-colors ${p.name === human.name ? 'bg-emerald-500/5' : ''}`}>
-                                            <td className="px-6 py-4 font-black text-white flex items-center gap-3">
-                                                <span className="text-slate-600 text-[10px] tabular-nums">{i + 1}</span>
-                                                {p.name}
-                                                {p.name === human.name && <span className="bg-emerald-500 text-[8px] px-2 py-0.5 rounded-full">YOU</span>}
-                                            </td>
-                                            <td className="px-6 py-4 text-slate-400 font-bold tabular-nums">{p.gamesPlayed}</td>
-                                            <td className="px-6 py-4 text-emerald-400 font-black tabular-nums">
-                                                {p.gamesPlayed > 0 ? Math.round((p.gamesWon / p.gamesPlayed) * 100) : 0}%
-                                            </td>
-                                            <td className="px-6 py-4 text-cyan-400 font-black tabular-nums">
-                                                {p.handsPlayed > 0 ? Math.round((p.handsWon / p.handsPlayed) * 100) : 0}%
-                                            </td>
-                                            <td className="px-6 py-4 text-purple-400 font-black tabular-nums">
-                                                {p.tricksTaken}
-                                            </td>
-                                            <td className="px-6 py-4 text-right font-black text-red-400 tabular-nums">
-                                                {p.euchresMade}
-                                            </td>
-                                        </tr>
-                                    ))}
+                                    {leaguePlayers.map((p: any, i: number) => {
+                                        // Calculate tricks %: tricks taken / (hands played * 5)
+                                        const totalPossibleTricks = p.handsPlayed * 5;
+                                        const tricksPercent = totalPossibleTricks > 0
+                                            ? Math.round((p.tricksTaken / totalPossibleTricks) * 100)
+                                            : 0;
+
+                                        return (
+                                            <tr key={i} className={`group hover:bg-slate-800/50 transition-colors ${p.name === human.name ? 'bg-emerald-500/5' : ''}`}>
+                                                <td className="px-6 py-4 font-black text-white flex items-center gap-3">
+                                                    <span className="text-slate-600 text-[10px] tabular-nums">{i + 1}</span>
+                                                    {p.name}
+                                                    {p.name === human.name && <span className="bg-emerald-500 text-[8px] px-2 py-0.5 rounded-full">YOU</span>}
+                                                </td>
+                                                <td className="px-6 py-4 text-slate-400 font-bold tabular-nums">{p.gamesPlayed}</td>
+                                                <td className="px-6 py-4 text-emerald-400 font-black tabular-nums">
+                                                    {p.gamesPlayed > 0 ? Math.round((p.gamesWon / p.gamesPlayed) * 100) : 0}%
+                                                </td>
+                                                <td className="px-6 py-4 text-cyan-400 font-black tabular-nums">
+                                                    {p.handsPlayed > 0 ? Math.round((p.handsWon / p.handsPlayed) * 100) : 0}%
+                                                </td>
+                                                <td className="px-6 py-4 text-purple-400 font-black tabular-nums">
+                                                    {p.tricksTaken}
+                                                </td>
+                                                <td className="px-6 py-4 text-purple-300 font-black tabular-nums">
+                                                    {tricksPercent}%
+                                                </td>
+                                                <td className="px-6 py-4 text-right font-black text-red-400 tabular-nums">
+                                                    {p.euchresMade}
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
                                 </tbody>
                             </table>
                         </div>
@@ -714,7 +726,7 @@ const LandingPage = () => {
                     Logout from {state.currentUser}
                 </button>
                 <div className="text-[10px] font-black text-slate-800 uppercase tracking-[0.3em]">
-                    Euchre Engine V3.3
+                    Euchre Engine V0.27
                 </div>
             </div>
 

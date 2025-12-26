@@ -447,7 +447,12 @@ const shouldIGenerate = myPlayerIndex === firstHumanSeat;
 3. Wait ~60 seconds for Vercel to deploy
 4. Then test on your mobile device
 
-**Version Numbering:** Increment the minor version (e.g., V2.5 → V2.6) for each deployment to easily verify you're testing the latest version on mobile.
+**Version Numbering (Beta):** 
+- Current Phase: **Beta (V0.x)**
+- Increment the patch version for each deployment (e.g., V0.27 → V0.28)
+- Only increment major version (V1.0) when explicitly decided by product owner
+- This makes it easy to verify you're testing the latest version on mobile
+- Version is displayed at the bottom of the landing page
 
 ### Testing Multiplayer
 
