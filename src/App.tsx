@@ -482,17 +482,14 @@ const LandingPage = () => {
     const [_refreshKey, setRefreshKey] = useState(0);
     const [isStatsOpen, setIsStatsOpen] = useState(false);
     const [cloudGames, setCloudGames] = useState<any[]>([]);
-    const [isLoadingCloud, setIsLoadingCloud] = useState(true);
 
     useEffect(() => {
         const loadCloudGames = async () => {
             if (!state.currentUser) {
-                setIsLoadingCloud(false);
                 return;
             }
             const games = await fetchUserCloudGames(state.currentUser);
             setCloudGames(games);
-            setIsLoadingCloud(false);
         };
         loadCloudGames();
     }, [state.currentUser, _refreshKey]);
