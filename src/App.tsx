@@ -482,6 +482,7 @@ const LandingPage = () => {
     const [_refreshKey, setRefreshKey] = useState(0);
     const [isStatsOpen, setIsStatsOpen] = useState(false);
     const [cloudGames, setCloudGames] = useState<any[]>([]);
+    const [gameFilter, setGameFilter] = useState<'in-progress' | 'completed'>('in-progress');
 
     useEffect(() => {
         const loadCloudGames = async () => {
@@ -550,10 +551,10 @@ const LandingPage = () => {
     };
 
     // Helper to delete game
-    const handleDelete = (tableId: string | null) => {
-        if (!tableId) return;
+    const handleDelete = async (tableCode: string | null) => {
+        if (!tableCode) return;
         if (confirm('Are you sure you want to delete this game?')) {
-            deleteActiveGame(tableId);
+            await deleteActiveGame(tableCode);
             setRefreshKey(prev => prev + 1);
         }
     };
@@ -634,52 +635,71 @@ const LandingPage = () => {
                 {/* Continue Progress Section */}
                 {savedGames.length > 0 && (
                     <div className="space-y-2 md:space-y-4">
-                        <div className="relative">
-                            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-800/50"></div></div>
-                            <div className="relative flex justify-center text-[10px] uppercase tracking-[0.3em] font-black text-slate-700 bg-slate-950 px-4">Continue Progress</div>
+                        {/* Tabs for game filtering */}
+                        <div className="flex gap-2 border-b-2 border-slate-800/50">
+                            <button
+                                onClick={() => setGameFilter('in-progress')}
+                                className={`flex-1 text-[10px] md:text-xs font-black uppercase tracking-widest py-2 px-4 transition-all ${gameFilter === 'in-progress'
+                                    ? 'text-emerald-400 border-b-2 border-emerald-500 -mb-[2px]'
+                                    : 'text-slate-600 hover:text-slate-400'
+                                    }`}
+                            >
+                                In Progress ({savedGames.filter(g => g.phase !== 'game_over').length})
+                            </button>
+                            <button
+                                onClick={() => setGameFilter('completed')}
+                                className={`flex-1 text-[10px] md:text-xs font-black uppercase tracking-widest py-2 px-4 transition-all ${gameFilter === 'completed'
+                                    ? 'text-emerald-400 border-b-2 border-emerald-500 -mb-[2px]'
+                                    : 'text-slate-600 hover:text-slate-400'
+                                    }`}
+                            >
+                                Completed ({savedGames.filter(g => g.phase === 'game_over').length})
+                            </button>
                         </div>
 
                         <div className="max-h-[300px] md:max-h-[400px] overflow-y-auto space-y-2 md:space-y-3 pr-2 scrollbar-thin scrollbar-thumb-slate-800 scrollbar-track-slate-950">
-                            {savedGames.map(game => (
-                                <div
-                                    key={game.tableId}
-                                    className="group relative w-full bg-slate-900/40 hover:bg-emerald-500/10 border-2 border-emerald-500/30 hover:border-emerald-500 rounded-xl md:rounded-[2rem] px-3 md:px-8 py-3 md:py-6 transition-all shadow-xl"
-                                >
-                                    <div className="flex items-center justify-between">
-                                        <div
-                                            className="text-left flex-1 cursor-pointer"
-                                            onClick={() => dispatch({ type: 'LOAD_EXISTING_GAME', payload: { gameState: game } })}
-                                        >
-                                            <div className="text-lg md:text-2xl font-black text-emerald-400 group-hover:text-emerald-300 transition-colors italic tracking-tight leading-tight">
-                                                {game.tableName}
-                                            </div>
-                                            <div className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-0.5 md:mt-1.5 opacity-80">
-                                                {game.phase} • Team A: {game.scores.team1} Team B: {game.scores.team2}
-                                            </div>
-                                            <div className="text-[8px] md:text-[9px] font-bold text-slate-600 mt-0.5 md:mt-1">
-                                                Last Activity: {getTimeAgo(game)}
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center gap-1 md:gap-3">
-                                            <button
-                                                onClick={(e) => { e.stopPropagation(); handleDelete(game.tableId); }}
-                                                className="text-slate-600 hover:text-red-500 transition-colors p-1 md:p-2"
-                                                title="Delete Game"
-                                            >
-                                                <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                </svg>
-                                            </button>
-                                            <button
+                            {savedGames
+                                .filter(g => gameFilter === 'in-progress' ? g.phase !== 'game_over' : g.phase === 'game_over')
+                                .map(game => (
+                                    <div
+                                        key={game.tableId}
+                                        className="group relative w-full bg-slate-900/40 hover:bg-emerald-500/10 border-2 border-emerald-500/30 hover:border-emerald-500 rounded-xl md:rounded-[2rem] px-3 md:px-8 py-3 md:py-6 transition-all shadow-xl"
+                                    >
+                                        <div className="flex items-center justify-between">
+                                            <div
+                                                className="text-left flex-1 cursor-pointer"
                                                 onClick={() => dispatch({ type: 'LOAD_EXISTING_GAME', payload: { gameState: game } })}
-                                                className="bg-emerald-500 hover:bg-emerald-400 text-white font-black px-3 md:px-6 py-1.5 md:py-3 rounded-lg md:rounded-2xl text-[9px] md:text-xs uppercase tracking-widest transition-all shadow-md"
                                             >
-                                                Resume
-                                            </button>
+                                                <div className="text-lg md:text-2xl font-black text-emerald-400 group-hover:text-emerald-300 transition-colors italic tracking-tight leading-tight">
+                                                    {game.tableName}
+                                                </div>
+                                                <div className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-0.5 md:mt-1.5 opacity-80">
+                                                    {game.phase} • Team A: {game.scores.team1} Team B: {game.scores.team2}
+                                                </div>
+                                                <div className="text-[8px] md:text-[9px] font-bold text-slate-600 mt-0.5 md:mt-1">
+                                                    Last Activity: {getTimeAgo(game)}
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-1 md:gap-3">
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); handleDelete(game.tableCode); }}
+                                                    className="text-slate-600 hover:text-red-500 transition-colors p-1 md:p-2"
+                                                    title="Delete Game"
+                                                >
+                                                    <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                    </svg>
+                                                </button>
+                                                <button
+                                                    onClick={() => dispatch({ type: 'LOAD_EXISTING_GAME', payload: { gameState: game } })}
+                                                    className="bg-emerald-500 hover:bg-emerald-400 text-white font-black px-3 md:px-6 py-1.5 md:py-3 rounded-lg md:rounded-2xl text-[9px] md:text-xs uppercase tracking-widest transition-all shadow-md"
+                                                >
+                                                    Resume
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            ))}
+                                ))}
                         </div>
                     </div>
                 )}
@@ -694,7 +714,7 @@ const LandingPage = () => {
                     Logout from {state.currentUser}
                 </button>
                 <div className="text-[10px] font-black text-slate-800 uppercase tracking-[0.3em]">
-                    Euchre Engine V3.0 (Debug)
+                    Euchre Engine V3.1
                 </div>
             </div>
 

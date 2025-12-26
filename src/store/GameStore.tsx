@@ -93,10 +93,22 @@ const saveActiveGame = (state: GameState) => {
     localStorage.setItem('euchre_active_games', JSON.stringify(games));
 };
 
-export const deleteActiveGame = (tableId: string) => {
+export const deleteActiveGame = async (tableCode: string) => {
+    // Delete from localStorage
     const games = getSavedGames();
-    delete games[tableId];
+    delete games[tableCode];
     localStorage.setItem('euchre_active_games', JSON.stringify(games));
+
+    // Delete from Supabase
+    try {
+        await supabase
+            .from('games')
+            .delete()
+            .eq('code', tableCode);
+        console.log(`Deleted game ${tableCode} from Supabase`);
+    } catch (err) {
+        console.error('Error deleting from Supabase:', err);
+    }
 };
 
 const createEmptyPlayer = (index: number): Player => ({
