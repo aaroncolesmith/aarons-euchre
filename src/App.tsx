@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { GameProvider, useGame, getEmptyStats, getSavedGames, BOT_NAMES_POOL, deleteActiveGame } from './store/GameStore';
 import { getEffectiveSuit, isValidPlay } from './utils/rules';
 import { Card } from './types/game';
 import { supabase } from './lib/supabase';
+import { fetchUserCloudGames, mergeLocalAndCloudGames } from './utils/cloudGames';
 
 const getCardJitter = (id: string) => {
     let hash = 0;
@@ -480,18 +481,30 @@ const LandingPage = () => {
     const [showJoin, setShowJoin] = useState(false);
     const [_refreshKey, setRefreshKey] = useState(0);
     const [isStatsOpen, setIsStatsOpen] = useState(false);
+    const [cloudGames, setCloudGames] = useState<any[]>([]);
+    const [isLoadingCloud, setIsLoadingCloud] = useState(true);
+
+    useEffect(() => {
+        const loadCloudGames = async () => {
+            if (!state.currentUser) {
+                setIsLoadingCloud(false);
+                return;
+            }
+            const games = await fetchUserCloudGames(state.currentUser);
+            setCloudGames(games);
+            setIsLoadingCloud(false);
+        };
+        loadCloudGames();
+    }, [state.currentUser, _refreshKey]);
 
     const savedGamesRaw = getSavedGames();
-    const savedGames = Object.values(savedGamesRaw)
+    const localGames = Object.values(savedGamesRaw)
         .filter(g =>
             g.currentUser === state.currentUser ||
             g.players.some(p => p.name === state.currentUser)
-        )
-        .sort((a, b) => {
-            if (a.lastActive && b.lastActive) return b.lastActive - a.lastActive;
-            const phaseOrder = ['lobby', 'randomizing_dealer', 'bidding', 'discard', 'playing', 'waiting_for_trick', 'scoring', 'waiting_for_next_deal', 'game_over'];
-            return phaseOrder.indexOf(b.phase) - phaseOrder.indexOf(a.phase);
-        });
+        );
+
+    const savedGames = mergeLocalAndCloudGames(localGames, cloudGames);
 
     const getTimeAgo = (game: any) => {
         if (!game.lastActive) return "Recently";
@@ -676,7 +689,13 @@ const LandingPage = () => {
             </div>
 
             {/* Footer Version */}
-            <div className="mt-auto pt-12 text-center">
+            <div className="mt-auto pt-12 text-center space-y-4">
+                <button
+                    onClick={() => dispatch({ type: 'LOGOUT' })}
+                    className="bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white font-black px-8 py-3 rounded-2xl text-sm uppercase tracking-widest border-2 border-red-500/30 hover:border-red-500 transition-all shadow-lg"
+                >
+                    Logout from {state.currentUser}
+                </button>
                 <div className="text-[10px] font-black text-slate-800 uppercase tracking-[0.3em]">
                     Euchre Engine V2.5
                 </div>
