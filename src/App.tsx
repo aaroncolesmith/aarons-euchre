@@ -270,14 +270,17 @@ const StatsModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
                                 >
                                     Leaderboard
                                 </button>
-                                {state.eventLog.length > 0 && (
-                                    <button
-                                        onClick={downloadSessionLog}
-                                        className="px-6 py-2 rounded-full text-[10px] bg-slate-800 text-slate-400 font-black uppercase tracking-widest hover:bg-slate-700 transition-all border border-slate-700/50"
-                                    >
-                                        Download Log
-                                    </button>
-                                )}
+                                <button
+                                    onClick={downloadSessionLog}
+                                    disabled={state.eventLog.length === 0}
+                                    className={`px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all border ${state.eventLog.length > 0
+                                        ? 'bg-slate-800 text-slate-400 hover:bg-slate-700 border-slate-700/50 cursor-pointer'
+                                        : 'bg-slate-900 text-slate-700 border-slate-800/30 cursor-not-allowed opacity-50'
+                                        }`}
+                                    title={state.eventLog.length > 0 ? `Download ${state.eventLog.length} events` : 'No events to download yet'}
+                                >
+                                    📥 Download Log {state.eventLog.length > 0 && `(${state.eventLog.length})`}
+                                </button>
                             </div>
                         </div>
                         <button onClick={onClose} className="bg-slate-800 hover:bg-slate-700 text-slate-400 p-4 rounded-3xl transition-colors">
@@ -726,7 +729,7 @@ const LandingPage = () => {
                     Logout from {state.currentUser}
                 </button>
                 <div className="text-[10px] font-black text-slate-800 uppercase tracking-[0.3em]">
-                    Euchre Engine V0.28
+                    Euchre Engine V0.29
                 </div>
             </div>
 
