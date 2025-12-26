@@ -559,9 +559,9 @@ const LandingPage = () => {
     };
 
     return (
-        <div className="flex flex-col items-center justify-start min-h-full w-full max-w-2xl p-6 md:p-8 pt-12 md:pt-8 animate-in fade-in zoom-in duration-700 overflow-y-auto pb-20">
+        <div className="flex flex-col items-center justify-start min-h-full w-full max-w-2xl p-4 md:p-8 pt-2 md:pt-8 animate-in fade-in zoom-in duration-700 overflow-y-auto pb-20">
             {/* Header with Branding */}
-            <div className="w-full mb-8 md:mb-12">
+            <div className="w-full mb-4 md:mb-12">
                 <div className="flex justify-between items-start mb-6">
                     <div>
                         <h1 className="text-5xl md:text-6xl font-black bg-gradient-to-br from-emerald-400 via-cyan-400 to-blue-500 bg-clip-text text-transparent italic leading-none tracking-tighter">
@@ -694,7 +694,7 @@ const LandingPage = () => {
                     Logout from {state.currentUser}
                 </button>
                 <div className="text-[10px] font-black text-slate-800 uppercase tracking-[0.3em]">
-                    Euchre Engine V2.5
+                    Euchre Engine V2.6
                 </div>
             </div>
 

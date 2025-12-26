@@ -442,9 +442,12 @@ const shouldIGenerate = myPlayerIndex === firstHumanSeat;
    - Live in ~60 seconds
 
 **IMPORTANT:** Always push changes to Vercel when testing on mobile devices! Mobile phones access the Vercel deployment (aarons-euchre.vercel.app), not your local dev server. After making changes, always:
-1. Commit and push to GitHub
-2. Wait ~60 seconds for Vercel to deploy
-3. Then test on your mobile device
+1. **Increment the version number** in `src/App.tsx` (search for "Euchre Engine V")
+2. Commit and push to GitHub
+3. Wait ~60 seconds for Vercel to deploy
+4. Then test on your mobile device
+
+**Version Numbering:** Increment the minor version (e.g., V2.5 → V2.6) for each deployment to easily verify you're testing the latest version on mobile.
 
 ### Testing Multiplayer
 
