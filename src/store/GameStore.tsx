@@ -94,20 +94,44 @@ const saveActiveGame = (state: GameState) => {
 };
 
 export const deleteActiveGame = async (tableCode: string) => {
-    // Delete from localStorage
-    const games = getSavedGames();
-    delete games[tableCode];
-    localStorage.setItem('euchre_active_games', JSON.stringify(games));
+    console.log(`[DELETE] Attempting to delete game with code: ${tableCode}`);
 
-    // Delete from Supabase
+    // Delete from localStorage - localStorage uses tableId as key, not tableCode!
+    const games = getSavedGames();
+    console.log(`[DELETE] Current localStorage has ${Object.keys(games).length} games`);
+
+    // Find the game by tableCode (since games are stored by tableId in localStorage)
+    let deletedFromLocal = false;
+    for (const [tableId, game] of Object.entries(games)) {
+        if (game.tableCode === tableCode) {
+            delete games[tableId];
+            localStorage.setItem('euchre_active_games', JSON.stringify(games));
+            console.log(`[DELETE] Removed from localStorage (tableId: ${tableId}). Now has ${Object.keys(games).length} games`);
+            deletedFromLocal = true;
+            break;
+        }
+    }
+
+    if (!deletedFromLocal) {
+        console.warn(`[DELETE] Game with tableCode ${tableCode} not found in localStorage!`);
+    }
+
+    // Delete from Supabase (uses code/tableCode as primary key)
     try {
-        await supabase
+        console.log(`[DELETE] Attempting to delete from Supabase with code: ${tableCode}`);
+        const { error, data } = await supabase
             .from('games')
             .delete()
-            .eq('code', tableCode);
-        console.log(`Deleted game ${tableCode} from Supabase`);
+            .eq('code', tableCode)
+            .select();
+
+        if (error) {
+            console.error('[DELETE] Supabase error:', error);
+        } else {
+            console.log(`[DELETE] Successfully deleted from Supabase:`, data);
+        }
     } catch (err) {
-        console.error('Error deleting from Supabase:', err);
+        console.error('[DELETE] Exception deleting from Supabase:', err);
     }
 };
 
