@@ -72,80 +72,96 @@ const PlayerSeat = ({
 
     if (!player.name) return null;
 
+    // Determine rotation for mobile - left and right cards face center
+    const mobileRotation = position === 'left' ? '-rotate-90' : position === 'right' ? 'rotate-90' : '';
+
     return (
         <motion.div
             layout
-            className={`absolute ${posClasses[position]} flex flex-col items-center gap-1 z-10`}
+            className={`absolute ${posClasses[position]} flex flex-col items-center gap-1 z-10 ${mobileRotation} md:rotate-0`}
         >
             <motion.div
                 layout
                 className={`
-                    relative px-6 py-2 rounded-2xl border-4 transition-all duration-300
+                    relative w-48 md:w-56 h-32 md:h-36 rounded-3xl border-4 transition-all duration-300 flex flex-col items-center justify-center
                     ${isAnimatingDealer
-                        ? 'bg-amber-500 border-white shadow-[0_0_40px_rgba(245,158,11,1)] scale-150'
+                        ? 'bg-slate-900/95 border-amber-500 shadow-[0_0_40px_rgba(245,158,11,1)]'
                         : isCurrentTurn
-                            ? 'bg-emerald-500 border-white shadow-[0_0_30px_rgba(16,185,129,0.8)] scale-125'
-                            : isTrumpCaller
-                                ? 'bg-slate-800/80 border-cyan-500 shadow-[0_0_20px_rgba(34,211,238,0.3)]'
-                                : isDealer
-                                    ? 'bg-slate-800/80 border-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.3)]'
-                                    : 'bg-slate-800/70 border-slate-700 shadow-xl opacity-90'}
+                            ? 'bg-slate-900/95 border-emerald-500 shadow-[0_0_30px_rgba(16,185,129,0.8)]'
+                            : 'bg-slate-900/90 border-cyan-500/50 shadow-xl'}\
                 `}
             >
-                {isDealer && !isAnimatingDealer && (
-                    <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        className="absolute -top-3 -right-3 bg-amber-500 text-[10px] font-black w-7 h-7 rounded-full flex items-center justify-center text-white border-2 border-slate-900 shadow-lg"
-                    >
-                        D
-                    </motion.div>
-                )}
+                {/* Caller Badge - Top Left */}
                 {isTrumpCaller && (
                     <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="absolute -top-3 -left-3 bg-cyan-500 text-[8px] font-black px-2 py-1 rounded-full flex items-center justify-center text-white border border-white shadow-lg animate-pulse uppercase"
+                        initial={{ opacity: 0, scale: 0 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="absolute -top-2 -left-2 bg-cyan-500/20 backdrop-blur-sm text-cyan-300 text-[9px] font-black px-4 py-1.5 rounded-full uppercase tracking-wider border-2 border-cyan-500"
                     >
                         Caller
                     </motion.div>
                 )}
+
+                {/* Dealer Badge - Top Right */}
+                {isDealer && !isAnimatingDealer && (
+                    <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        className="absolute -top-3 -right-3 bg-amber-500 text-white text-sm font-black w-10 h-10 rounded-full flex items-center justify-center border-4 border-slate-900 shadow-lg"
+                    >
+                        D
+                    </motion.div>
+                )}
+
+                {/* Remove Button (Lobby Only) */}
                 {player.isComputer && inLobby && (
                     <button
                         onClick={() => dispatch({ type: 'REMOVE_PLAYER', payload: { seatIndex: index } })}
-                        className="absolute -top-2 -left-2 bg-red-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-[8px] border-2 border-slate-900"
+                        className="absolute -top-3 -left-3 bg-red-500 text-white w-7 h-7 rounded-full flex items-center justify-center text-xs font-black border-2 border-slate-900 z-10"
                     >
                         ✕
                     </button>
                 )}
-                <div className={`font-black text-sm uppercase tracking-tighter ${isCurrentTurn || isAnimatingDealer ? 'text-white' : 'text-slate-300'}`}>
+
+                {/* Player Name */}
+                <div className={`font-black text-lg md:text-xl uppercase tracking-tight ${isCurrentTurn || isAnimatingDealer ? 'text-white' : 'text-slate-200'} mb-1`}>
                     {player.name}
                 </div>
-                {!inLobby && index !== 0 && state.phase !== 'randomizing_dealer' && (
-                    <div className="flex gap-1 mt-1.5 justify-center">
-                        {Array(player.hand.length).fill(0).map((_, i) => (
-                            <motion.div
-                                key={i}
-                                layout
-                                className="w-2.5 h-4 bg-slate-600 rounded-[2px] border-[1px] border-slate-500 shadow-sm"
-                            />
-                        ))}
+
+                {/* Tricks Won - 5 Card Icons */}
+                {!inLobby && state.phase !== 'randomizing_dealer' && (
+                    <div className="flex gap-1.5 justify-center">
+                        {[0, 1, 2, 3, 4].map((i) => {
+                            const won = i < (state.tricksWon[player.id] || 0);
+                            return (
+                                <motion.div
+                                    key={i}
+                                    initial={{ opacity: 0, scale: 0 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    transition={{ delay: i * 0.05 }}
+                                    className={`
+                                        w-4 h-6 rounded-sm border-2 transition-all
+                                        ${won
+                                            ? 'bg-slate-600 border-slate-500 shadow-inner'
+                                            : 'bg-slate-800/50 border-slate-700/50'}
+                                    `}
+                                />
+                            );
+                        })}
                     </div>
                 )}
-                {!inLobby && state.tricksWon[player.id] > 0 && (
-                    <div className="flex gap-1 mt-1 justify-center">
-                        {Array(state.tricksWon[player.id]).fill(0).map((_, i) => (
-                            <motion.div
-                                key={i}
-                                initial={{ scale: 0 }}
-                                animate={{ scale: 1 }}
-                                className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.6)]"
-                            />
-                        ))}
-                    </div>
+
+                {/* Card Count Badge - Bottom Right */}
+                {!inLobby && index !== 0 && state.phase !== 'randomizing_dealer' && player.hand.length > 0 && (
+                    <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        className="absolute -bottom-3 -right-3 bg-cyan-400 text-slate-900 text-lg font-black w-10 h-10 rounded-full flex items-center justify-center border-4 border-slate-900 shadow-lg"
+                    >
+                        {player.hand.length}
+                    </motion.div>
                 )}
             </motion.div>
-
 
             <div className="hidden">
                 {position === 'bottom' ? 'South' : position === 'left' ? 'West' : position === 'top' ? 'North' : 'East'}
