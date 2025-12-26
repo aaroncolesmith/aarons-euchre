@@ -74,11 +74,9 @@ const PlayerSeat = ({
 
     return (
         <motion.div
-            layout
             className={`absolute ${posClasses[position]} flex flex-col items-center gap-1 z-10`}
         >
             <motion.div
-                layout
                 className={`
                     relative w-48 h-24 rounded-3xl border-4 transition-all duration-300 flex flex-col items-center justify-center
                     ${isAnimatingDealer
