@@ -77,8 +77,15 @@ const getGlobalStats = (): { [name: string]: PlayerStats } => {
     return saved ? JSON.parse(saved) : {};
 };
 
-const saveGlobalStats = (stats: { [name: string]: PlayerStats }) => {
+const saveGlobalStats = async (stats: { [name: string]: PlayerStats }) => {
+    // Save to localStorage
     localStorage.setItem('euchre_global_profiles', JSON.stringify(stats));
+
+    // Sync each player's stats to Supabase
+    const { savePlayerStats } = await import('../utils/cloudStats');
+    for (const [playerName, playerStats] of Object.entries(stats)) {
+        await savePlayerStats(playerName, playerStats);
+    }
 };
 
 export const getSavedGames = (): { [id: string]: GameState } => {
@@ -984,8 +991,25 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
 
     useEffect(() => {
-        const globalProfiles = getGlobalStats();
-        dispatch({ type: 'LOAD_GLOBAL_STATS', payload: globalProfiles });
+        const loadStats = async () => {
+            // Load local stats
+            const localStats = getGlobalStats();
+
+            // Load cloud stats
+            const { fetchAllPlayersStats, mergeAllStats } = await import('../utils/cloudStats');
+            const cloudStats = await fetchAllPlayersStats();
+
+            // Merge local and cloud stats
+            const mergedStats = mergeAllStats(localStats, cloudStats);
+
+            // Save merged stats locally
+            localStorage.setItem('euchre_global_profiles', JSON.stringify(mergedStats));
+
+            // Load into state
+            dispatch({ type: 'LOAD_GLOBAL_STATS', payload: mergedStats });
+        };
+
+        loadStats();
 
         const savedUser = localStorage.getItem('euchre_current_user');
         if (savedUser) dispatch({ type: 'LOGIN', payload: { userName: savedUser } });
