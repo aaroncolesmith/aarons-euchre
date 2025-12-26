@@ -45,13 +45,28 @@ export function mergeLocalAndCloudGames(localGames: GameState[], cloudGames: Gam
         }
     });
 
-    // Add/update with cloud games if they're more recent
+    // Add/update with cloud games - cloud is always the source of truth
+    // Only keep local if cloud doesn't have it OR local is more recent
     cloudGames.forEach(g => {
         if (g.tableId) {
             const existing = gamesMap.get(g.tableId);
-            if (!existing || (g.lastActive && existing.lastActive && g.lastActive > existing.lastActive)) {
+
+            // Always use cloud if:
+            // 1. Local doesn't exist
+            // 2. Cloud is more recent (higher lastActive)
+            // 3. Neither has lastActive (cloud is source of truth)
+            if (!existing) {
+                gamesMap.set(g.tableId, g);
+            } else if (g.lastActive && existing.lastActive) {
+                // Both have timestamps - use the more recent one
+                if (g.lastActive >= existing.lastActive) {
+                    gamesMap.set(g.tableId, g);
+                }
+            } else if (g.lastActive && !existing.lastActive) {
+                // Cloud has timestamp, local doesn't - use cloud
                 gamesMap.set(g.tableId, g);
             }
+            // else: local has timestamp but cloud doesn't - keep local
         }
     });
 
