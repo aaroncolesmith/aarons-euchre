@@ -257,19 +257,19 @@ const StatsModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
                 <div className="p-10">
                     <div className="flex justify-between items-start mb-10">
                         <div>
-                            <h2 className="text-4xl font-black text-white italic tracking-tighter mb-2">Euchre Hall of Fame</h2>
+                            <h2 className="text-4xl font-black text-white italic tracking-tighter mb-2">Stats</h2>
                             <div className="flex gap-4 mt-6">
                                 <button
                                     onClick={() => setTab('me')}
                                     className={`px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all ${tab === 'me' ? 'bg-emerald-500 text-white shadow-[0_0_20px_rgba(16,185,129,0.4)]' : 'bg-slate-800 text-slate-500 hover:text-slate-300'}`}
                                 >
-                                    My Career
+                                    My Stats
                                 </button>
                                 <button
                                     onClick={() => setTab('league')}
                                     className={`px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all ${tab === 'league' ? 'bg-emerald-500 text-white shadow-[0_0_20px_rgba(16,185,129,0.4)]' : 'bg-slate-800 text-slate-500 hover:text-slate-300'}`}
                                 >
-                                    League Standings
+                                    Leaderboard
                                 </button>
                                 {state.eventLog.length > 0 && (
                                     <button
@@ -365,6 +365,7 @@ const StatsModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
                                         <th className="px-6 py-4">GP</th>
                                         <th className="px-6 py-4">Game Win %</th>
                                         <th className="px-6 py-4">Hand Win %</th>
+                                        <th className="px-6 py-4">Tricks Taken</th>
                                         <th className="px-6 py-4 text-right">Euchres Made</th>
                                     </tr>
                                 </thead>
@@ -382,6 +383,9 @@ const StatsModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
                                             </td>
                                             <td className="px-6 py-4 text-cyan-400 font-black tabular-nums">
                                                 {p.handsPlayed > 0 ? Math.round((p.handsWon / p.handsPlayed) * 100) : 0}%
+                                            </td>
+                                            <td className="px-6 py-4 text-purple-400 font-black tabular-nums">
+                                                {p.tricksTaken}
                                             </td>
                                             <td className="px-6 py-4 text-right font-black text-red-400 tabular-nums">
                                                 {p.euchresMade}
