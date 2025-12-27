@@ -30,7 +30,8 @@ type Action =
     | { type: 'CLEAR_OVERLAY' }
     | { type: 'ADD_LOG'; payload: string }
     | { type: 'EXIT_TO_LANDING' }
-    | { type: 'FORCE_PHASE'; payload: { phase: GameState['phase'] } };
+    | { type: 'FORCE_PHASE'; payload: { phase: GameState['phase'] } }
+    | { type: 'FORCE_NEXT_PLAYER'; payload: { nextPlayerIndex: number } };
 
 // --- Constants ---
 export const BOT_NAMES_POOL = ['Fizz', 'J-Bock', 'Huber', 'Moses', 'Wooden', 'Buff'];
@@ -982,6 +983,14 @@ const gameReducer = (state: GameState, action: Action): GameState => {
                 logs: [`(System) Auto-recovering stuck game state...`, ...state.logs]
             };
 
+        case 'FORCE_NEXT_PLAYER':
+            Logger.warn(`[FORCE_NEXT_PLAYER] Forcing advance from ${state.currentPlayerIndex} to ${action.payload.nextPlayerIndex}`);
+            return {
+                ...state,
+                currentPlayerIndex: action.payload.nextPlayerIndex,
+                logs: [`(System) Auto-advanced to next player (freeze recovery)`, ...state.logs]
+            };
+
         default:
             return state;
     }
@@ -1289,6 +1298,34 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
         return () => clearTimeout(watchdogTimer);
     }, [state.currentPlayerIndex, state.phase, state.tableCode]);
+
+    // LONER FREEZE DETECTOR - Critical fix for partner getting stuck during loners
+    useEffect(() => {
+        // Only check during loners in playing phase
+        if (!state.isLoner || state.phase !== 'playing' || state.trumpCallerIndex === null) return;
+
+        const partnerIndex = (state.trumpCallerIndex + 2) % 4;
+        const currentPlayer = state.players[state.currentPlayerIndex];
+
+        // CRITICAL: If current player is the partner during a loner, this is a BUG
+        if (state.currentPlayerIndex === partnerIndex) {
+            Logger.error(`[LONER FREEZE DETECTED] Current player is partner! 
+                Partner Index: ${partnerIndex}, 
+                Current Index: ${state.currentPlayerIndex}, 
+                Trump Caller: ${state.trumpCallerIndex}, 
+                Player: ${currentPlayer?.name}`);
+
+            // Auto-recover: Skip to next player
+            const nextIndex = (partnerIndex + 1) % 4;
+            setTimeout(() => {
+                Logger.warn(`[AUTO-RECOVERY] Forcing advance to player ${nextIndex}`);
+                broadcastDispatch({
+                    type: 'FORCE_NEXT_PLAYER',
+                    payload: { nextPlayerIndex: nextIndex }
+                });
+            }, 1000); // Small delay to let other processes settle
+        }
+    }, [state.currentPlayerIndex, state.isLoner, state.trumpCallerIndex, state.phase]);
 
     return (
         <GameContext.Provider value={{ state, dispatch: broadcastDispatch }}>

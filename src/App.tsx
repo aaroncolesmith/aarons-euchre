@@ -125,7 +125,7 @@ const PlayerSeat = ({
                 </div>
 
                 {/* CARDS LEFT - 5 rectangles showing hand size */}
-                {!inLobby && index !== 0 && state.phase !== 'randomizing_dealer' && (
+                {!inLobby && player.name !== state.currentViewPlayerName && state.phase !== 'randomizing_dealer' && (
                     <div className="flex gap-1 justify-center mb-1">
                         {[0, 1, 2, 3, 4].map((i) => {
                             const hasCard = i < player.hand.length;
@@ -814,7 +814,7 @@ const LandingPage = () => {
                     Logout from {state.currentUser}
                 </button>
                 <div className="text-[10px] font-black text-slate-800 uppercase tracking-[0.3em]">
-                    Euchre Engine V0.31
+                    Euchre Engine V0.32
                 </div>
             </div>
 
