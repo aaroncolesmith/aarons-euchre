@@ -830,9 +830,20 @@ const gameReducer = (state: GameState, action: Action): GameState => {
                 overlayMessage = summary;
             }
 
+            // LONER FIX: After clearing trick, if next player should be skipped (partner), advance
+            let nextPlayer = state.currentPlayerIndex;
+            if (state.isLoner && !isHandOver && state.trumpCallerIndex !== null) {
+                const partnerIndex = (state.trumpCallerIndex + 2) % 4;
+                if (nextPlayer === partnerIndex) {
+                    nextPlayer = (nextPlayer + 1) % 4;
+                    Logger.debug(`[LONER] Skipping partner ${partnerIndex}, advancing to ${nextPlayer}`);
+                }
+            }
+
             return {
                 ...state,
                 currentTrick: [],
+                currentPlayerIndex: nextPlayer,
                 phase: isHandOver ? 'scoring' : 'playing',
                 logs,
                 overlayMessage
