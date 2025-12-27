@@ -997,12 +997,37 @@ const gameReducer = (state: GameState, action: Action): GameState => {
     }
 };
 
+// State sanitizer - fixes known deadlock scenarios
+const sanitizeGameState = (state: GameState): GameState => {
+    // FIX: Scoring phase deadlock - overlay acknowledged but game stuck
+    if (state.phase === 'scoring' && state.overlayMessage) {
+        const humanPlayers = state.players.filter(p => p.name && !p.isComputer);
+        const allAcknowledged = humanPlayers.every(p => state.overlayAcknowledged[p.name || '']);
+
+        if (allAcknowledged) {
+            Logger.warn('[STATE SANITIZER] Fixing scoring deadlock - auto-advancing to waiting_for_next_deal');
+            return {
+                ...state,
+                phase: 'waiting_for_next_deal',
+                overlayMessage: null,
+                logs: ['(System) Auto-recovered from scoring deadlock', ...state.logs]
+            };
+        }
+    }
+
+    return state;
+};
+
 const gameReducerFixed = (state: GameState, action: Action): GameState => {
     const newState = gameReducer(state, action);
-    if (newState !== state && action.type !== 'UPDATE_ANIMATION_DEALER') {
-        return { ...newState, lastActive: Date.now() };
+
+    // Sanitize state after any action
+    const sanitized = sanitizeGameState(newState);
+
+    if (sanitized !== state && action.type !== 'UPDATE_ANIMATION_DEALER') {
+        return { ...sanitized, lastActive: Date.now() };
     }
-    return newState;
+    return sanitized;
 };
 
 // --- Context ---
