@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase';
 import { createDeck, dealHands, shuffleDeck } from '../utils/deck';
 import { getBestBid, getEffectiveSuit, determineWinner, shouldCallTrump, getBotMove, sortHand } from '../utils/rules';
 import { createTrumpCallLog } from '../utils/trumpCallLogger';
+import { debugGameState, suggestFix } from '../utils/freezeDebugger';
 import Logger from '../utils/logger';
 
 // --- Actions ---
@@ -1326,6 +1327,55 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             }, 1000); // Small delay to let other processes settle
         }
     }, [state.currentPlayerIndex, state.isLoner, state.trumpCallerIndex, state.phase]);
+
+    // UNIVERSAL FREEZE DETECTOR - Works for ALL freeze scenarios
+    useEffect(() => {
+        // Skip if in safe phases
+        if (['login', 'landing', 'lobby', 'game_over', 'randomizing_dealer'].includes(state.phase)) return;
+
+        const currentPlayer = state.players[state.currentPlayerIndex];
+        if (!currentPlayer) return;
+
+        // Only check if it's a bot's turn (humans control their own pace)
+        if (!currentPlayer.isComputer) return;
+
+        const timer = setTimeout(() => {
+            // Log diagnostic info
+            const diagnostic = debugGameState(state);
+            Logger.warn('[UNIVERSAL FREEZE DETECTOR]\n' + diagnostic);
+
+            // Try to suggest and apply a fix
+            const fix = suggestFix(state);
+            if (fix) {
+                Logger.warn(`[AUTO-FIX] Applying: ${fix.description}`);
+
+                // Apply the fix
+                if (fix.action === 'CLEAR_OVERLAY') {
+                    broadcastDispatch({ type: 'CLEAR_OVERLAY' });
+                } else if (fix.action === 'CLEAR_TRICK') {
+                    broadcastDispatch({ type: 'CLEAR_TRICK' });
+                } else if (fix.action === 'PASS_BID') {
+                    broadcastDispatch({ type: 'PASS_BID', payload: { playerIndex: state.currentPlayerIndex } });
+                } else if (fix.action === 'PLAY_CARD' && currentPlayer.hand.length > 0) {
+                    const card = getBotMove(
+                        currentPlayer.hand,
+                        state.currentTrick,
+                        state.trump!,
+                        state.players.map(p => p.id),
+                        currentPlayer.id
+                    );
+                    broadcastDispatch({ type: 'PLAY_CARD', payload: { playerIndex: state.currentPlayerIndex, cardId: card.id } });
+                } else if (fix.action === 'FORCE_NEXT_PLAYER') {
+                    const nextIdx = (state.currentPlayerIndex + 1) % 4;
+                    broadcastDispatch({ type: 'FORCE_NEXT_PLAYER', payload: { nextPlayerIndex: nextIdx } });
+                }
+            } else {
+                Logger.error('[FREEZE DETECTOR] No auto-fix available for current state');
+            }
+        }, 12000); // Check after 12 seconds of inactivity
+
+        return () => clearTimeout(timer);
+    }, [state.currentPlayerIndex, state.phase, state.players, state.overlayMessage, state.currentTrick]);
 
     return (
         <GameContext.Provider value={{ state, dispatch: broadcastDispatch }}>

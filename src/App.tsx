@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { GameProvider, useGame, getEmptyStats, getSavedGames, BOT_NAMES_POOL, deleteActiveGame } from './store/GameStore';
 import { getEffectiveSuit, isValidPlay } from './utils/rules';
@@ -508,11 +508,36 @@ const StatsModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
 const TableOverlay = () => {
     const { state, dispatch } = useGame();
 
-    if (!state.overlayMessage || state.phase === 'scoring') return null;
+    // Don't show if no overlay message
+    if (!state.overlayMessage) return null;
+
+    // Auto-advance from scoring when everyone has acknowledged
+    React.useEffect(() => {
+        if (state.phase === 'scoring' && state.overlayMessage) {
+            const humanPlayers = state.players.filter(p => p.name && !p.isComputer);
+            const allAcknowledged = humanPlayers.every(p => state.overlayAcknowledged[p.name || '']);
+
+            if (allAcknowledged) {
+                // Everyone acknowledged - auto-advance after short delay
+                const timer = setTimeout(() => {
+                    dispatch({ type: 'FINISH_HAND' });
+                }, 2000);
+                return () => clearTimeout(timer);
+            }
+        }
+    }, [state.phase, state.overlayMessage, state.overlayAcknowledged, state.players]);
+
+    const handleClick = () => {
+        const myName = state.currentViewPlayerName;
+        if (myName && !state.overlayAcknowledged[myName]) {
+            // Mark as acknowledged
+            dispatch({ type: 'CLEAR_OVERLAY' });
+        }
+    };
 
     return (
         <div
-            onClick={() => dispatch({ type: 'CLEAR_OVERLAY' })}
+            onClick={handleClick}
             className="absolute inset-0 z-[60] flex items-center justify-center p-4 md:p-8 bg-slate-950/40 backdrop-blur-sm animate-in fade-in duration-300 cursor-pointer"
         >
             <div className="bg-emerald-500 text-white px-6 md:px-12 py-6 md:py-8 rounded-2xl md:rounded-[3rem] shadow-[0_0_100px_rgba(16,185,129,0.4)] border-4 border-white animate-in zoom-in slide-in-from-bottom-12 duration-500 max-w-lg w-full max-h-[80vh] flex flex-col">
@@ -814,7 +839,7 @@ const LandingPage = () => {
                     Logout from {state.currentUser}
                 </button>
                 <div className="text-[10px] font-black text-slate-800 uppercase tracking-[0.3em]">
-                    Euchre Engine V0.32
+                    Euchre Engine V0.34
                 </div>
             </div>
 
