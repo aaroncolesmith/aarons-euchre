@@ -3,6 +3,7 @@ import { GameState, Suit, HandResult, PlayerStats, Player, GameEvent, Card } fro
 import { supabase } from '../lib/supabase';
 import { createDeck, dealHands, shuffleDeck } from '../utils/deck';
 import { getBestBid, getEffectiveSuit, determineWinner, shouldCallTrump, getBotMove, sortHand } from '../utils/rules';
+import { createTrumpCallLog } from '../utils/trumpCallLogger';
 import Logger from '../utils/logger';
 
 // --- Actions ---
@@ -543,6 +544,17 @@ const gameReducer = (state: GameState, action: Action): GameState => {
                     return p;
                 });
 
+                // Log trump call
+                const trumpLog = createTrumpCallLog(
+                    caller,
+                    suit,
+                    dealerName,
+                    relationship,
+                    state.upcard,
+                    state.biddingRound,
+                    state.tableCode || 'unknown'
+                );
+
                 return {
                     ...state,
                     players: updatedPlayers,
@@ -552,7 +564,8 @@ const gameReducer = (state: GameState, action: Action): GameState => {
                     phase: 'discard',
                     currentPlayerIndex: state.dealerIndex,
                     logs: [logMsg, ...state.logs],
-                    eventLog: [...state.eventLog, bidEvent]
+                    eventLog: [...state.eventLog, bidEvent],
+                    trumpCallLogs: [...state.trumpCallLogs, trumpLog]
                 };
             }
 
@@ -586,6 +599,17 @@ const gameReducer = (state: GameState, action: Action): GameState => {
                 .filter(p => p.isComputer && p.name)
                 .reduce((acc, p) => ({ ...acc, [p.name!]: true }), {});
 
+            // Log trump call
+            const trumpLog = createTrumpCallLog(
+                caller,
+                suit,
+                dealerName,
+                relationship,
+                null, // No upcard in round 2
+                state.biddingRound,
+                state.tableCode || 'unknown'
+            );
+
             return {
                 ...state,
                 players: newPlayers,
@@ -597,7 +621,8 @@ const gameReducer = (state: GameState, action: Action): GameState => {
                 logs: [logMsg, ...state.logs],
                 eventLog: [...state.eventLog, bidEvent],
                 overlayMessage: generateTrumpMessage(),
-                overlayAcknowledged: botAcknowledgments // Bots pre-acknowledged
+                overlayAcknowledged: botAcknowledgments, // Bots pre-acknowledged
+                trumpCallLogs: [...state.trumpCallLogs, trumpLog]
             };
         }
 

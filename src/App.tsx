@@ -221,7 +221,7 @@ const CardComponent = ({
 
 const StatsModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
     const { state } = useGame();
-    const [tab, setTab] = useState<'me' | 'league'>('me');
+    const [tab, setTab] = useState<'me' | 'league' | 'trumps'>('me');
 
     // Load global stats from localStorage
     const globalStats = JSON.parse(localStorage.getItem('euchre_global_profiles') || '{}');
@@ -250,6 +250,18 @@ const StatsModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
         downloadAnchorNode.remove();
     };
 
+    const downloadTrumpCallsCSV = () => {
+        const { trumpCallsToCSV } = require('../utils/trumpCallLogger');
+        const csv = trumpCallsToCSV(state.trumpCallLogs);
+        const blob = new Blob([csv], { type: 'text/tab-separated-values' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `trump_calls_${Date.now()}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+    };
+
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-950/80 backdrop-blur-xl animate-in fade-in duration-300">
             <div className="bg-slate-900 border-2 border-slate-800 w-full max-w-4xl rounded-[3rem] shadow-2xl overflow-hidden animate-in zoom-in duration-300">
@@ -269,6 +281,12 @@ const StatsModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
                                     className={`px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all ${tab === 'league' ? 'bg-emerald-500 text-white shadow-[0_0_20px_rgba(16,185,129,0.4)]' : 'bg-slate-800 text-slate-500 hover:text-slate-300'}`}
                                 >
                                     Leaderboard
+                                </button>
+                                <button
+                                    onClick={() => setTab('trumps')}
+                                    className={`px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all ${tab === 'trumps' ? 'bg-emerald-500 text-white shadow-[0_0_20px_rgba(16,185,129,0.4)]' : 'bg-slate-800 text-slate-500 hover:text-slate-300'}`}
+                                >
+                                    Trump Calls
                                 </button>
                                 <button
                                     onClick={downloadSessionLog}
@@ -358,7 +376,7 @@ const StatsModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
                                 </div>
                             </div>
                         </div>
-                    ) : (
+                    ) : tab === 'league' ? (
                         <div className="bg-slate-800/30 border border-slate-800 rounded-[2rem] overflow-hidden">
                             <table className="w-full text-left">
                                 <thead>
@@ -409,7 +427,74 @@ const StatsModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
                                 </tbody>
                             </table>
                         </div>
-                    )}
+                    ) : tab === 'trumps' ? (
+                        <div className="space-y-6">
+                            <div className="flex justify-between items-center">
+                                <div className="text-sm text-slate-400">
+                                    {state.trumpCallLogs.length} trump calls logged this session
+                                </div>
+                                <button
+                                    onClick={downloadTrumpCallsCSV}
+                                    disabled={state.trumpCallLogs.length === 0}
+                                    className={`px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all ${state.trumpCallLogs.length > 0
+                                        ? 'bg-emerald-500 text-white hover:bg-emerald-600 shadow-[0_0_20px_rgba(16,185,129,0.4)]'
+                                        : 'bg-slate-800 text-slate-600 cursor-not-allowed opacity-50'
+                                        }`}
+                                >
+                                    📥 Export CSV
+                                </button>
+                            </div>
+
+                            {state.trumpCallLogs.length === 0 ? (
+                                <div className="bg-slate-800/30 border border-slate-800 rounded-[2rem] p-12 text-center">
+                                    <div className="text-slate-500 text-lg mb-2">No trump calls logged yet</div>
+                                    <div className="text-slate-600 text-sm">Play some hands and trump calls will appear here for analysis</div>
+                                </div>
+                            ) : (
+                                <div className="bg-slate-800/30 border border-slate-800 rounded-[2rem] overflow-hidden">
+                                    <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
+                                        <table className="w-full text-left text-xs">
+                                            <thead className="bg-slate-800/50 sticky top-0">
+                                                <tr className="text-[9px] font-black text-slate-500 uppercase">
+                                                    <th className="px-4 py-3">Who Called</th>
+                                                    <th className="px-4 py-3">Type</th>
+                                                    <th className="px-4 py-3">Dealer</th>
+                                                    <th className="px-4 py-3">Picked Up</th>
+                                                    <th className="px-4 py-3">Trump</th>
+                                                    <th className="px-4 py-3 text-center">Bowers</th>
+                                                    <th className="px-4 py-3 text-center">Trump #</th>
+                                                    <th className="px-4 py-3 text-center">Suit #</th>
+                                                    <th className="px-4 py-3">Hand After Discard</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-slate-800">
+                                                {state.trumpCallLogs.map((log, i) => (
+                                                    <tr key={i} className="hover:bg-slate-800/30 transition-colors">
+                                                        <td className="px-4 py-3 font-bold text-white">{log.whoCalled}</td>
+                                                        <td className="px-4 py-3">
+                                                            <span className={`px-2 py-1 rounded text-[9px] font-black ${log.userType === 'Human'
+                                                                ? 'bg-emerald-500/20 text-emerald-400'
+                                                                : 'bg-blue-500/20 text-blue-400'
+                                                                }`}>
+                                                                {log.userType}
+                                                            </span>
+                                                        </td>
+                                                        <td className="px-4 py-3 text-slate-400 text-[10px]">{log.dealer}</td>
+                                                        <td className="px-4 py-3 text-cyan-400 font-bold">{log.cardPickedUp}</td>
+                                                        <td className="px-4 py-3 text-emerald-400 font-black">{log.suitCalled}</td>
+                                                        <td className="px-4 py-3 text-purple-400 font-bold text-center">{log.bowerCount}</td>
+                                                        <td className="px-4 py-3 text-purple-400 font-bold text-center">{log.trumpCount}</td>
+                                                        <td className="px-4 py-3 text-blue-400 font-bold text-center">{log.suitCount}</td>
+                                                        <td className="px-4 py-3 text-slate-300 font-mono text-[10px]">{log.handAfterDiscard}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    ) : null}
 
                     <div className="mt-10 pt-10 border-t border-slate-800 flex justify-center">
                         <button onClick={onClose} className="bg-white text-slate-900 font-black py-4 px-12 rounded-2xl shadow-xl text-lg hover:scale-105 transition-transform active:scale-95">BACK TO TABLE</button>
@@ -729,7 +814,7 @@ const LandingPage = () => {
                     Logout from {state.currentUser}
                 </button>
                 <div className="text-[10px] font-black text-slate-800 uppercase tracking-[0.3em]">
-                    Euchre Engine V0.29
+                    Euchre Engine V0.30
                 </div>
             </div>
 
