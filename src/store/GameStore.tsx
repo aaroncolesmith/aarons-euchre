@@ -1005,9 +1005,14 @@ const sanitizeGameState = (state: GameState): GameState => {
         const allAcknowledged = humanPlayers.every(p => state.overlayAcknowledged[p.name || '']);
 
         if (allAcknowledged) {
-            Logger.warn('[STATE SANITIZER] Fixing scoring deadlock - running FINISH_HAND to score properly');
-            // Actually score the hand by running FINISH_HAND action
-            return gameReducer(state, { type: 'FINISH_HAND' });
+            // Check how long since last activity - only auto-fix if truly stuck
+            const timeSinceActive = Date.now() - (state.lastActive || 0);
+
+            if (timeSinceActive > 5000) { // 5 seconds = likely a real deadlock
+                Logger.warn('[STATE SANITIZER] Fixing scoring deadlock - running FINISH_HAND to score properly');
+                // Actually score the hand by running FINISH_HAND action
+                return gameReducer(state, { type: 'FINISH_HAND' });
+            }
         }
     }
 
