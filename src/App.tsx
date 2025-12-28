@@ -245,10 +245,14 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
         }
     }, [tab, isOpen]);
 
-    // Get my stats - prioritize global stats over current game stats
-    const myGlobalStats = globalStats[state.currentViewPlayerName || ''] || getEmptyStats();
+    // Load ALL trump calls from localStorage (not just current session)
+    const allTrumpCalls = JSON.parse(localStorage.getItem('euchre_trump_calls') || '[]');
+
+    // Get my stats - use currentUser (works everywhere) or fallback to currentViewPlayerName (in-game)
+    const playerName = state.currentUser || state.currentViewPlayerName || '';
+    const myGlobalStats = globalStats[playerName] || getEmptyStats();
     const human = {
-        name: state.currentViewPlayerName,
+        name: playerName,
         stats: myGlobalStats
     };
 
@@ -271,7 +275,7 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
 
     const downloadTrumpCallsCSV = () => {
         const { trumpCallsToCSV } = require('../utils/trumpCallLogger');
-        const csv = trumpCallsToCSV(state.trumpCallLogs);
+        const csv = trumpCallsToCSV(allTrumpCalls);
         const blob = new Blob([csv], { type: 'text/tab-separated-values' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -458,12 +462,12 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                         <div className="space-y-6">
                             <div className="flex justify-between items-center">
                                 <div className="text-sm text-slate-400">
-                                    {state.trumpCallLogs.length} trump calls logged this session
+                                    {allTrumpCalls.length} trump calls logged (all games)
                                 </div>
                                 <button
                                     onClick={downloadTrumpCallsCSV}
-                                    disabled={state.trumpCallLogs.length === 0}
-                                    className={`px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all ${state.trumpCallLogs.length > 0
+                                    disabled={allTrumpCalls.length === 0}
+                                    className={`px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all ${allTrumpCalls.length > 0
                                         ? 'bg-emerald-500 text-white hover:bg-emerald-600 shadow-[0_0_20px_rgba(16,185,129,0.4)]'
                                         : 'bg-slate-800 text-slate-600 cursor-not-allowed opacity-50'
                                         }`}
@@ -472,7 +476,7 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                                 </button>
                             </div>
 
-                            {state.trumpCallLogs.length === 0 ? (
+                            {allTrumpCalls.length === 0 ? (
                                 <div className="bg-slate-800/30 border border-slate-800 rounded-[2rem] p-12 text-center">
                                     <div className="text-slate-500 text-lg mb-2">No trump calls logged yet</div>
                                     <div className="text-slate-600 text-sm">Play some hands and trump calls will appear here for analysis</div>
@@ -483,6 +487,7 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                                         <table className="w-full text-left text-xs">
                                             <thead className="bg-slate-800/50 sticky top-0">
                                                 <tr className="text-[9px] font-black text-slate-500 uppercase">
+                                                    <th className="px-4 py-3">Game ID</th>
                                                     <th className="px-4 py-3">Who Called</th>
                                                     <th className="px-4 py-3">Type</th>
                                                     <th className="px-4 py-3">Dealer</th>
@@ -495,8 +500,9 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y divide-slate-800">
-                                                {state.trumpCallLogs.map((log, i) => (
+                                                {allTrumpCalls.map((log: any, i: number) => (
                                                     <tr key={i} className="hover:bg-slate-800/30 transition-colors">
+                                                        <td className="px-4 py-3 font-mono text-cyan-400 text-[10px]">{log.gameId || 'N/A'}</td>
                                                         <td className="px-4 py-3 font-bold text-white">{log.whoCalled}</td>
                                                         <td className="px-4 py-3">
                                                             <span className={`px-2 py-1 rounded text-[9px] font-black ${log.userType === 'Human'
@@ -999,7 +1005,7 @@ const LandingPage = () => {
                     Logout from {state.currentUser}
                 </button>
                 <div className="text-[10px] font-black text-slate-800 uppercase tracking-[0.3em]">
-                    Euchre Engine V0.48
+                    Euchre Engine V0.49
                 </div>
             </div>
 
