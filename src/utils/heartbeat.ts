@@ -160,8 +160,19 @@ export function applyRecovery(
             break;
 
         case 'FORCE_BOT_PLAY':
+            // Force bot to play a card immediately
+            // The actual card selection will be handled by the reducer
+            Logger.warn('[HEARTBEAT] Forcing bot to play card via bot automation useEffect');
+            // Just dispatch a state-touching action to re-trigger bot useEffect
+            dispatch({ type: 'TOGGLE_STEP_MODE' });
+            setTimeout(() => dispatch({ type: 'TOGGLE_STEP_MODE' }), 100);
+            break;
+
         case 'AUTO_DISCARD':
-            Logger.warn(`[HEARTBEAT] ${action.type} needs implementation`);
+            // Force bot to discard immediately  
+            Logger.warn('[HEARTBEAT] Forcing bot discard via bot automation useEffect');
+            dispatch({ type: 'TOGGLE_STEP_MODE' });
+            setTimeout(() => dispatch({ type: 'TOGGLE_STEP_MODE' }), 100);
             break;
 
         default:

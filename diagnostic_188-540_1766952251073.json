@@ -1,0 +1,1364 @@
+{
+  "tableCode": "188-540",
+  "phase": "playing",
+  "currentPlayerIndex": 2,
+  "currentPlayerName": "Buff",
+  "isBot": true,
+  "overlayMessage": null,
+  "currentTrick": [],
+  "trump": "hearts",
+  "lastActive": 1766952221525,
+  "timeSinceActive": 29,
+  "potentialIssues": [
+    "Bot stuck for 30s"
+  ],
+  "fullState": {
+    "logs": [
+      "Buff called hearts.",
+      "Everyone passed. Round 2 bidding starts.",
+      "Fizz is dealing. Buff to bid.",
+      "Hand finished. Next deal in 4 seconds...",
+      "Buff & Mimi won the hand 5 tricks to 0 (+2)",
+      "Mimi won the trick.",
+      "Mimi won the trick.",
+      "Mimi won the trick.",
+      "Mimi won the trick.",
+      "Mimi won the trick.",
+      "Mimi called diamonds.",
+      "Mimi is dealing. Fizz to bid.",
+      "Hand finished. Next deal in 4 seconds...",
+      "Fizz & Huber won the hand 4 tricks to 1 (+1)",
+      "Huber won the trick.",
+      "Huber won the trick.",
+      "Huber won the trick.",
+      "Fizz won the trick.",
+      "Mimi won the trick.",
+      "Fizz called clubs.",
+      "Everyone passed. Round 2 bidding starts.",
+      "Huber is dealing. Mimi to bid.",
+      "Hand finished. Next deal in 4 seconds...",
+      "Buff & Mimi EUCHRED Fizz & Huber! (+2)",
+      "Fizz won the trick.",
+      "Mimi won the trick.",
+      "Mimi won the trick.",
+      "Mimi won the trick.",
+      "Huber won the trick.",
+      "Huber called hearts.",
+      "Everyone passed. Round 2 bidding starts.",
+      "Buff is dealing. Huber to bid.",
+      "Game starting... shuffling deck.",
+      "Table \"The Emerald Dealer\" created. Share code 188-540 with friends.",
+      "Welcome to Euchre. Create or join a table to begin."
+    ],
+    "phase": "playing",
+    "trump": "hearts",
+    "scores": {
+      "team1": 4,
+      "team2": 1
+    },
+    "upcard": {
+      "id": "10-clubs",
+      "rank": "10",
+      "suit": "clubs"
+    },
+    "history": [
+      {
+        "trump": "diamonds",
+        "isLoner": false,
+        "timestamp": 1766952186592,
+        "tricksWon": {
+          "player-0": 5,
+          "player-1": 0,
+          "player-2": 0,
+          "player-3": 0
+        },
+        "dealerIndex": 0,
+        "winningTeam": 1,
+        "pointsScored": {
+          "team1": 2,
+          "team2": 0
+        },
+        "trumpCallerIndex": 0
+      },
+      {
+        "trump": "clubs",
+        "isLoner": false,
+        "timestamp": 1766951923016,
+        "tricksWon": {
+          "player-0": 1,
+          "player-1": 1,
+          "player-2": 0,
+          "player-3": 3
+        },
+        "dealerIndex": 3,
+        "winningTeam": 2,
+        "pointsScored": {
+          "team1": 0,
+          "team2": 1
+        },
+        "trumpCallerIndex": 1
+      },
+      {
+        "trump": "hearts",
+        "isLoner": false,
+        "timestamp": 1766951810436,
+        "tricksWon": {
+          "player-0": 3,
+          "player-1": 1,
+          "player-2": 0,
+          "player-3": 1
+        },
+        "dealerIndex": 2,
+        "winningTeam": 1,
+        "pointsScored": {
+          "team1": 2,
+          "team2": 0
+        },
+        "trumpCallerIndex": 3
+      }
+    ],
+    "isLoner": false,
+    "players": [
+      {
+        "id": "player-0",
+        "hand": [
+          {
+            "id": "9-hearts",
+            "rank": "9",
+            "suit": "hearts"
+          },
+          {
+            "id": "9-spades",
+            "rank": "9",
+            "suit": "spades"
+          },
+          {
+            "id": "A-clubs",
+            "rank": "A",
+            "suit": "clubs"
+          },
+          {
+            "id": "Q-clubs",
+            "rank": "Q",
+            "suit": "clubs"
+          },
+          {
+            "id": "9-diamonds",
+            "rank": "9",
+            "suit": "diamonds"
+          }
+        ],
+        "name": "Mimi",
+        "stats": {
+          "swept": 31,
+          "sweeps": 5,
+          "euchred": 23,
+          "callsWon": 27,
+          "gamesWon": 4,
+          "handsWon": 135,
+          "callsMade": 22,
+          "euchresMade": 42,
+          "gamesPlayed": 6,
+          "handsPlayed": 246,
+          "tricksTaken": 302,
+          "tricksPlayed": 1180,
+          "tricksWonTeam": 562,
+          "lonersAttempted": 0,
+          "lonersConverted": 0
+        },
+        "isComputer": false
+      },
+      {
+        "id": "player-1",
+        "hand": [
+          {
+            "id": "Q-diamonds",
+            "rank": "Q",
+            "suit": "diamonds"
+          },
+          {
+            "id": "10-hearts",
+            "rank": "10",
+            "suit": "hearts"
+          },
+          {
+            "id": "K-diamonds",
+            "rank": "K",
+            "suit": "diamonds"
+          },
+          {
+            "id": "10-spades",
+            "rank": "10",
+            "suit": "spades"
+          },
+          {
+            "id": "J-diamonds",
+            "rank": "J",
+            "suit": "diamonds"
+          }
+        ],
+        "name": "Fizz",
+        "stats": {
+          "swept": 2,
+          "sweeps": 5,
+          "euchred": 5,
+          "callsWon": 14,
+          "gamesWon": 2,
+          "handsWon": 22,
+          "callsMade": 15,
+          "euchresMade": 4,
+          "gamesPlayed": 2,
+          "handsPlayed": 36,
+          "tricksTaken": 51,
+          "tricksPlayed": 180,
+          "tricksWonTeam": 100,
+          "lonersAttempted": 0,
+          "lonersConverted": 0
+        },
+        "isComputer": true
+      },
+      {
+        "id": "player-2",
+        "hand": [
+          {
+            "id": "A-hearts",
+            "rank": "A",
+            "suit": "hearts"
+          },
+          {
+            "id": "J-spades",
+            "rank": "J",
+            "suit": "spades"
+          },
+          {
+            "id": "J-hearts",
+            "rank": "J",
+            "suit": "hearts"
+          },
+          {
+            "id": "K-hearts",
+            "rank": "K",
+            "suit": "hearts"
+          },
+          {
+            "id": "Q-hearts",
+            "rank": "Q",
+            "suit": "hearts"
+          }
+        ],
+        "name": "Buff",
+        "stats": {
+          "swept": 2,
+          "sweeps": 2,
+          "euchred": 4,
+          "callsWon": 5,
+          "gamesWon": 1,
+          "handsWon": 10,
+          "callsMade": 6,
+          "euchresMade": 2,
+          "gamesPlayed": 1,
+          "handsPlayed": 16,
+          "tricksTaken": 18,
+          "tricksPlayed": 80,
+          "tricksWonTeam": 47,
+          "lonersAttempted": 0,
+          "lonersConverted": 0
+        },
+        "isComputer": true
+      },
+      {
+        "id": "player-3",
+        "hand": [
+          {
+            "id": "9-clubs",
+            "rank": "9",
+            "suit": "clubs"
+          },
+          {
+            "id": "Q-spades",
+            "rank": "Q",
+            "suit": "spades"
+          },
+          {
+            "id": "A-diamonds",
+            "rank": "A",
+            "suit": "diamonds"
+          },
+          {
+            "id": "K-spades",
+            "rank": "K",
+            "suit": "spades"
+          },
+          {
+            "id": "K-clubs",
+            "rank": "K",
+            "suit": "clubs"
+          }
+        ],
+        "name": "Huber",
+        "stats": {
+          "swept": 1,
+          "sweeps": 3,
+          "euchred": 6,
+          "callsWon": 2,
+          "gamesWon": 2,
+          "handsWon": 13,
+          "callsMade": 7,
+          "euchresMade": 6,
+          "gamesPlayed": 2,
+          "handsPlayed": 21,
+          "tricksTaken": 31,
+          "tricksPlayed": 110,
+          "tricksWonTeam": 63,
+          "lonersAttempted": 0,
+          "lonersConverted": 0
+        },
+        "isComputer": true
+      }
+    ],
+    "tableId": "j60imnvba",
+    "eventLog": [
+      {
+        "type": "dealer",
+        "timestamp": 1766951666509,
+        "dealerName": "Buff",
+        "dealerIndex": 2
+      },
+      {
+        "type": "pass",
+        "round": 1,
+        "timestamp": 1766951667735,
+        "playerName": "Huber",
+        "playerIndex": 3
+      },
+      {
+        "type": "pass",
+        "round": 1,
+        "timestamp": 1766951696812,
+        "playerName": "Mimi",
+        "playerIndex": 0
+      },
+      {
+        "type": "pass",
+        "round": 1,
+        "timestamp": 1766951698020,
+        "playerName": "Fizz",
+        "playerIndex": 1
+      },
+      {
+        "type": "pass",
+        "round": 1,
+        "timestamp": 1766951699238,
+        "playerName": "Buff",
+        "playerIndex": 2
+      },
+      {
+        "suit": "hearts",
+        "type": "bid",
+        "round": 2,
+        "isLoner": false,
+        "timestamp": 1766951700457,
+        "playerName": "Huber",
+        "playerIndex": 3
+      },
+      {
+        "card": {
+          "id": "J-hearts",
+          "rank": "J",
+          "suit": "hearts"
+        },
+        "type": "play",
+        "timestamp": 1766951711885,
+        "playerName": "Huber",
+        "trickIndex": 0,
+        "playerIndex": 3
+      },
+      {
+        "card": {
+          "id": "A-hearts",
+          "rank": "A",
+          "suit": "hearts"
+        },
+        "type": "play",
+        "timestamp": 1766951766351,
+        "playerName": "Mimi",
+        "trickIndex": 0,
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "10-hearts",
+          "rank": "10",
+          "suit": "hearts"
+        },
+        "type": "play",
+        "timestamp": 1766951767570,
+        "playerName": "Fizz",
+        "trickIndex": 0,
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "K-hearts",
+          "rank": "K",
+          "suit": "hearts"
+        },
+        "type": "play",
+        "timestamp": 1766951768794,
+        "playerName": "Buff",
+        "trickIndex": 0,
+        "playerIndex": 2
+      },
+      {
+        "card": {
+          "id": "9-hearts",
+          "rank": "9",
+          "suit": "hearts"
+        },
+        "type": "play",
+        "timestamp": 1766951773039,
+        "playerName": "Huber",
+        "trickIndex": 1,
+        "playerIndex": 3
+      },
+      {
+        "card": {
+          "id": "J-diamonds",
+          "rank": "J",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766951778633,
+        "playerName": "Mimi",
+        "trickIndex": 1,
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "Q-hearts",
+          "rank": "Q",
+          "suit": "hearts"
+        },
+        "type": "play",
+        "timestamp": 1766951779847,
+        "playerName": "Fizz",
+        "trickIndex": 1,
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "9-spades",
+          "rank": "9",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766951781067,
+        "playerName": "Buff",
+        "trickIndex": 1,
+        "playerIndex": 2
+      },
+      {
+        "card": {
+          "id": "A-spades",
+          "rank": "A",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766951785337,
+        "playerName": "Mimi",
+        "trickIndex": 2,
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "9-diamonds",
+          "rank": "9",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766951786548,
+        "playerName": "Fizz",
+        "trickIndex": 2,
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "10-clubs",
+          "rank": "10",
+          "suit": "clubs"
+        },
+        "type": "play",
+        "timestamp": 1766951787768,
+        "playerName": "Buff",
+        "trickIndex": 2,
+        "playerIndex": 2
+      },
+      {
+        "card": {
+          "id": "J-spades",
+          "rank": "J",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766951788990,
+        "playerName": "Huber",
+        "trickIndex": 2,
+        "playerIndex": 3
+      },
+      {
+        "card": {
+          "id": "10-spades",
+          "rank": "10",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766951793342,
+        "playerName": "Mimi",
+        "trickIndex": 3,
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "J-clubs",
+          "rank": "J",
+          "suit": "clubs"
+        },
+        "type": "play",
+        "timestamp": 1766951794549,
+        "playerName": "Fizz",
+        "trickIndex": 3,
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "K-clubs",
+          "rank": "K",
+          "suit": "clubs"
+        },
+        "type": "play",
+        "timestamp": 1766951795768,
+        "playerName": "Buff",
+        "trickIndex": 3,
+        "playerIndex": 2
+      },
+      {
+        "card": {
+          "id": "9-clubs",
+          "rank": "9",
+          "suit": "clubs"
+        },
+        "type": "play",
+        "timestamp": 1766951796987,
+        "playerName": "Huber",
+        "trickIndex": 3,
+        "playerIndex": 3
+      },
+      {
+        "card": {
+          "id": "Q-diamonds",
+          "rank": "Q",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766951801731,
+        "playerName": "Mimi",
+        "trickIndex": 4,
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "K-diamonds",
+          "rank": "K",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766951802941,
+        "playerName": "Fizz",
+        "trickIndex": 4,
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "A-clubs",
+          "rank": "A",
+          "suit": "clubs"
+        },
+        "type": "play",
+        "timestamp": 1766951804159,
+        "playerName": "Buff",
+        "trickIndex": 4,
+        "playerIndex": 2
+      },
+      {
+        "card": {
+          "id": "10-diamonds",
+          "rank": "10",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766951805393,
+        "playerName": "Huber",
+        "trickIndex": 4,
+        "playerIndex": 3
+      },
+      {
+        "type": "hand_result",
+        "result": {
+          "trump": "hearts",
+          "isLoner": false,
+          "timestamp": 1766951810436,
+          "tricksWon": {
+            "player-0": 3,
+            "player-1": 1,
+            "player-2": 0,
+            "player-3": 1
+          },
+          "dealerIndex": 2,
+          "winningTeam": 1,
+          "pointsScored": {
+            "team1": 2,
+            "team2": 0
+          },
+          "trumpCallerIndex": 3
+        },
+        "timestamp": 1766951810436
+      },
+      {
+        "type": "dealer",
+        "timestamp": 1766951812444,
+        "dealerName": "Huber",
+        "dealerIndex": 3
+      },
+      {
+        "type": "pass",
+        "round": 1,
+        "timestamp": 1766951848363,
+        "playerName": "Mimi",
+        "playerIndex": 0
+      },
+      {
+        "type": "pass",
+        "round": 1,
+        "timestamp": 1766951849572,
+        "playerName": "Fizz",
+        "playerIndex": 1
+      },
+      {
+        "type": "pass",
+        "round": 1,
+        "timestamp": 1766951850791,
+        "playerName": "Buff",
+        "playerIndex": 2
+      },
+      {
+        "type": "pass",
+        "round": 1,
+        "timestamp": 1766951852010,
+        "playerName": "Huber",
+        "playerIndex": 3
+      },
+      {
+        "type": "pass",
+        "round": 2,
+        "timestamp": 1766951873228,
+        "playerName": "Mimi",
+        "playerIndex": 0
+      },
+      {
+        "suit": "clubs",
+        "type": "bid",
+        "round": 2,
+        "isLoner": false,
+        "timestamp": 1766951874439,
+        "playerName": "Fizz",
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "A-hearts",
+          "rank": "A",
+          "suit": "hearts"
+        },
+        "type": "play",
+        "timestamp": 1766951882390,
+        "playerName": "Mimi",
+        "trickIndex": 0,
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "9-hearts",
+          "rank": "9",
+          "suit": "hearts"
+        },
+        "type": "play",
+        "timestamp": 1766951883600,
+        "playerName": "Fizz",
+        "trickIndex": 0,
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "10-hearts",
+          "rank": "10",
+          "suit": "hearts"
+        },
+        "type": "play",
+        "timestamp": 1766951884821,
+        "playerName": "Buff",
+        "trickIndex": 0,
+        "playerIndex": 2
+      },
+      {
+        "card": {
+          "id": "Q-hearts",
+          "rank": "Q",
+          "suit": "hearts"
+        },
+        "type": "play",
+        "timestamp": 1766951886043,
+        "playerName": "Huber",
+        "trickIndex": 0,
+        "playerIndex": 3
+      },
+      {
+        "card": {
+          "id": "A-spades",
+          "rank": "A",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766951889835,
+        "playerName": "Mimi",
+        "trickIndex": 1,
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "Q-clubs",
+          "rank": "Q",
+          "suit": "clubs"
+        },
+        "type": "play",
+        "timestamp": 1766951891046,
+        "playerName": "Fizz",
+        "trickIndex": 1,
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "9-spades",
+          "rank": "9",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766951892266,
+        "playerName": "Buff",
+        "trickIndex": 1,
+        "playerIndex": 2
+      },
+      {
+        "card": {
+          "id": "K-hearts",
+          "rank": "K",
+          "suit": "hearts"
+        },
+        "type": "play",
+        "timestamp": 1766951893499,
+        "playerName": "Huber",
+        "trickIndex": 1,
+        "playerIndex": 3
+      },
+      {
+        "card": {
+          "id": "A-diamonds",
+          "rank": "A",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766951897747,
+        "playerName": "Fizz",
+        "trickIndex": 2,
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "9-clubs",
+          "rank": "9",
+          "suit": "clubs"
+        },
+        "type": "play",
+        "timestamp": 1766951898965,
+        "playerName": "Buff",
+        "trickIndex": 2,
+        "playerIndex": 2
+      },
+      {
+        "card": {
+          "id": "10-clubs",
+          "rank": "10",
+          "suit": "clubs"
+        },
+        "type": "play",
+        "timestamp": 1766951900187,
+        "playerName": "Huber",
+        "trickIndex": 2,
+        "playerIndex": 3
+      },
+      {
+        "card": {
+          "id": "10-diamonds",
+          "rank": "10",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766951901322,
+        "playerName": "Mimi",
+        "trickIndex": 2,
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "J-clubs",
+          "rank": "J",
+          "suit": "clubs"
+        },
+        "type": "play",
+        "timestamp": 1766951905556,
+        "playerName": "Huber",
+        "trickIndex": 3,
+        "playerIndex": 3
+      },
+      {
+        "card": {
+          "id": "Q-spades",
+          "rank": "Q",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766951907587,
+        "playerName": "Mimi",
+        "trickIndex": 3,
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "J-spades",
+          "rank": "J",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766951908798,
+        "playerName": "Fizz",
+        "trickIndex": 3,
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "10-spades",
+          "rank": "10",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766951910019,
+        "playerName": "Buff",
+        "trickIndex": 3,
+        "playerIndex": 2
+      },
+      {
+        "card": {
+          "id": "A-clubs",
+          "rank": "A",
+          "suit": "clubs"
+        },
+        "type": "play",
+        "timestamp": 1766951914277,
+        "playerName": "Huber",
+        "trickIndex": 4,
+        "playerIndex": 3
+      },
+      {
+        "card": {
+          "id": "K-diamonds",
+          "rank": "K",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766951915524,
+        "playerName": "Mimi",
+        "trickIndex": 4,
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "Q-diamonds",
+          "rank": "Q",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766951916737,
+        "playerName": "Fizz",
+        "trickIndex": 4,
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "J-hearts",
+          "rank": "J",
+          "suit": "hearts"
+        },
+        "type": "play",
+        "timestamp": 1766951917956,
+        "playerName": "Buff",
+        "trickIndex": 4,
+        "playerIndex": 2
+      },
+      {
+        "type": "hand_result",
+        "result": {
+          "trump": "clubs",
+          "isLoner": false,
+          "timestamp": 1766951923016,
+          "tricksWon": {
+            "player-0": 1,
+            "player-1": 1,
+            "player-2": 0,
+            "player-3": 3
+          },
+          "dealerIndex": 3,
+          "winningTeam": 2,
+          "pointsScored": {
+            "team1": 0,
+            "team2": 1
+          },
+          "trumpCallerIndex": 1
+        },
+        "timestamp": 1766951923016
+      },
+      {
+        "type": "dealer",
+        "timestamp": 1766951923129,
+        "dealerName": "Mimi",
+        "dealerIndex": 0
+      },
+      {
+        "type": "pass",
+        "round": 1,
+        "timestamp": 1766951924348,
+        "playerName": "Fizz",
+        "playerIndex": 1
+      },
+      {
+        "type": "pass",
+        "round": 1,
+        "timestamp": 1766951925568,
+        "playerName": "Buff",
+        "playerIndex": 2
+      },
+      {
+        "type": "pass",
+        "round": 1,
+        "timestamp": 1766951926786,
+        "playerName": "Huber",
+        "playerIndex": 3
+      },
+      {
+        "suit": "diamonds",
+        "type": "bid",
+        "round": 1,
+        "isLoner": false,
+        "timestamp": 1766951934405,
+        "playerName": "Mimi",
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "A-clubs",
+          "rank": "A",
+          "suit": "clubs"
+        },
+        "type": "play",
+        "timestamp": 1766952136324,
+        "playerName": "Fizz",
+        "trickIndex": 0,
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "10-clubs",
+          "rank": "10",
+          "suit": "clubs"
+        },
+        "type": "play",
+        "timestamp": 1766952137567,
+        "playerName": "Buff",
+        "trickIndex": 0,
+        "playerIndex": 2
+      },
+      {
+        "card": {
+          "id": "9-clubs",
+          "rank": "9",
+          "suit": "clubs"
+        },
+        "type": "play",
+        "timestamp": 1766952138793,
+        "playerName": "Huber",
+        "trickIndex": 0,
+        "playerIndex": 3
+      },
+      {
+        "card": {
+          "id": "Q-diamonds",
+          "rank": "Q",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766952144715,
+        "playerName": "Mimi",
+        "trickIndex": 0,
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "J-diamonds",
+          "rank": "J",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766952151802,
+        "playerName": "Mimi",
+        "trickIndex": 1,
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "J-hearts",
+          "rank": "J",
+          "suit": "hearts"
+        },
+        "type": "play",
+        "timestamp": 1766952153017,
+        "playerName": "Fizz",
+        "trickIndex": 1,
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "9-diamonds",
+          "rank": "9",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766952154242,
+        "playerName": "Buff",
+        "trickIndex": 1,
+        "playerIndex": 2
+      },
+      {
+        "card": {
+          "id": "K-diamonds",
+          "rank": "K",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766952155468,
+        "playerName": "Huber",
+        "trickIndex": 1,
+        "playerIndex": 3
+      },
+      {
+        "card": {
+          "id": "A-diamonds",
+          "rank": "A",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766952160959,
+        "playerName": "Mimi",
+        "trickIndex": 2,
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "10-spades",
+          "rank": "10",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766952162179,
+        "playerName": "Fizz",
+        "trickIndex": 2,
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "10-diamonds",
+          "rank": "10",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766952163406,
+        "playerName": "Buff",
+        "trickIndex": 2,
+        "playerIndex": 2
+      },
+      {
+        "card": {
+          "id": "9-spades",
+          "rank": "9",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766952164636,
+        "playerName": "Huber",
+        "trickIndex": 2,
+        "playerIndex": 3
+      },
+      {
+        "card": {
+          "id": "A-hearts",
+          "rank": "A",
+          "suit": "hearts"
+        },
+        "type": "play",
+        "timestamp": 1766952171077,
+        "playerName": "Mimi",
+        "trickIndex": 3,
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "Q-spades",
+          "rank": "Q",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766952172288,
+        "playerName": "Fizz",
+        "trickIndex": 3,
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "9-hearts",
+          "rank": "9",
+          "suit": "hearts"
+        },
+        "type": "play",
+        "timestamp": 1766952173511,
+        "playerName": "Buff",
+        "trickIndex": 3,
+        "playerIndex": 2
+      },
+      {
+        "card": {
+          "id": "Q-hearts",
+          "rank": "Q",
+          "suit": "hearts"
+        },
+        "type": "play",
+        "timestamp": 1766952174735,
+        "playerName": "Huber",
+        "trickIndex": 3,
+        "playerIndex": 3
+      },
+      {
+        "card": {
+          "id": "K-hearts",
+          "rank": "K",
+          "suit": "hearts"
+        },
+        "type": "play",
+        "timestamp": 1766952177875,
+        "playerName": "Mimi",
+        "trickIndex": 4,
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "A-spades",
+          "rank": "A",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766952179085,
+        "playerName": "Fizz",
+        "trickIndex": 4,
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "K-clubs",
+          "rank": "K",
+          "suit": "clubs"
+        },
+        "type": "play",
+        "timestamp": 1766952180307,
+        "playerName": "Buff",
+        "trickIndex": 4,
+        "playerIndex": 2
+      },
+      {
+        "card": {
+          "id": "J-spades",
+          "rank": "J",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766952181542,
+        "playerName": "Huber",
+        "trickIndex": 4,
+        "playerIndex": 3
+      },
+      {
+        "type": "hand_result",
+        "result": {
+          "trump": "diamonds",
+          "isLoner": false,
+          "timestamp": 1766952186592,
+          "tricksWon": {
+            "player-0": 5,
+            "player-1": 0,
+            "player-2": 0,
+            "player-3": 0
+          },
+          "dealerIndex": 0,
+          "winningTeam": 1,
+          "pointsScored": {
+            "team1": 2,
+            "team2": 0
+          },
+          "trumpCallerIndex": 0
+        },
+        "timestamp": 1766952186592
+      },
+      {
+        "type": "dealer",
+        "timestamp": 1766952188610,
+        "dealerName": "Fizz",
+        "dealerIndex": 1
+      },
+      {
+        "type": "pass",
+        "round": 1,
+        "timestamp": 1766952189838,
+        "playerName": "Buff",
+        "playerIndex": 2
+      },
+      {
+        "type": "pass",
+        "round": 1,
+        "timestamp": 1766952191060,
+        "playerName": "Huber",
+        "playerIndex": 3
+      },
+      {
+        "type": "pass",
+        "round": 1,
+        "timestamp": 1766952206371,
+        "playerName": "Mimi",
+        "playerIndex": 0
+      },
+      {
+        "type": "pass",
+        "round": 1,
+        "timestamp": 1766952207586,
+        "playerName": "Fizz",
+        "playerIndex": 1
+      },
+      {
+        "suit": "hearts",
+        "type": "bid",
+        "round": 2,
+        "isLoner": false,
+        "timestamp": 1766952208808,
+        "playerName": "Buff",
+        "playerIndex": 2
+      }
+    ],
+    "stepMode": false,
+    "tableCode": "188-540",
+    "tableName": "The Emerald Dealer",
+    "teamNames": {
+      "team1": "Buff & Mimi",
+      "team2": "Fizz & Huber"
+    },
+    "tricksWon": {
+      "player-0": 0,
+      "player-1": 0,
+      "player-2": 0,
+      "player-3": 0
+    },
+    "lastActive": 1766952221525,
+    "currentUser": "Mimi",
+    "dealerIndex": 1,
+    "handsPlayed": 3,
+    "biddingRound": 2,
+    "currentTrick": [],
+    "trumpCallLogs": [
+      {
+        "dealer": "Opponent - Buff",
+        "gameId": "188-540",
+        "userType": "Bot",
+        "suitCount": 2,
+        "timestamp": 1766951700458,
+        "whoCalled": "Huber",
+        "bowerCount": 1,
+        "suitCalled": "Hearts",
+        "trumpCount": 2,
+        "cardPickedUp": "n/a",
+        "handAfterDiscard": "9C, JH, 9H, JS, 10D"
+      },
+      {
+        "dealer": "Teammate - Huber",
+        "gameId": "188-540",
+        "userType": "Bot",
+        "suitCount": 1,
+        "timestamp": 1766951874439,
+        "whoCalled": "Fizz",
+        "bowerCount": 1,
+        "suitCalled": "Clubs",
+        "trumpCount": 2,
+        "cardPickedUp": "n/a",
+        "handAfterDiscard": "QC, AD, 9H, QD, JS"
+      },
+      {
+        "dealer": "Self - Mimi",
+        "gameId": "188-540",
+        "userType": "Human",
+        "suitCount": 2,
+        "timestamp": 1766951934405,
+        "whoCalled": "Mimi",
+        "bowerCount": 1,
+        "suitCalled": "Diamonds",
+        "trumpCount": 2,
+        "cardPickedUp": "AD",
+        "handAfterDiscard": "KS, AH, KH, QD, JD"
+      },
+      {
+        "dealer": "Opponent - Fizz",
+        "gameId": "188-540",
+        "userType": "Bot",
+        "suitCount": 4,
+        "timestamp": 1766952208809,
+        "whoCalled": "Buff",
+        "bowerCount": 1,
+        "suitCalled": "Hearts",
+        "trumpCount": 4,
+        "cardPickedUp": "n/a",
+        "handAfterDiscard": "AH, JS, JH, KH, QH"
+      }
+    ],
+    "overlayMessage": null,
+    "trumpCallerIndex": 2,
+    "currentPlayerIndex": 2,
+    "overlayAcknowledged": {
+      "Buff": true,
+      "Fizz": true,
+      "Mimi": true,
+      "Huber": true
+    },
+    "currentViewPlayerName": "Mimi"
+  }
+}
