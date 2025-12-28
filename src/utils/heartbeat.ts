@@ -2,6 +2,7 @@
 // Runs every 10 seconds to ensure game is progressing
 
 import Logger from './logger';
+import { logFreezeIncident, getAppVersion } from './cloudFreezeLogger';
 
 export interface HeartbeatState {
     phase: string;
@@ -184,4 +185,39 @@ export function createHeartbeatSnapshot(gameState: any): HeartbeatState {
         overlayMessage: gameState.overlayMessage,
         currentTrick: gameState.currentTrick || []
     };
+}
+
+/**
+ * Log freeze to cloud for monitoring
+ */
+export async function logFreezeToCloud(
+    gameState: any,
+    recoveryAction: RecoveryAction | null,
+    recovered: boolean
+): Promise<void> {
+    const currentPlayer = gameState.players?.[gameState.currentPlayerIndex];
+    const timeSinceActive = Date.now() - (gameState.lastActive || Date.now());
+
+    const freezeType = recoveryAction?.type || 'UNKNOWN';
+
+    await logFreezeIncident({
+        game_code: gameState.tableCode || 'unknown',
+        table_id: gameState.tableId,
+        freeze_type: freezeType,
+        phase: gameState.phase,
+        current_player_index: gameState.currentPlayerIndex,
+        current_player_name: currentPlayer?.name,
+        is_bot: currentPlayer?.isComputer || false,
+        time_since_active_ms: timeSinceActive,
+        recovery_action: recoveryAction?.reason,
+        recovered,
+        app_version: getAppVersion(),
+        diagnostic_data: {
+            isLoner: gameState.isLoner,
+            trumpCallerIndex: gameState.trumpCallerIndex,
+            overlayMessage: gameState.overlayMessage,
+            currentTrickSize: gameState.currentTrick?.length || 0,
+            scores: gameState.scores
+        }
+    });
 }

@@ -5,7 +5,7 @@ import { createDeck, dealHands, shuffleDeck } from '../utils/deck';
 import { getBestBid, getEffectiveSuit, determineWinner, shouldCallTrump, getBotMove, sortHand } from '../utils/rules';
 import { createTrumpCallLog } from '../utils/trumpCallLogger';
 import { debugGameState, suggestFix } from '../utils/freezeDebugger';
-import { createHeartbeatSnapshot, detectFreeze, applyRecovery } from '../utils/heartbeat';
+import { createHeartbeatSnapshot, detectFreeze, applyRecovery, logFreezeToCloud } from '../utils/heartbeat';
 import Logger from '../utils/logger';
 
 // --- Actions ---
@@ -1405,6 +1405,11 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 Logger.error('[HEARTBEAT] 🚨 FREEZE DETECTED - Auto-recovering', {
                     phase: state.phase,
                     reason: recoveryAction.reason
+                });
+
+                // Log freeze to cloud before attempting recovery
+                logFreezeToCloud(state, recoveryAction, true).catch(err => {
+                    Logger.warn('[HEARTBEAT] Failed to log freeze to cloud', err);
                 });
 
                 applyRecovery(recoveryAction, broadcastDispatch);
