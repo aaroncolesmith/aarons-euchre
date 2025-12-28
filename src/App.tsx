@@ -408,55 +408,151 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                             </div>
                         </div>
                     ) : tab === 'league' ? (
-                        <div className="bg-slate-800/30 border border-slate-800 rounded-[2rem] overflow-hidden">
-                            <table className="w-full text-left">
-                                <thead>
-                                    <tr className="bg-slate-800/50 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">
-                                        <th className="px-6 py-4">Player</th>
-                                        <th className="px-6 py-4">GP</th>
-                                        <th className="px-6 py-4">Game Win %</th>
-                                        <th className="px-6 py-4">Hand Win %</th>
-                                        <th className="px-6 py-4">Tricks Taken</th>
-                                        <th className="px-6 py-4">Tricks %</th>
-                                        <th className="px-6 py-4 text-right">Euchres Made</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-slate-800">
-                                    {leaguePlayers.map((p: any, i: number) => {
-                                        // Calculate tricks %: tricks taken / (hands played * 5)
-                                        const totalPossibleTricks = p.handsPlayed * 5;
-                                        const tricksPercent = totalPossibleTricks > 0
-                                            ? Math.round((p.tricksTaken / totalPossibleTricks) * 100)
-                                            : 0;
+                        <div>
+                            {(() => {
+                                const [sortColumn, setSortColumn] = useState<string>('winPct');
+                                const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
-                                        return (
-                                            <tr key={i} className={`group hover:bg-slate-800/50 transition-colors ${p.name === human.name ? 'bg-emerald-500/5' : ''}`}>
-                                                <td className="px-6 py-4 font-black text-white flex items-center gap-3">
-                                                    <span className="text-slate-600 text-[10px] tabular-nums">{i + 1}</span>
-                                                    {p.name}
-                                                    {p.name === human.name && <span className="bg-emerald-500 text-[8px] px-2 py-0.5 rounded-full">YOU</span>}
-                                                </td>
-                                                <td className="px-6 py-4 text-slate-400 font-bold tabular-nums">{p.gamesPlayed}</td>
-                                                <td className="px-6 py-4 text-emerald-400 font-black tabular-nums">
-                                                    {p.gamesPlayed > 0 ? Math.round((p.gamesWon / p.gamesPlayed) * 100) : 0}%
-                                                </td>
-                                                <td className="px-6 py-4 text-cyan-400 font-black tabular-nums">
-                                                    {p.handsPlayed > 0 ? Math.round((p.handsWon / p.handsPlayed) * 100) : 0}%
-                                                </td>
-                                                <td className="px-6 py-4 text-purple-400 font-black tabular-nums">
-                                                    {p.tricksTaken}
-                                                </td>
-                                                <td className="px-6 py-4 text-purple-300 font-black tabular-nums">
-                                                    {tricksPercent}%
-                                                </td>
-                                                <td className="px-6 py-4 text-right font-black text-red-400 tabular-nums">
-                                                    {p.euchresMade}
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
+                                const handleSort = (column: string) => {
+                                    if (sortColumn === column) {
+                                        setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+                                    } else {
+                                        setSortColumn(column);
+                                        setSortDirection('desc');
+                                    }
+                                };
+
+                                const sortedPlayers = [...leaguePlayers].sort((a: any, b: any) => {
+                                    let aVal, bVal;
+
+                                    switch (sortColumn) {
+                                        case 'name':
+                                            aVal = a.name;
+                                            bVal = b.name;
+                                            break;
+                                        case 'gp':
+                                            aVal = a.gamesPlayed;
+                                            bVal = b.gamesPlayed;
+                                            break;
+                                        case 'wins':
+                                            aVal = a.gamesWon;
+                                            bVal = b.gamesWon;
+                                            break;
+                                        case 'losses':
+                                            aVal = a.gamesPlayed - a.gamesWon;
+                                            bVal = b.gamesPlayed - b.gamesWon;
+                                            break;
+                                        case 'winPct':
+                                            aVal = a.gamesPlayed > 0 ? (a.gamesWon / a.gamesPlayed) : 0;
+                                            bVal = b.gamesPlayed > 0 ? (b.gamesWon / b.gamesPlayed) : 0;
+                                            break;
+                                        case 'handWinPct':
+                                            aVal = a.handsPlayed > 0 ? (a.handsWon / a.handsPlayed) : 0;
+                                            bVal = b.handsPlayed > 0 ? (b.handsWon / b.handsPlayed) : 0;
+                                            break;
+                                        case 'tricksTaken':
+                                            aVal = a.tricksTaken;
+                                            bVal = b.tricksTaken;
+                                            break;
+                                        case 'tricksPct':
+                                            const aTotalTricks = a.handsPlayed * 5;
+                                            const bTotalTricks = b.handsPlayed * 5;
+                                            aVal = aTotalTricks > 0 ? (a.tricksTaken / aTotalTricks) : 0;
+                                            bVal = bTotalTricks > 0 ? (b.tricksTaken / bTotalTricks) : 0;
+                                            break;
+                                        case 'euchres':
+                                            aVal = a.euchresMade;
+                                            bVal = b.euchresMade;
+                                            break;
+                                        case 'lonersWon':
+                                            aVal = a.lonersConverted;
+                                            bVal = b.lonersConverted;
+                                            break;
+                                        case 'lonersCalled':
+                                            aVal = a.lonersAttempted;
+                                            bVal = b.lonersAttempted;
+                                            break;
+                                        default:
+                                            aVal = 0;
+                                            bVal = 0;
+                                    }
+
+                                    if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
+                                    if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
+                                    return 0;
+                                });
+
+                                const SortableHeader = ({ column, children }: { column: string; children: React.ReactNode }) => (
+                                    <th
+                                        className="px-4 py-4 cursor-pointer hover:bg-slate-700/30 transition-colors"
+                                        onClick={() => handleSort(column)}
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            {children}
+                                            {sortColumn === column && (
+                                                <span className="text-emerald-400">
+                                                    {sortDirection === 'asc' ? '↑' : '↓'}
+                                                </span>
+                                            )}
+                                        </div>
+                                    </th>
+                                );
+
+                                return (
+                                    <div className="bg-slate-800/30 border border-slate-800 rounded-[2rem] overflow-hidden">
+                                        <div className="overflow-x-auto">
+                                            <table className="w-full text-left text-sm">
+                                                <thead>
+                                                    <tr className="bg-slate-800/50 text-[9px] font-black text-slate-500 uppercase tracking-[0.15em]">
+                                                        <SortableHeader column="name">Player</SortableHeader>
+                                                        <SortableHeader column="gp">GP</SortableHeader>
+                                                        <SortableHeader column="wins">Wins</SortableHeader>
+                                                        <SortableHeader column="losses">Losses</SortableHeader>
+                                                        <SortableHeader column="winPct">Win %</SortableHeader>
+                                                        <SortableHeader column="handWinPct">Hand Win %</SortableHeader>
+                                                        <SortableHeader column="tricksTaken">Tricks Taken</SortableHeader>
+                                                        <SortableHeader column="tricksPct">Tricks %</SortableHeader>
+                                                        <SortableHeader column="euchres">Euchres Made</SortableHeader>
+                                                        <SortableHeader column="lonersWon">Loners Won</SortableHeader>
+                                                        <SortableHeader column="lonersCalled">Loners Called</SortableHeader>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y divide-slate-800">
+                                                    {sortedPlayers.map((p: any, i: number) => {
+                                                        const totalPossibleTricks = p.handsPlayed * 5;
+                                                        const tricksPercent = totalPossibleTricks > 0
+                                                            ? Math.round((p.tricksTaken / totalPossibleTricks) * 100)
+                                                            : 0;
+
+                                                        return (
+                                                            <tr key={i} className={`group hover:bg-slate-800/50 transition-colors ${p.name === human.name ? 'bg-emerald-500/5' : ''}`}>
+                                                                <td className="px-4 py-3 font-bold text-white whitespace-nowrap">
+                                                                    {p.name}
+                                                                    {p.name === human.name && <span className="ml-2 bg-emerald-500 text-[8px] px-2 py-0.5 rounded-full">YOU</span>}
+                                                                </td>
+                                                                <td className="px-4 py-3 text-slate-400 font-bold tabular-nums">{p.gamesPlayed}</td>
+                                                                <td className="px-4 py-3 text-emerald-400 font-bold tabular-nums">{p.gamesWon}</td>
+                                                                <td className="px-4 py-3 text-red-400 font-bold tabular-nums">{p.gamesPlayed - p.gamesWon}</td>
+                                                                <td className="px-4 py-3 text-emerald-400 font-black tabular-nums">
+                                                                    {p.gamesPlayed > 0 ? Math.round((p.gamesWon / p.gamesPlayed) * 100) : 0}%
+                                                                </td>
+                                                                <td className="px-4 py-3 text-cyan-400 font-black tabular-nums">
+                                                                    {p.handsPlayed > 0 ? Math.round((p.handsWon / p.handsPlayed) * 100) : 0}%
+                                                                </td>
+                                                                <td className="px-4 py-3 text-purple-400 font-bold tabular-nums">{p.tricksTaken}</td>
+                                                                <td className="px-4 py-3 text-purple-300 font-bold tabular-nums">{tricksPercent}%</td>
+                                                                <td className="px-4 py-3 text-red-400 font-bold tabular-nums">{p.euchresMade}</td>
+                                                                <td className="px-4 py-3 text-yellow-400 font-bold tabular-nums">{p.lonersConverted}</td>
+                                                                <td className="px-4 py-3 text-orange-400 font-bold tabular-nums">{p.lonersAttempted}</td>
+                                                            </tr>
+                                                        );
+                                                    })}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                );
+                            })()}
                         </div>
                     ) : tab === 'trumps' ? (
                         <div className="space-y-6">
@@ -1005,7 +1101,7 @@ const LandingPage = () => {
                     Logout from {state.currentUser}
                 </button>
                 <div className="text-[10px] font-black text-slate-800 uppercase tracking-[0.3em]">
-                    Euchre Engine V0.49
+                    Euchre Engine V0.50
                 </div>
             </div>
 
