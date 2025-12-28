@@ -1193,10 +1193,11 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 const nextDealer = state.players[state.dealerIndex];
 
                 // The new dealer is responsible for generating the cards
-                // If dealer is a bot, the Host (Player 0) takes responsibility
+                // If dealer is a bot, ANY human player can take responsibility
+                // This prevents freeze when bot is dealer and no one deals
                 const isMyResponsibility =
                     (nextDealer.name === state.currentUser) ||
-                    (nextDealer.isComputer && state.players[0].name === state.currentUser);
+                    (nextDealer.isComputer && state.currentUser); // Any logged-in user can deal for bots
 
                 if (isMyResponsibility) {
                     const deck = shuffleDeck(createDeck());
