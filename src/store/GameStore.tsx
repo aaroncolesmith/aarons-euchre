@@ -17,6 +17,7 @@ type Action =
     | { type: 'LOAD_EXISTING_GAME'; payload: { gameState: GameState } }
     | { type: 'SIT_PLAYER'; payload: { seatIndex: number; name: string } }
     | { type: 'ADD_BOT'; payload: { seatIndex: number; botName: string } }
+    | { type: 'AUTOFILL_BOTS' }
     | { type: 'REMOVE_PLAYER'; payload: { seatIndex: number } }
     | { type: 'START_MATCH' }
     | { type: 'UPDATE_ANIMATION_DEALER'; payload: { index: number } }
@@ -369,6 +370,30 @@ const gameReducer = (state: GameState, action: Action): GameState => {
                     isComputer: true,
                     stats: globalStats[botName] || getEmptyStats()
                 } : p)
+            };
+        }
+
+        case 'AUTOFILL_BOTS': {
+            const globalStats = getGlobalStats();
+            const usedBotNames = state.players.filter(p => p.isComputer && p.name).map(p => p.name);
+            const availableBots = BOT_NAMES_POOL.filter(name => !usedBotNames.includes(name));
+
+            let botIndex = 0;
+            return {
+                ...state,
+                players: state.players.map((p) => {
+                    // If seat is empty, fill with next available bot
+                    if (!p.name && botIndex < availableBots.length) {
+                        const botName = availableBots[botIndex++];
+                        return {
+                            ...p,
+                            name: botName,
+                            isComputer: true,
+                            stats: globalStats[botName] || getEmptyStats()
+                        };
+                    }
+                    return p;
+                })
             };
         }
 

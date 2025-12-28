@@ -999,7 +999,7 @@ const LandingPage = () => {
                     Logout from {state.currentUser}
                 </button>
                 <div className="text-[10px] font-black text-slate-800 uppercase tracking-[0.3em]">
-                    Euchre Engine V0.45
+                    Euchre Engine V0.46
                 </div>
             </div>
 
@@ -1192,16 +1192,10 @@ const GameView = () => {
 
                         <div className="flex flex-col gap-4">
                             <button
-                                onClick={() => dispatch({ type: 'START_MATCH' })}
+                                onClick={() => dispatch({ type: 'EXIT_TO_LANDING' })}
                                 className="w-full bg-emerald-500 hover:bg-emerald-400 text-white font-black py-6 rounded-2xl text-xl shadow-[0_0_30px_rgba(16,185,129,0.3)] transition-all active:scale-95"
                             >
-                                PLAY AGAIN
-                            </button>
-                            <button
-                                onClick={() => dispatch({ type: 'EXIT_TO_LANDING' })}
-                                className="w-full bg-slate-700 hover:bg-slate-600 text-white font-black py-4 rounded-2xl shadow-xl transition-all active:scale-95"
-                            >
-                                RETURN TO LANDING
+                                GO HOME
                             </button>
                         </div>
                     </div>
@@ -1310,7 +1304,23 @@ const GameView = () => {
 
                             {state.phase === 'lobby' ? (
                                 <button
-                                    onClick={() => dispatch({ type: 'START_MATCH' })}
+                                    onClick={() => {
+                                        // Check if there are empty seats
+                                        const emptySeats = state.players.filter(p => !p.name).length;
+
+                                        if (emptySeats > 0) {
+                                            // Prompt user to auto-fill
+                                            if (confirm(`There ${emptySeats === 1 ? 'is 1 empty seat' : `are ${emptySeats} empty seats`}. Would you like to auto-fill with bots?`)) {
+                                                // Auto-fill empty seats with bots
+                                                dispatch({ type: 'AUTOFILL_BOTS' });
+                                                // Then start the match
+                                                setTimeout(() => dispatch({ type: 'START_MATCH' }), 100);
+                                            }
+                                        } else {
+                                            // All seats filled, start immediately
+                                            dispatch({ type: 'START_MATCH' });
+                                        }
+                                    }}
                                     className="bg-emerald-600 hover:bg-emerald-500 text-white font-black py-1 px-4 md:py-2 md:px-10 rounded-lg md:rounded-xl transition transform active:scale-95 text-[10px] md:text-sm shadow-lg shadow-emerald-500/20 animate-pulse"
                                 >
                                     START
