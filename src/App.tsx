@@ -6,6 +6,7 @@ import { Card } from './types/game';
 import { supabase } from './lib/supabase';
 import { fetchUserCloudGames, mergeLocalAndCloudGames } from './utils/cloudGames';
 import { getFreezeStats, getFreezeRate } from './utils/cloudFreezeLogger';
+import { getAllPlayerStats } from './utils/supabaseStats';
 
 const getCardJitter = (id: string) => {
     let hash = 0;
@@ -238,8 +239,35 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
         }
     }, [isOpen, initialTab]);
 
-    // Load global stats from localStorage
-    const globalStats = JSON.parse(localStorage.getItem('euchre_global_profiles') || '{}');
+    // Load global stats from Supabase (primary) with localStorage fallback
+    const [globalStats, setGlobalStats] = useState<Record<string, any>>({});
+
+    useEffect(() => {
+        const loadStats = async () => {
+            try {
+                // Try Supabase first
+                const supabaseStats = await getAllPlayerStats();
+
+                if (Object.keys(supabaseStats).length > 0) {
+                    console.log('[STATS] Loaded from Supabase:', Object.keys(supabaseStats).length, 'players');
+                    setGlobalStats(supabaseStats);
+                } else {
+                    // Fallback to localStorage
+                    const localStats = JSON.parse(localStorage.getItem('euchre_global_profiles') || '{}');
+                    console.log('[STATS] Using localStorage fallback:', Object.keys(localStats).length, 'players');
+                    setGlobalStats(localStats);
+                }
+            } catch (err) {
+                console.error('[STATS] Error loading from Supabase, using localStorage:', err);
+                const localStats = JSON.parse(localStorage.getItem('euchre_global_profiles') || '{}');
+                setGlobalStats(localStats);
+            }
+        };
+
+        if (isOpen) {
+            loadStats();
+        }
+    }, [isOpen]);
 
     // Load freeze statistics when admin tab is selected
     useEffect(() => {
@@ -1102,7 +1130,7 @@ const LandingPage = () => {
                     Logout from {state.currentUser}
                 </button>
                 <div className="text-[10px] font-black text-slate-800 uppercase tracking-[0.3em]">
-                    Euchre Engine V0.52
+                    Euchre Engine V0.53
                 </div>
             </div>
 

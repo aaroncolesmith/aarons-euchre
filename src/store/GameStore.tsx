@@ -6,6 +6,7 @@ import { getBestBid, getEffectiveSuit, determineWinner, shouldCallTrump, getBotM
 import { createTrumpCallLog } from '../utils/trumpCallLogger';
 import { debugGameState, suggestFix } from '../utils/freezeDebugger';
 import { createHeartbeatSnapshot, detectFreeze, applyRecovery, logFreezeToCloud } from '../utils/heartbeat';
+import { saveMultiplePlayerStats } from '../utils/supabaseStats';
 import Logger from '../utils/logger';
 
 // --- Actions ---
@@ -991,7 +992,12 @@ const gameReducer = (state: GameState, action: Action): GameState => {
                         swept: prevGlobal.swept + p.stats.swept,
                     };
                 });
-                saveGlobalStats(globalStats);
+
+                // Save to BOTH Supabase (primary) and localStorage (backup)
+                saveMultiplePlayerStats(globalStats).catch(err => {
+                    console.error('[GAME] Failed to save stats to Supabase:', err);
+                });
+                saveGlobalStats(globalStats); // Backup to localStorage
             }
 
             if (isGameOver && state.tableId) {
