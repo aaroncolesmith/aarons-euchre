@@ -1,0 +1,3470 @@
+{
+  "tableCode": "589-436",
+  "phase": "playing",
+  "currentPlayerIndex": 0,
+  "currentPlayerName": "Moses",
+  "isBot": true,
+  "overlayMessage": null,
+  "currentTrick": [
+    {
+      "card": {
+        "id": "10-hearts",
+        "rank": "10",
+        "suit": "hearts"
+      },
+      "playerId": "player-1",
+      "playerIndex": 1
+    },
+    {
+      "card": {
+        "id": "K-hearts",
+        "rank": "K",
+        "suit": "hearts"
+      },
+      "playerId": "player-2",
+      "playerIndex": 2
+    },
+    {
+      "card": {
+        "id": "9-clubs",
+        "rank": "9",
+        "suit": "clubs"
+      },
+      "playerId": "player-3",
+      "playerIndex": 3
+    }
+  ],
+  "trump": "clubs",
+  "lastActive": 1766932516734,
+  "timeSinceActive": 1,
+  "potentialIssues": [],
+  "fullState": {
+    "logs": [
+      "J-Bock won the trick.",
+      "J-Bock won the trick.",
+      "Wooden called clubs.",
+      "Moses is dealing. J-Bock to bid.",
+      "Hand finished. Next deal in 4 seconds...",
+      "J-Bock & Wooden EUCHRED Mimi & Moses! (+2)",
+      "Moses won the trick.",
+      "Wooden won the trick.",
+      "J-Bock won the trick.",
+      "Moses won the trick.",
+      "J-Bock won the trick.",
+      "Moses called clubs.",
+      "Everyone passed. Round 2 bidding starts.",
+      "Wooden is dealing. Moses to bid.",
+      "Hand finished. Next deal in 4 seconds...",
+      "Mimi & Moses won the hand 4 tricks to 1 (+1)",
+      "Mimi won the trick.",
+      "Moses won the trick.",
+      "Wooden won the trick.",
+      "Mimi won the trick.",
+      "Mimi won the trick.",
+      "Moses called spades.",
+      "Mimi is dealing. Wooden to bid.",
+      "Hand finished. Next deal in 4 seconds...",
+      "J-Bock & Wooden won the hand 3 tricks to 2 (+1)",
+      "J-Bock won the trick.",
+      "J-Bock won the trick.",
+      "J-Bock won the trick.",
+      "Moses won the trick.",
+      "Moses won the trick.",
+      "J-Bock called clubs.",
+      "J-Bock is dealing. Mimi to bid.",
+      "Hand finished. Next deal in 4 seconds...",
+      "J-Bock & Wooden won the hand 5 tricks to 0 (+2)",
+      "Wooden won the trick.",
+      "Wooden won the trick.",
+      "J-Bock won the trick.",
+      "J-Bock won the trick.",
+      "J-Bock won the trick.",
+      "J-Bock called spades.",
+      "Moses is dealing. J-Bock to bid.",
+      "Hand finished. Next deal in 4 seconds...",
+      "Mimi & Moses won the hand 5 tricks to 0 (+2)",
+      "Moses won the trick.",
+      "Moses won the trick.",
+      "Moses won the trick.",
+      "Moses won the trick.",
+      "Moses won the trick.",
+      "Moses called spades.",
+      "Everyone passed. Round 2 bidding starts.",
+      "Wooden is dealing. Moses to bid.",
+      "Hand finished. Next deal in 4 seconds...",
+      "J-Bock & Wooden won the hand 3 tricks to 2 (+1)",
+      "Moses won the trick.",
+      "Moses won the trick.",
+      "Wooden won the trick.",
+      "Wooden won the trick.",
+      "Wooden won the trick.",
+      "Wooden called spades.",
+      "Everyone passed. Round 2 bidding starts.",
+      "Mimi is dealing. Wooden to bid.",
+      "Hand finished. Next deal in 4 seconds...",
+      "Mimi & Moses won the hand 4 tricks to 1 (+1)",
+      "Mimi won the trick.",
+      "Moses won the trick.",
+      "Moses won the trick.",
+      "J-Bock won the trick.",
+      "Moses won the trick.",
+      "Moses called diamonds.",
+      "J-Bock is dealing. Mimi to bid.",
+      "Hand finished. Next deal in 4 seconds...",
+      "Mimi & Moses EUCHRED J-Bock & Wooden! (+2)",
+      "J-Bock won the trick.",
+      "Mimi won the trick.",
+      "Wooden won the trick.",
+      "Moses won the trick.",
+      "Moses won the trick.",
+      "Wooden called diamonds.",
+      "Moses is dealing. J-Bock to bid.",
+      "Hand finished. Next deal in 4 seconds...",
+      "Mimi & Moses won the hand 3 tricks to 2 (+1)",
+      "Moses won the trick.",
+      "Moses won the trick.",
+      "Moses won the trick.",
+      "J-Bock won the trick.",
+      "J-Bock won the trick.",
+      "Moses called diamonds.",
+      "Everyone passed. Round 2 bidding starts.",
+      "Wooden is dealing. Moses to bid.",
+      "Game starting... shuffling deck.",
+      "Table \"The Crimson Bower\" created. Share code 589-436 with friends.",
+      "Welcome to Euchre. Create or join a table to begin."
+    ],
+    "phase": "playing",
+    "trump": "clubs",
+    "scores": {
+      "team1": 7,
+      "team2": 6
+    },
+    "upcard": {
+      "id": "K-clubs",
+      "rank": "K",
+      "suit": "clubs"
+    },
+    "history": [
+      {
+        "trump": "clubs",
+        "isLoner": false,
+        "timestamp": 1766932400356,
+        "tricksWon": {
+          "player-0": 2,
+          "player-1": 2,
+          "player-2": 0,
+          "player-3": 1
+        },
+        "dealerIndex": 3,
+        "winningTeam": 2,
+        "pointsScored": {
+          "team1": 0,
+          "team2": 2
+        },
+        "trumpCallerIndex": 0
+      },
+      {
+        "trump": "spades",
+        "isLoner": false,
+        "timestamp": 1766932331631,
+        "tricksWon": {
+          "player-0": 1,
+          "player-1": 0,
+          "player-2": 3,
+          "player-3": 1
+        },
+        "dealerIndex": 2,
+        "winningTeam": 1,
+        "pointsScored": {
+          "team1": 1,
+          "team2": 0
+        },
+        "trumpCallerIndex": 0
+      },
+      {
+        "trump": "clubs",
+        "isLoner": false,
+        "timestamp": 1766932267518,
+        "tricksWon": {
+          "player-0": 2,
+          "player-1": 3,
+          "player-2": 0,
+          "player-3": 0
+        },
+        "dealerIndex": 1,
+        "winningTeam": 2,
+        "pointsScored": {
+          "team1": 0,
+          "team2": 1
+        },
+        "trumpCallerIndex": 1
+      },
+      {
+        "trump": "spades",
+        "isLoner": false,
+        "timestamp": 1766932149214,
+        "tricksWon": {
+          "player-0": 0,
+          "player-1": 3,
+          "player-2": 0,
+          "player-3": 2
+        },
+        "dealerIndex": 0,
+        "winningTeam": 2,
+        "pointsScored": {
+          "team1": 0,
+          "team2": 2
+        },
+        "trumpCallerIndex": 1
+      },
+      {
+        "trump": "spades",
+        "isLoner": false,
+        "timestamp": 1766931953753,
+        "tricksWon": {
+          "player-0": 5,
+          "player-1": 0,
+          "player-2": 0,
+          "player-3": 0
+        },
+        "dealerIndex": 3,
+        "winningTeam": 1,
+        "pointsScored": {
+          "team1": 2,
+          "team2": 0
+        },
+        "trumpCallerIndex": 0
+      },
+      {
+        "trump": "spades",
+        "isLoner": false,
+        "timestamp": 1766931830885,
+        "tricksWon": {
+          "player-0": 2,
+          "player-1": 0,
+          "player-2": 0,
+          "player-3": 3
+        },
+        "dealerIndex": 2,
+        "winningTeam": 2,
+        "pointsScored": {
+          "team1": 0,
+          "team2": 1
+        },
+        "trumpCallerIndex": 3
+      },
+      {
+        "trump": "diamonds",
+        "isLoner": false,
+        "timestamp": 1766931664968,
+        "tricksWon": {
+          "player-0": 3,
+          "player-1": 1,
+          "player-2": 1,
+          "player-3": 0
+        },
+        "dealerIndex": 1,
+        "winningTeam": 1,
+        "pointsScored": {
+          "team1": 1,
+          "team2": 0
+        },
+        "trumpCallerIndex": 0
+      },
+      {
+        "trump": "diamonds",
+        "isLoner": false,
+        "timestamp": 1766931593803,
+        "tricksWon": {
+          "player-0": 2,
+          "player-1": 1,
+          "player-2": 1,
+          "player-3": 1
+        },
+        "dealerIndex": 0,
+        "winningTeam": 1,
+        "pointsScored": {
+          "team1": 2,
+          "team2": 0
+        },
+        "trumpCallerIndex": 3
+      },
+      {
+        "trump": "diamonds",
+        "isLoner": false,
+        "timestamp": 1766931505821,
+        "tricksWon": {
+          "player-0": 3,
+          "player-1": 2,
+          "player-2": 0,
+          "player-3": 0
+        },
+        "dealerIndex": 3,
+        "winningTeam": 1,
+        "pointsScored": {
+          "team1": 1,
+          "team2": 0
+        },
+        "trumpCallerIndex": 0
+      }
+    ],
+    "isLoner": false,
+    "players": [
+      {
+        "id": "player-0",
+        "hand": [
+          {
+            "id": "A-clubs",
+            "rank": "A",
+            "suit": "clubs"
+          },
+          {
+            "id": "K-spades",
+            "rank": "K",
+            "suit": "spades"
+          },
+          {
+            "id": "K-clubs",
+            "rank": "K",
+            "suit": "clubs"
+          }
+        ],
+        "name": "Moses",
+        "stats": {
+          "swept": 2,
+          "sweeps": 3,
+          "euchred": 2,
+          "callsWon": 8,
+          "gamesWon": 1,
+          "handsWon": 20,
+          "callsMade": 9,
+          "euchresMade": 4,
+          "gamesPlayed": 1,
+          "handsPlayed": 32,
+          "tricksTaken": 41,
+          "tricksPlayed": 147,
+          "tricksWonTeam": 79,
+          "lonersAttempted": 0,
+          "lonersConverted": 0
+        },
+        "isComputer": true
+      },
+      {
+        "id": "player-1",
+        "hand": [
+          {
+            "id": "9-hearts",
+            "rank": "9",
+            "suit": "hearts"
+          },
+          {
+            "id": "9-diamonds",
+            "rank": "9",
+            "suit": "diamonds"
+          }
+        ],
+        "name": "J-Bock",
+        "stats": {
+          "swept": 6,
+          "sweeps": 2,
+          "euchred": 7,
+          "callsWon": 6,
+          "gamesWon": 1,
+          "handsWon": 20,
+          "callsMade": 12,
+          "euchresMade": 6,
+          "gamesPlayed": 1,
+          "handsPlayed": 54,
+          "tricksTaken": 54,
+          "tricksPlayed": 257,
+          "tricksWonTeam": 115,
+          "lonersAttempted": 0,
+          "lonersConverted": 0
+        },
+        "isComputer": true
+      },
+      {
+        "id": "player-2",
+        "hand": [
+          {
+            "id": "J-hearts",
+            "rank": "J",
+            "suit": "hearts"
+          },
+          {
+            "id": "Q-diamonds",
+            "rank": "Q",
+            "suit": "diamonds"
+          }
+        ],
+        "name": "Mimi",
+        "stats": {
+          "swept": 6,
+          "sweeps": 1,
+          "euchred": 4,
+          "callsWon": 5,
+          "gamesWon": 1,
+          "handsWon": 26,
+          "callsMade": 4,
+          "euchresMade": 7,
+          "gamesPlayed": 2,
+          "handsPlayed": 46,
+          "tricksTaken": 56,
+          "tricksPlayed": 222,
+          "tricksWonTeam": 106,
+          "lonersAttempted": 0,
+          "lonersConverted": 0
+        },
+        "isComputer": false
+      },
+      {
+        "id": "player-3",
+        "hand": [
+          {
+            "id": "J-clubs",
+            "rank": "J",
+            "suit": "clubs"
+          },
+          {
+            "id": "J-spades",
+            "rank": "J",
+            "suit": "spades"
+          }
+        ],
+        "name": "Wooden",
+        "stats": {
+          "swept": 1,
+          "sweeps": 3,
+          "euchred": 3,
+          "callsWon": 4,
+          "gamesWon": 0,
+          "handsWon": 8,
+          "callsMade": 6,
+          "euchresMade": 2,
+          "gamesPlayed": 1,
+          "handsPlayed": 21,
+          "tricksTaken": 22,
+          "tricksPlayed": 102,
+          "tricksWonTeam": 50,
+          "lonersAttempted": 0,
+          "lonersConverted": 0
+        },
+        "isComputer": true
+      }
+    ],
+    "tableId": "6koilivh7",
+    "eventLog": [
+      {
+        "type": "dealer",
+        "timestamp": 1766931428957,
+        "dealerName": "Wooden",
+        "dealerIndex": 3
+      },
+      {
+        "type": "pass",
+        "round": 1,
+        "timestamp": 1766931430189,
+        "playerName": "Moses",
+        "playerIndex": 0
+      },
+      {
+        "type": "pass",
+        "round": 1,
+        "timestamp": 1766931431419,
+        "playerName": "J-Bock",
+        "playerIndex": 1
+      },
+      {
+        "type": "pass",
+        "round": 1,
+        "timestamp": 1766931444689,
+        "playerName": "Mimi",
+        "playerIndex": 2
+      },
+      {
+        "type": "pass",
+        "round": 1,
+        "timestamp": 1766931445897,
+        "playerName": "Wooden",
+        "playerIndex": 3
+      },
+      {
+        "suit": "diamonds",
+        "type": "bid",
+        "round": 2,
+        "isLoner": false,
+        "timestamp": 1766931447117,
+        "playerName": "Moses",
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "A-diamonds",
+          "rank": "A",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766931458514,
+        "playerName": "Moses",
+        "trickIndex": 0,
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "J-hearts",
+          "rank": "J",
+          "suit": "hearts"
+        },
+        "type": "play",
+        "timestamp": 1766931459739,
+        "playerName": "J-Bock",
+        "trickIndex": 0,
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "9-hearts",
+          "rank": "9",
+          "suit": "hearts"
+        },
+        "type": "play",
+        "timestamp": 1766931461758,
+        "playerName": "Mimi",
+        "trickIndex": 0,
+        "playerIndex": 2
+      },
+      {
+        "card": {
+          "id": "9-diamonds",
+          "rank": "9",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766931462968,
+        "playerName": "Wooden",
+        "trickIndex": 0,
+        "playerIndex": 3
+      },
+      {
+        "card": {
+          "id": "J-diamonds",
+          "rank": "J",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766931467208,
+        "playerName": "J-Bock",
+        "trickIndex": 1,
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "9-spades",
+          "rank": "9",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766931469722,
+        "playerName": "Mimi",
+        "trickIndex": 1,
+        "playerIndex": 2
+      },
+      {
+        "card": {
+          "id": "10-spades",
+          "rank": "10",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766931470934,
+        "playerName": "Wooden",
+        "trickIndex": 1,
+        "playerIndex": 3
+      },
+      {
+        "card": {
+          "id": "Q-diamonds",
+          "rank": "Q",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766931472155,
+        "playerName": "Moses",
+        "trickIndex": 1,
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "10-diamonds",
+          "rank": "10",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766931476396,
+        "playerName": "J-Bock",
+        "trickIndex": 2,
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "J-clubs",
+          "rank": "J",
+          "suit": "clubs"
+        },
+        "type": "play",
+        "timestamp": 1766931481887,
+        "playerName": "Mimi",
+        "trickIndex": 2,
+        "playerIndex": 2
+      },
+      {
+        "card": {
+          "id": "Q-clubs",
+          "rank": "Q",
+          "suit": "clubs"
+        },
+        "type": "play",
+        "timestamp": 1766931483097,
+        "playerName": "Wooden",
+        "trickIndex": 2,
+        "playerIndex": 3
+      },
+      {
+        "card": {
+          "id": "K-diamonds",
+          "rank": "K",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766931484318,
+        "playerName": "Moses",
+        "trickIndex": 2,
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "Q-hearts",
+          "rank": "Q",
+          "suit": "hearts"
+        },
+        "type": "play",
+        "timestamp": 1766931488557,
+        "playerName": "Moses",
+        "trickIndex": 3,
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "10-clubs",
+          "rank": "10",
+          "suit": "clubs"
+        },
+        "type": "play",
+        "timestamp": 1766931489776,
+        "playerName": "J-Bock",
+        "trickIndex": 3,
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "A-clubs",
+          "rank": "A",
+          "suit": "clubs"
+        },
+        "type": "play",
+        "timestamp": 1766931492207,
+        "playerName": "Mimi",
+        "trickIndex": 3,
+        "playerIndex": 2
+      },
+      {
+        "card": {
+          "id": "Q-spades",
+          "rank": "Q",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766931493423,
+        "playerName": "Wooden",
+        "trickIndex": 3,
+        "playerIndex": 3
+      },
+      {
+        "card": {
+          "id": "10-hearts",
+          "rank": "10",
+          "suit": "hearts"
+        },
+        "type": "play",
+        "timestamp": 1766931497665,
+        "playerName": "Moses",
+        "trickIndex": 4,
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "J-spades",
+          "rank": "J",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766931498883,
+        "playerName": "J-Bock",
+        "trickIndex": 4,
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "A-spades",
+          "rank": "A",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766931499708,
+        "playerName": "Mimi",
+        "trickIndex": 4,
+        "playerIndex": 2
+      },
+      {
+        "card": {
+          "id": "K-spades",
+          "rank": "K",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766931500919,
+        "playerName": "Wooden",
+        "trickIndex": 4,
+        "playerIndex": 3
+      },
+      {
+        "type": "hand_result",
+        "result": {
+          "trump": "diamonds",
+          "isLoner": false,
+          "timestamp": 1766931505821,
+          "tricksWon": {
+            "player-0": 3,
+            "player-1": 2,
+            "player-2": 0,
+            "player-3": 0
+          },
+          "dealerIndex": 3,
+          "winningTeam": 1,
+          "pointsScored": {
+            "team1": 1,
+            "team2": 0
+          },
+          "trumpCallerIndex": 0
+        },
+        "timestamp": 1766931505821
+      },
+      {
+        "type": "dealer",
+        "timestamp": 1766931521074,
+        "dealerName": "Moses",
+        "dealerIndex": 0
+      },
+      {
+        "type": "pass",
+        "round": 1,
+        "timestamp": 1766931522305,
+        "playerName": "J-Bock",
+        "playerIndex": 1
+      },
+      {
+        "type": "pass",
+        "round": 1,
+        "timestamp": 1766931526375,
+        "playerName": "Mimi",
+        "playerIndex": 2
+      },
+      {
+        "suit": "diamonds",
+        "type": "bid",
+        "round": 1,
+        "isLoner": false,
+        "timestamp": 1766931527583,
+        "playerName": "Wooden",
+        "playerIndex": 3
+      },
+      {
+        "card": {
+          "id": "A-hearts",
+          "rank": "A",
+          "suit": "hearts"
+        },
+        "type": "play",
+        "timestamp": 1766931540257,
+        "playerName": "J-Bock",
+        "trickIndex": 0,
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "Q-hearts",
+          "rank": "Q",
+          "suit": "hearts"
+        },
+        "type": "play",
+        "timestamp": 1766931542541,
+        "playerName": "Mimi",
+        "trickIndex": 0,
+        "playerIndex": 2
+      },
+      {
+        "card": {
+          "id": "10-hearts",
+          "rank": "10",
+          "suit": "hearts"
+        },
+        "type": "play",
+        "timestamp": 1766931543751,
+        "playerName": "Wooden",
+        "trickIndex": 0,
+        "playerIndex": 3
+      },
+      {
+        "card": {
+          "id": "10-diamonds",
+          "rank": "10",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766931544974,
+        "playerName": "Moses",
+        "trickIndex": 0,
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "A-clubs",
+          "rank": "A",
+          "suit": "clubs"
+        },
+        "type": "play",
+        "timestamp": 1766931549220,
+        "playerName": "Moses",
+        "trickIndex": 1,
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "Q-clubs",
+          "rank": "Q",
+          "suit": "clubs"
+        },
+        "type": "play",
+        "timestamp": 1766931550440,
+        "playerName": "J-Bock",
+        "trickIndex": 1,
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "9-clubs",
+          "rank": "9",
+          "suit": "clubs"
+        },
+        "type": "play",
+        "timestamp": 1766931551438,
+        "playerName": "Mimi",
+        "trickIndex": 1,
+        "playerIndex": 2
+      },
+      {
+        "card": {
+          "id": "10-clubs",
+          "rank": "10",
+          "suit": "clubs"
+        },
+        "type": "play",
+        "timestamp": 1766931552647,
+        "playerName": "Wooden",
+        "trickIndex": 1,
+        "playerIndex": 3
+      },
+      {
+        "card": {
+          "id": "J-hearts",
+          "rank": "J",
+          "suit": "hearts"
+        },
+        "type": "play",
+        "timestamp": 1766931556892,
+        "playerName": "Moses",
+        "trickIndex": 2,
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "Q-diamonds",
+          "rank": "Q",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766931558104,
+        "playerName": "J-Bock",
+        "trickIndex": 2,
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "K-diamonds",
+          "rank": "K",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766931571090,
+        "playerName": "Mimi",
+        "trickIndex": 2,
+        "playerIndex": 2
+      },
+      {
+        "card": {
+          "id": "J-diamonds",
+          "rank": "J",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766931572300,
+        "playerName": "Wooden",
+        "trickIndex": 2,
+        "playerIndex": 3
+      },
+      {
+        "card": {
+          "id": "9-diamonds",
+          "rank": "9",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766931576540,
+        "playerName": "Wooden",
+        "trickIndex": 3,
+        "playerIndex": 3
+      },
+      {
+        "card": {
+          "id": "J-clubs",
+          "rank": "J",
+          "suit": "clubs"
+        },
+        "type": "play",
+        "timestamp": 1766931577759,
+        "playerName": "Moses",
+        "trickIndex": 3,
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "K-spades",
+          "rank": "K",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766931578980,
+        "playerName": "J-Bock",
+        "trickIndex": 3,
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "A-diamonds",
+          "rank": "A",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766931581077,
+        "playerName": "Mimi",
+        "trickIndex": 3,
+        "playerIndex": 2
+      },
+      {
+        "card": {
+          "id": "9-spades",
+          "rank": "9",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766931585107,
+        "playerName": "Mimi",
+        "trickIndex": 4,
+        "playerIndex": 2
+      },
+      {
+        "card": {
+          "id": "Q-spades",
+          "rank": "Q",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766931586318,
+        "playerName": "Wooden",
+        "trickIndex": 4,
+        "playerIndex": 3
+      },
+      {
+        "card": {
+          "id": "K-clubs",
+          "rank": "K",
+          "suit": "clubs"
+        },
+        "type": "play",
+        "timestamp": 1766931587538,
+        "playerName": "Moses",
+        "trickIndex": 4,
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "A-spades",
+          "rank": "A",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766931588758,
+        "playerName": "J-Bock",
+        "trickIndex": 4,
+        "playerIndex": 1
+      },
+      {
+        "type": "hand_result",
+        "result": {
+          "trump": "diamonds",
+          "isLoner": false,
+          "timestamp": 1766931593803,
+          "tricksWon": {
+            "player-0": 2,
+            "player-1": 1,
+            "player-2": 1,
+            "player-3": 1
+          },
+          "dealerIndex": 0,
+          "winningTeam": 1,
+          "pointsScored": {
+            "team1": 2,
+            "team2": 0
+          },
+          "trumpCallerIndex": 3
+        },
+        "timestamp": 1766931593803
+      },
+      {
+        "type": "dealer",
+        "timestamp": 1766931597818,
+        "dealerName": "J-Bock",
+        "dealerIndex": 1
+      },
+      {
+        "type": "pass",
+        "round": 1,
+        "timestamp": 1766931604877,
+        "playerName": "Mimi",
+        "playerIndex": 2
+      },
+      {
+        "type": "pass",
+        "round": 1,
+        "timestamp": 1766931606085,
+        "playerName": "Wooden",
+        "playerIndex": 3
+      },
+      {
+        "suit": "diamonds",
+        "type": "bid",
+        "round": 1,
+        "isLoner": false,
+        "timestamp": 1766931607305,
+        "playerName": "Moses",
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "9-clubs",
+          "rank": "9",
+          "suit": "clubs"
+        },
+        "type": "play",
+        "timestamp": 1766931620347,
+        "playerName": "Mimi",
+        "trickIndex": 0,
+        "playerIndex": 2
+      },
+      {
+        "card": {
+          "id": "10-clubs",
+          "rank": "10",
+          "suit": "clubs"
+        },
+        "type": "play",
+        "timestamp": 1766931621557,
+        "playerName": "Wooden",
+        "trickIndex": 0,
+        "playerIndex": 3
+      },
+      {
+        "card": {
+          "id": "K-clubs",
+          "rank": "K",
+          "suit": "clubs"
+        },
+        "type": "play",
+        "timestamp": 1766931622778,
+        "playerName": "Moses",
+        "trickIndex": 0,
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "Q-clubs",
+          "rank": "Q",
+          "suit": "clubs"
+        },
+        "type": "play",
+        "timestamp": 1766931624000,
+        "playerName": "J-Bock",
+        "trickIndex": 0,
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "A-hearts",
+          "rank": "A",
+          "suit": "hearts"
+        },
+        "type": "play",
+        "timestamp": 1766931628247,
+        "playerName": "Moses",
+        "trickIndex": 1,
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "Q-diamonds",
+          "rank": "Q",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766931629466,
+        "playerName": "J-Bock",
+        "trickIndex": 1,
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "9-hearts",
+          "rank": "9",
+          "suit": "hearts"
+        },
+        "type": "play",
+        "timestamp": 1766931630589,
+        "playerName": "Mimi",
+        "trickIndex": 1,
+        "playerIndex": 2
+      },
+      {
+        "card": {
+          "id": "J-spades",
+          "rank": "J",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766931631800,
+        "playerName": "Wooden",
+        "trickIndex": 1,
+        "playerIndex": 3
+      },
+      {
+        "card": {
+          "id": "A-diamonds",
+          "rank": "A",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766931636042,
+        "playerName": "J-Bock",
+        "trickIndex": 2,
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "10-diamonds",
+          "rank": "10",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766931638555,
+        "playerName": "Mimi",
+        "trickIndex": 2,
+        "playerIndex": 2
+      },
+      {
+        "card": {
+          "id": "9-diamonds",
+          "rank": "9",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766931639765,
+        "playerName": "Wooden",
+        "trickIndex": 2,
+        "playerIndex": 3
+      },
+      {
+        "card": {
+          "id": "J-diamonds",
+          "rank": "J",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766931640985,
+        "playerName": "Moses",
+        "trickIndex": 2,
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "K-diamonds",
+          "rank": "K",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766931645225,
+        "playerName": "Moses",
+        "trickIndex": 3,
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "Q-spades",
+          "rank": "Q",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766931646443,
+        "playerName": "J-Bock",
+        "trickIndex": 3,
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "9-spades",
+          "rank": "9",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766931650824,
+        "playerName": "Mimi",
+        "trickIndex": 3,
+        "playerIndex": 2
+      },
+      {
+        "card": {
+          "id": "J-clubs",
+          "rank": "J",
+          "suit": "clubs"
+        },
+        "type": "play",
+        "timestamp": 1766931652036,
+        "playerName": "Wooden",
+        "trickIndex": 3,
+        "playerIndex": 3
+      },
+      {
+        "card": {
+          "id": "Q-hearts",
+          "rank": "Q",
+          "suit": "hearts"
+        },
+        "type": "play",
+        "timestamp": 1766931656277,
+        "playerName": "Moses",
+        "trickIndex": 4,
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "K-spades",
+          "rank": "K",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766931657495,
+        "playerName": "J-Bock",
+        "trickIndex": 4,
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "K-hearts",
+          "rank": "K",
+          "suit": "hearts"
+        },
+        "type": "play",
+        "timestamp": 1766931658722,
+        "playerName": "Mimi",
+        "trickIndex": 4,
+        "playerIndex": 2
+      },
+      {
+        "card": {
+          "id": "A-clubs",
+          "rank": "A",
+          "suit": "clubs"
+        },
+        "type": "play",
+        "timestamp": 1766931659928,
+        "playerName": "Wooden",
+        "trickIndex": 4,
+        "playerIndex": 3
+      },
+      {
+        "type": "hand_result",
+        "result": {
+          "trump": "diamonds",
+          "isLoner": false,
+          "timestamp": 1766931664968,
+          "tricksWon": {
+            "player-0": 3,
+            "player-1": 1,
+            "player-2": 1,
+            "player-3": 0
+          },
+          "dealerIndex": 1,
+          "winningTeam": 1,
+          "pointsScored": {
+            "team1": 1,
+            "team2": 0
+          },
+          "trumpCallerIndex": 0
+        },
+        "timestamp": 1766931664968
+      },
+      {
+        "type": "dealer",
+        "timestamp": 1766931668983,
+        "dealerName": "Mimi",
+        "dealerIndex": 2
+      },
+      {
+        "type": "pass",
+        "round": 1,
+        "timestamp": 1766931670208,
+        "playerName": "Wooden",
+        "playerIndex": 3
+      },
+      {
+        "type": "pass",
+        "round": 1,
+        "timestamp": 1766931671427,
+        "playerName": "Moses",
+        "playerIndex": 0
+      },
+      {
+        "type": "pass",
+        "round": 1,
+        "timestamp": 1766931672645,
+        "playerName": "J-Bock",
+        "playerIndex": 1
+      },
+      {
+        "type": "pass",
+        "round": 1,
+        "timestamp": 1766931677156,
+        "playerName": "Mimi",
+        "playerIndex": 2
+      },
+      {
+        "suit": "spades",
+        "type": "bid",
+        "round": 2,
+        "isLoner": false,
+        "timestamp": 1766931678365,
+        "playerName": "Wooden",
+        "playerIndex": 3
+      },
+      {
+        "card": {
+          "id": "J-spades",
+          "rank": "J",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766931784962,
+        "playerName": "Wooden",
+        "trickIndex": 0,
+        "playerIndex": 3
+      },
+      {
+        "card": {
+          "id": "9-spades",
+          "rank": "9",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766931786189,
+        "playerName": "Moses",
+        "trickIndex": 0,
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "9-clubs",
+          "rank": "9",
+          "suit": "clubs"
+        },
+        "type": "play",
+        "timestamp": 1766931787414,
+        "playerName": "J-Bock",
+        "trickIndex": 0,
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "10-spades",
+          "rank": "10",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766931792015,
+        "playerName": "Mimi",
+        "trickIndex": 0,
+        "playerIndex": 2
+      },
+      {
+        "card": {
+          "id": "A-spades",
+          "rank": "A",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766931796248,
+        "playerName": "Wooden",
+        "trickIndex": 1,
+        "playerIndex": 3
+      },
+      {
+        "card": {
+          "id": "Q-diamonds",
+          "rank": "Q",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766931797471,
+        "playerName": "Moses",
+        "trickIndex": 1,
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "9-diamonds",
+          "rank": "9",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766931798697,
+        "playerName": "J-Bock",
+        "trickIndex": 1,
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "Q-spades",
+          "rank": "Q",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766931800838,
+        "playerName": "Mimi",
+        "trickIndex": 1,
+        "playerIndex": 2
+      },
+      {
+        "card": {
+          "id": "K-spades",
+          "rank": "K",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766931805068,
+        "playerName": "Wooden",
+        "trickIndex": 2,
+        "playerIndex": 3
+      },
+      {
+        "card": {
+          "id": "K-hearts",
+          "rank": "K",
+          "suit": "hearts"
+        },
+        "type": "play",
+        "timestamp": 1766931806289,
+        "playerName": "Moses",
+        "trickIndex": 2,
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "10-diamonds",
+          "rank": "10",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766931807511,
+        "playerName": "J-Bock",
+        "trickIndex": 2,
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "10-hearts",
+          "rank": "10",
+          "suit": "hearts"
+        },
+        "type": "play",
+        "timestamp": 1766931809335,
+        "playerName": "Mimi",
+        "trickIndex": 2,
+        "playerIndex": 2
+      },
+      {
+        "card": {
+          "id": "Q-hearts",
+          "rank": "Q",
+          "suit": "hearts"
+        },
+        "type": "play",
+        "timestamp": 1766931813563,
+        "playerName": "Wooden",
+        "trickIndex": 3,
+        "playerIndex": 3
+      },
+      {
+        "card": {
+          "id": "A-hearts",
+          "rank": "A",
+          "suit": "hearts"
+        },
+        "type": "play",
+        "timestamp": 1766931814783,
+        "playerName": "Moses",
+        "trickIndex": 3,
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "J-hearts",
+          "rank": "J",
+          "suit": "hearts"
+        },
+        "type": "play",
+        "timestamp": 1766931816004,
+        "playerName": "J-Bock",
+        "trickIndex": 3,
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "K-clubs",
+          "rank": "K",
+          "suit": "clubs"
+        },
+        "type": "play",
+        "timestamp": 1766931818351,
+        "playerName": "Mimi",
+        "trickIndex": 3,
+        "playerIndex": 2
+      },
+      {
+        "card": {
+          "id": "A-clubs",
+          "rank": "A",
+          "suit": "clubs"
+        },
+        "type": "play",
+        "timestamp": 1766931822580,
+        "playerName": "Moses",
+        "trickIndex": 4,
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "K-diamonds",
+          "rank": "K",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766931823800,
+        "playerName": "J-Bock",
+        "trickIndex": 4,
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "A-diamonds",
+          "rank": "A",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766931824628,
+        "playerName": "Mimi",
+        "trickIndex": 4,
+        "playerIndex": 2
+      },
+      {
+        "card": {
+          "id": "J-diamonds",
+          "rank": "J",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766931825837,
+        "playerName": "Wooden",
+        "trickIndex": 4,
+        "playerIndex": 3
+      },
+      {
+        "type": "hand_result",
+        "result": {
+          "trump": "spades",
+          "isLoner": false,
+          "timestamp": 1766931830885,
+          "tricksWon": {
+            "player-0": 2,
+            "player-1": 0,
+            "player-2": 0,
+            "player-3": 3
+          },
+          "dealerIndex": 2,
+          "winningTeam": 2,
+          "pointsScored": {
+            "team1": 0,
+            "team2": 1
+          },
+          "trumpCallerIndex": 3
+        },
+        "timestamp": 1766931830885
+      },
+      {
+        "type": "dealer",
+        "timestamp": 1766931834925,
+        "dealerName": "Wooden",
+        "dealerIndex": 3
+      },
+      {
+        "type": "pass",
+        "round": 1,
+        "timestamp": 1766931836161,
+        "playerName": "Moses",
+        "playerIndex": 0
+      },
+      {
+        "type": "pass",
+        "round": 1,
+        "timestamp": 1766931837384,
+        "playerName": "J-Bock",
+        "playerIndex": 1
+      },
+      {
+        "type": "pass",
+        "round": 1,
+        "timestamp": 1766931841369,
+        "playerName": "Mimi",
+        "playerIndex": 2
+      },
+      {
+        "type": "pass",
+        "round": 1,
+        "timestamp": 1766931842576,
+        "playerName": "Wooden",
+        "playerIndex": 3
+      },
+      {
+        "suit": "spades",
+        "type": "bid",
+        "round": 2,
+        "isLoner": false,
+        "timestamp": 1766931843796,
+        "playerName": "Moses",
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "J-spades",
+          "rank": "J",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766931895977,
+        "playerName": "Moses",
+        "trickIndex": 0,
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "9-clubs",
+          "rank": "9",
+          "suit": "clubs"
+        },
+        "type": "play",
+        "timestamp": 1766931897203,
+        "playerName": "J-Bock",
+        "trickIndex": 0,
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "10-clubs",
+          "rank": "10",
+          "suit": "clubs"
+        },
+        "type": "play",
+        "timestamp": 1766931912109,
+        "playerName": "Mimi",
+        "trickIndex": 0,
+        "playerIndex": 2
+      },
+      {
+        "card": {
+          "id": "K-spades",
+          "rank": "K",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766931913319,
+        "playerName": "Wooden",
+        "trickIndex": 0,
+        "playerIndex": 3
+      },
+      {
+        "card": {
+          "id": "A-spades",
+          "rank": "A",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766931917562,
+        "playerName": "Moses",
+        "trickIndex": 1,
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "9-hearts",
+          "rank": "9",
+          "suit": "hearts"
+        },
+        "type": "play",
+        "timestamp": 1766931918787,
+        "playerName": "J-Bock",
+        "trickIndex": 1,
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "Q-diamonds",
+          "rank": "Q",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766931923393,
+        "playerName": "Mimi",
+        "trickIndex": 1,
+        "playerIndex": 2
+      },
+      {
+        "card": {
+          "id": "J-diamonds",
+          "rank": "J",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766931924603,
+        "playerName": "Wooden",
+        "trickIndex": 1,
+        "playerIndex": 3
+      },
+      {
+        "card": {
+          "id": "10-spades",
+          "rank": "10",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766931928852,
+        "playerName": "Moses",
+        "trickIndex": 2,
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "9-diamonds",
+          "rank": "9",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766931930073,
+        "playerName": "J-Bock",
+        "trickIndex": 2,
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "K-diamonds",
+          "rank": "K",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766931931247,
+        "playerName": "Mimi",
+        "trickIndex": 2,
+        "playerIndex": 2
+      },
+      {
+        "card": {
+          "id": "K-clubs",
+          "rank": "K",
+          "suit": "clubs"
+        },
+        "type": "play",
+        "timestamp": 1766931932460,
+        "playerName": "Wooden",
+        "trickIndex": 2,
+        "playerIndex": 3
+      },
+      {
+        "card": {
+          "id": "9-spades",
+          "rank": "9",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766931936710,
+        "playerName": "Moses",
+        "trickIndex": 3,
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "10-diamonds",
+          "rank": "10",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766931937930,
+        "playerName": "J-Bock",
+        "trickIndex": 3,
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "K-hearts",
+          "rank": "K",
+          "suit": "hearts"
+        },
+        "type": "play",
+        "timestamp": 1766931939596,
+        "playerName": "Mimi",
+        "trickIndex": 3,
+        "playerIndex": 2
+      },
+      {
+        "card": {
+          "id": "A-hearts",
+          "rank": "A",
+          "suit": "hearts"
+        },
+        "type": "play",
+        "timestamp": 1766931940808,
+        "playerName": "Wooden",
+        "trickIndex": 3,
+        "playerIndex": 3
+      },
+      {
+        "card": {
+          "id": "Q-hearts",
+          "rank": "Q",
+          "suit": "hearts"
+        },
+        "type": "play",
+        "timestamp": 1766931945057,
+        "playerName": "Moses",
+        "trickIndex": 4,
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "Q-clubs",
+          "rank": "Q",
+          "suit": "clubs"
+        },
+        "type": "play",
+        "timestamp": 1766931946291,
+        "playerName": "J-Bock",
+        "trickIndex": 4,
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "A-diamonds",
+          "rank": "A",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766931947497,
+        "playerName": "Mimi",
+        "trickIndex": 4,
+        "playerIndex": 2
+      },
+      {
+        "card": {
+          "id": "A-clubs",
+          "rank": "A",
+          "suit": "clubs"
+        },
+        "type": "play",
+        "timestamp": 1766931948706,
+        "playerName": "Wooden",
+        "trickIndex": 4,
+        "playerIndex": 3
+      },
+      {
+        "type": "hand_result",
+        "result": {
+          "trump": "spades",
+          "isLoner": false,
+          "timestamp": 1766931953753,
+          "tricksWon": {
+            "player-0": 5,
+            "player-1": 0,
+            "player-2": 0,
+            "player-3": 0
+          },
+          "dealerIndex": 3,
+          "winningTeam": 1,
+          "pointsScored": {
+            "team1": 2,
+            "team2": 0
+          },
+          "trumpCallerIndex": 0
+        },
+        "timestamp": 1766931953753
+      },
+      {
+        "type": "dealer",
+        "timestamp": 1766931957784,
+        "dealerName": "Moses",
+        "dealerIndex": 0
+      },
+      {
+        "suit": "spades",
+        "type": "bid",
+        "round": 1,
+        "isLoner": false,
+        "timestamp": 1766931959007,
+        "playerName": "J-Bock",
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "J-spades",
+          "rank": "J",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766932077681,
+        "playerName": "J-Bock",
+        "trickIndex": 0,
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "9-spades",
+          "rank": "9",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766932090270,
+        "playerName": "Mimi",
+        "trickIndex": 0,
+        "playerIndex": 2
+      },
+      {
+        "card": {
+          "id": "Q-spades",
+          "rank": "Q",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766932091480,
+        "playerName": "Wooden",
+        "trickIndex": 0,
+        "playerIndex": 3
+      },
+      {
+        "card": {
+          "id": "10-spades",
+          "rank": "10",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766932092709,
+        "playerName": "Moses",
+        "trickIndex": 0,
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "J-clubs",
+          "rank": "J",
+          "suit": "clubs"
+        },
+        "type": "play",
+        "timestamp": 1766932096971,
+        "playerName": "J-Bock",
+        "trickIndex": 1,
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "K-spades",
+          "rank": "K",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766932098945,
+        "playerName": "Mimi",
+        "trickIndex": 1,
+        "playerIndex": 2
+      },
+      {
+        "card": {
+          "id": "10-diamonds",
+          "rank": "10",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766932100155,
+        "playerName": "Wooden",
+        "trickIndex": 1,
+        "playerIndex": 3
+      },
+      {
+        "card": {
+          "id": "A-spades",
+          "rank": "A",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766932101379,
+        "playerName": "Moses",
+        "trickIndex": 1,
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "K-hearts",
+          "rank": "K",
+          "suit": "hearts"
+        },
+        "type": "play",
+        "timestamp": 1766932105638,
+        "playerName": "J-Bock",
+        "trickIndex": 2,
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "9-hearts",
+          "rank": "9",
+          "suit": "hearts"
+        },
+        "type": "play",
+        "timestamp": 1766932116261,
+        "playerName": "Mimi",
+        "trickIndex": 2,
+        "playerIndex": 2
+      },
+      {
+        "card": {
+          "id": "Q-hearts",
+          "rank": "Q",
+          "suit": "hearts"
+        },
+        "type": "play",
+        "timestamp": 1766932117469,
+        "playerName": "Wooden",
+        "trickIndex": 2,
+        "playerIndex": 3
+      },
+      {
+        "card": {
+          "id": "9-clubs",
+          "rank": "9",
+          "suit": "clubs"
+        },
+        "type": "play",
+        "timestamp": 1766932118697,
+        "playerName": "Moses",
+        "trickIndex": 2,
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "Q-diamonds",
+          "rank": "Q",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766932122960,
+        "playerName": "J-Bock",
+        "trickIndex": 3,
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "Q-clubs",
+          "rank": "Q",
+          "suit": "clubs"
+        },
+        "type": "play",
+        "timestamp": 1766932133666,
+        "playerName": "Mimi",
+        "trickIndex": 3,
+        "playerIndex": 2
+      },
+      {
+        "card": {
+          "id": "K-diamonds",
+          "rank": "K",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766932134875,
+        "playerName": "Wooden",
+        "trickIndex": 3,
+        "playerIndex": 3
+      },
+      {
+        "card": {
+          "id": "9-diamonds",
+          "rank": "9",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766932136097,
+        "playerName": "Moses",
+        "trickIndex": 3,
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "A-hearts",
+          "rank": "A",
+          "suit": "hearts"
+        },
+        "type": "play",
+        "timestamp": 1766932140342,
+        "playerName": "Wooden",
+        "trickIndex": 4,
+        "playerIndex": 3
+      },
+      {
+        "card": {
+          "id": "J-diamonds",
+          "rank": "J",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766932141562,
+        "playerName": "Moses",
+        "trickIndex": 4,
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "10-clubs",
+          "rank": "10",
+          "suit": "clubs"
+        },
+        "type": "play",
+        "timestamp": 1766932142785,
+        "playerName": "J-Bock",
+        "trickIndex": 4,
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "K-clubs",
+          "rank": "K",
+          "suit": "clubs"
+        },
+        "type": "play",
+        "timestamp": 1766932144182,
+        "playerName": "Mimi",
+        "trickIndex": 4,
+        "playerIndex": 2
+      },
+      {
+        "type": "hand_result",
+        "result": {
+          "trump": "spades",
+          "isLoner": false,
+          "timestamp": 1766932149214,
+          "tricksWon": {
+            "player-0": 0,
+            "player-1": 3,
+            "player-2": 0,
+            "player-3": 2
+          },
+          "dealerIndex": 0,
+          "winningTeam": 2,
+          "pointsScored": {
+            "team1": 0,
+            "team2": 2
+          },
+          "trumpCallerIndex": 1
+        },
+        "timestamp": 1766932149214
+      },
+      {
+        "type": "dealer",
+        "timestamp": 1766932153242,
+        "dealerName": "J-Bock",
+        "dealerIndex": 1
+      },
+      {
+        "type": "pass",
+        "round": 1,
+        "timestamp": 1766932202459,
+        "playerName": "Mimi",
+        "playerIndex": 2
+      },
+      {
+        "type": "pass",
+        "round": 1,
+        "timestamp": 1766932203669,
+        "playerName": "Wooden",
+        "playerIndex": 3
+      },
+      {
+        "type": "pass",
+        "round": 1,
+        "timestamp": 1766932204890,
+        "playerName": "Moses",
+        "playerIndex": 0
+      },
+      {
+        "suit": "clubs",
+        "type": "bid",
+        "round": 1,
+        "isLoner": false,
+        "timestamp": 1766932206112,
+        "playerName": "J-Bock",
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "10-spades",
+          "rank": "10",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766932225559,
+        "playerName": "Mimi",
+        "trickIndex": 0,
+        "playerIndex": 2
+      },
+      {
+        "card": {
+          "id": "K-spades",
+          "rank": "K",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766932226765,
+        "playerName": "Wooden",
+        "trickIndex": 0,
+        "playerIndex": 3
+      },
+      {
+        "card": {
+          "id": "A-spades",
+          "rank": "A",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766932227989,
+        "playerName": "Moses",
+        "trickIndex": 0,
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "Q-spades",
+          "rank": "Q",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766932229212,
+        "playerName": "J-Bock",
+        "trickIndex": 0,
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "A-diamonds",
+          "rank": "A",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766932233474,
+        "playerName": "Moses",
+        "trickIndex": 1,
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "Q-diamonds",
+          "rank": "Q",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766932234697,
+        "playerName": "J-Bock",
+        "trickIndex": 1,
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "10-hearts",
+          "rank": "10",
+          "suit": "hearts"
+        },
+        "type": "play",
+        "timestamp": 1766932236971,
+        "playerName": "Mimi",
+        "trickIndex": 1,
+        "playerIndex": 2
+      },
+      {
+        "card": {
+          "id": "9-diamonds",
+          "rank": "9",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766932238181,
+        "playerName": "Wooden",
+        "trickIndex": 1,
+        "playerIndex": 3
+      },
+      {
+        "card": {
+          "id": "J-spades",
+          "rank": "J",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766932242427,
+        "playerName": "Moses",
+        "trickIndex": 2,
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "J-clubs",
+          "rank": "J",
+          "suit": "clubs"
+        },
+        "type": "play",
+        "timestamp": 1766932243647,
+        "playerName": "J-Bock",
+        "trickIndex": 2,
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "9-clubs",
+          "rank": "9",
+          "suit": "clubs"
+        },
+        "type": "play",
+        "timestamp": 1766932245123,
+        "playerName": "Mimi",
+        "trickIndex": 2,
+        "playerIndex": 2
+      },
+      {
+        "card": {
+          "id": "9-hearts",
+          "rank": "9",
+          "suit": "hearts"
+        },
+        "type": "play",
+        "timestamp": 1766932246333,
+        "playerName": "Wooden",
+        "trickIndex": 2,
+        "playerIndex": 3
+      },
+      {
+        "card": {
+          "id": "A-clubs",
+          "rank": "A",
+          "suit": "clubs"
+        },
+        "type": "play",
+        "timestamp": 1766932250577,
+        "playerName": "J-Bock",
+        "trickIndex": 3,
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "J-hearts",
+          "rank": "J",
+          "suit": "hearts"
+        },
+        "type": "play",
+        "timestamp": 1766932252323,
+        "playerName": "Mimi",
+        "trickIndex": 3,
+        "playerIndex": 2
+      },
+      {
+        "card": {
+          "id": "K-hearts",
+          "rank": "K",
+          "suit": "hearts"
+        },
+        "type": "play",
+        "timestamp": 1766932253532,
+        "playerName": "Wooden",
+        "trickIndex": 3,
+        "playerIndex": 3
+      },
+      {
+        "card": {
+          "id": "Q-clubs",
+          "rank": "Q",
+          "suit": "clubs"
+        },
+        "type": "play",
+        "timestamp": 1766932254759,
+        "playerName": "Moses",
+        "trickIndex": 3,
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "K-clubs",
+          "rank": "K",
+          "suit": "clubs"
+        },
+        "type": "play",
+        "timestamp": 1766932259018,
+        "playerName": "J-Bock",
+        "trickIndex": 4,
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "Q-hearts",
+          "rank": "Q",
+          "suit": "hearts"
+        },
+        "type": "play",
+        "timestamp": 1766932260031,
+        "playerName": "Mimi",
+        "trickIndex": 4,
+        "playerIndex": 2
+      },
+      {
+        "card": {
+          "id": "A-hearts",
+          "rank": "A",
+          "suit": "hearts"
+        },
+        "type": "play",
+        "timestamp": 1766932261238,
+        "playerName": "Wooden",
+        "trickIndex": 4,
+        "playerIndex": 3
+      },
+      {
+        "card": {
+          "id": "10-diamonds",
+          "rank": "10",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766932262459,
+        "playerName": "Moses",
+        "trickIndex": 4,
+        "playerIndex": 0
+      },
+      {
+        "type": "hand_result",
+        "result": {
+          "trump": "clubs",
+          "isLoner": false,
+          "timestamp": 1766932267518,
+          "tricksWon": {
+            "player-0": 2,
+            "player-1": 3,
+            "player-2": 0,
+            "player-3": 0
+          },
+          "dealerIndex": 1,
+          "winningTeam": 2,
+          "pointsScored": {
+            "team1": 0,
+            "team2": 1
+          },
+          "trumpCallerIndex": 1
+        },
+        "timestamp": 1766932267518
+      },
+      {
+        "type": "dealer",
+        "timestamp": 1766932271536,
+        "dealerName": "Mimi",
+        "dealerIndex": 2
+      },
+      {
+        "type": "pass",
+        "round": 1,
+        "timestamp": 1766932272767,
+        "playerName": "Wooden",
+        "playerIndex": 3
+      },
+      {
+        "suit": "spades",
+        "type": "bid",
+        "round": 1,
+        "isLoner": false,
+        "timestamp": 1766932273990,
+        "playerName": "Moses",
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "A-diamonds",
+          "rank": "A",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766932288161,
+        "playerName": "Wooden",
+        "trickIndex": 0,
+        "playerIndex": 3
+      },
+      {
+        "card": {
+          "id": "10-diamonds",
+          "rank": "10",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766932289383,
+        "playerName": "Moses",
+        "trickIndex": 0,
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "K-diamonds",
+          "rank": "K",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766932290606,
+        "playerName": "J-Bock",
+        "trickIndex": 0,
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "Q-spades",
+          "rank": "Q",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766932294480,
+        "playerName": "Mimi",
+        "trickIndex": 0,
+        "playerIndex": 2
+      },
+      {
+        "card": {
+          "id": "K-hearts",
+          "rank": "K",
+          "suit": "hearts"
+        },
+        "type": "play",
+        "timestamp": 1766932298448,
+        "playerName": "Mimi",
+        "trickIndex": 1,
+        "playerIndex": 2
+      },
+      {
+        "card": {
+          "id": "10-hearts",
+          "rank": "10",
+          "suit": "hearts"
+        },
+        "type": "play",
+        "timestamp": 1766932299658,
+        "playerName": "Wooden",
+        "trickIndex": 1,
+        "playerIndex": 3
+      },
+      {
+        "card": {
+          "id": "9-hearts",
+          "rank": "9",
+          "suit": "hearts"
+        },
+        "type": "play",
+        "timestamp": 1766932300884,
+        "playerName": "Moses",
+        "trickIndex": 1,
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "J-hearts",
+          "rank": "J",
+          "suit": "hearts"
+        },
+        "type": "play",
+        "timestamp": 1766932302107,
+        "playerName": "J-Bock",
+        "trickIndex": 1,
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "A-hearts",
+          "rank": "A",
+          "suit": "hearts"
+        },
+        "type": "play",
+        "timestamp": 1766932307029,
+        "playerName": "Mimi",
+        "trickIndex": 2,
+        "playerIndex": 2
+      },
+      {
+        "card": {
+          "id": "9-spades",
+          "rank": "9",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766932308239,
+        "playerName": "Wooden",
+        "trickIndex": 2,
+        "playerIndex": 3
+      },
+      {
+        "card": {
+          "id": "Q-hearts",
+          "rank": "Q",
+          "suit": "hearts"
+        },
+        "type": "play",
+        "timestamp": 1766932309461,
+        "playerName": "Moses",
+        "trickIndex": 2,
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "10-clubs",
+          "rank": "10",
+          "suit": "clubs"
+        },
+        "type": "play",
+        "timestamp": 1766932310685,
+        "playerName": "J-Bock",
+        "trickIndex": 2,
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "J-clubs",
+          "rank": "J",
+          "suit": "clubs"
+        },
+        "type": "play",
+        "timestamp": 1766932314947,
+        "playerName": "Wooden",
+        "trickIndex": 3,
+        "playerIndex": 3
+      },
+      {
+        "card": {
+          "id": "J-spades",
+          "rank": "J",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766932316170,
+        "playerName": "Moses",
+        "trickIndex": 3,
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "K-clubs",
+          "rank": "K",
+          "suit": "clubs"
+        },
+        "type": "play",
+        "timestamp": 1766932317413,
+        "playerName": "J-Bock",
+        "trickIndex": 3,
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "K-spades",
+          "rank": "K",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766932318547,
+        "playerName": "Mimi",
+        "trickIndex": 3,
+        "playerIndex": 2
+      },
+      {
+        "card": {
+          "id": "10-spades",
+          "rank": "10",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766932322777,
+        "playerName": "Moses",
+        "trickIndex": 4,
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "A-clubs",
+          "rank": "A",
+          "suit": "clubs"
+        },
+        "type": "play",
+        "timestamp": 1766932323998,
+        "playerName": "J-Bock",
+        "trickIndex": 4,
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "A-spades",
+          "rank": "A",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766932325437,
+        "playerName": "Mimi",
+        "trickIndex": 4,
+        "playerIndex": 2
+      },
+      {
+        "card": {
+          "id": "J-diamonds",
+          "rank": "J",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766932326668,
+        "playerName": "Wooden",
+        "trickIndex": 4,
+        "playerIndex": 3
+      },
+      {
+        "type": "hand_result",
+        "result": {
+          "trump": "spades",
+          "isLoner": false,
+          "timestamp": 1766932331631,
+          "tricksWon": {
+            "player-0": 1,
+            "player-1": 0,
+            "player-2": 3,
+            "player-3": 1
+          },
+          "dealerIndex": 2,
+          "winningTeam": 1,
+          "pointsScored": {
+            "team1": 1,
+            "team2": 0
+          },
+          "trumpCallerIndex": 0
+        },
+        "timestamp": 1766932331631
+      },
+      {
+        "type": "dealer",
+        "timestamp": 1766932335638,
+        "dealerName": "Wooden",
+        "dealerIndex": 3
+      },
+      {
+        "type": "pass",
+        "round": 1,
+        "timestamp": 1766932336868,
+        "playerName": "Moses",
+        "playerIndex": 0
+      },
+      {
+        "type": "pass",
+        "round": 1,
+        "timestamp": 1766932338089,
+        "playerName": "J-Bock",
+        "playerIndex": 1
+      },
+      {
+        "type": "pass",
+        "round": 1,
+        "timestamp": 1766932340461,
+        "playerName": "Mimi",
+        "playerIndex": 2
+      },
+      {
+        "type": "pass",
+        "round": 1,
+        "timestamp": 1766932341668,
+        "playerName": "Wooden",
+        "playerIndex": 3
+      },
+      {
+        "suit": "clubs",
+        "type": "bid",
+        "round": 2,
+        "isLoner": false,
+        "timestamp": 1766932342891,
+        "playerName": "Moses",
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "A-clubs",
+          "rank": "A",
+          "suit": "clubs"
+        },
+        "type": "play",
+        "timestamp": 1766932354280,
+        "playerName": "Moses",
+        "trickIndex": 0,
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "J-spades",
+          "rank": "J",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766932355504,
+        "playerName": "J-Bock",
+        "trickIndex": 0,
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "K-clubs",
+          "rank": "K",
+          "suit": "clubs"
+        },
+        "type": "play",
+        "timestamp": 1766932360717,
+        "playerName": "Mimi",
+        "trickIndex": 0,
+        "playerIndex": 2
+      },
+      {
+        "card": {
+          "id": "9-diamonds",
+          "rank": "9",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766932361926,
+        "playerName": "Wooden",
+        "trickIndex": 0,
+        "playerIndex": 3
+      },
+      {
+        "card": {
+          "id": "A-diamonds",
+          "rank": "A",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766932366180,
+        "playerName": "J-Bock",
+        "trickIndex": 1,
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "10-diamonds",
+          "rank": "10",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766932367656,
+        "playerName": "Mimi",
+        "trickIndex": 1,
+        "playerIndex": 2
+      },
+      {
+        "card": {
+          "id": "J-diamonds",
+          "rank": "J",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766932368865,
+        "playerName": "Wooden",
+        "trickIndex": 1,
+        "playerIndex": 3
+      },
+      {
+        "card": {
+          "id": "9-clubs",
+          "rank": "9",
+          "suit": "clubs"
+        },
+        "type": "play",
+        "timestamp": 1766932370088,
+        "playerName": "Moses",
+        "trickIndex": 1,
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "10-clubs",
+          "rank": "10",
+          "suit": "clubs"
+        },
+        "type": "play",
+        "timestamp": 1766932374354,
+        "playerName": "Moses",
+        "trickIndex": 2,
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "Q-clubs",
+          "rank": "Q",
+          "suit": "clubs"
+        },
+        "type": "play",
+        "timestamp": 1766932375578,
+        "playerName": "J-Bock",
+        "trickIndex": 2,
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "9-spades",
+          "rank": "9",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766932377762,
+        "playerName": "Mimi",
+        "trickIndex": 2,
+        "playerIndex": 2
+      },
+      {
+        "card": {
+          "id": "10-spades",
+          "rank": "10",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766932378971,
+        "playerName": "Wooden",
+        "trickIndex": 2,
+        "playerIndex": 3
+      },
+      {
+        "card": {
+          "id": "Q-diamonds",
+          "rank": "Q",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766932383219,
+        "playerName": "J-Bock",
+        "trickIndex": 3,
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "9-hearts",
+          "rank": "9",
+          "suit": "hearts"
+        },
+        "type": "play",
+        "timestamp": 1766932385044,
+        "playerName": "Mimi",
+        "trickIndex": 3,
+        "playerIndex": 2
+      },
+      {
+        "card": {
+          "id": "K-diamonds",
+          "rank": "K",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766932386255,
+        "playerName": "Wooden",
+        "trickIndex": 3,
+        "playerIndex": 3
+      },
+      {
+        "card": {
+          "id": "J-hearts",
+          "rank": "J",
+          "suit": "hearts"
+        },
+        "type": "play",
+        "timestamp": 1766932387483,
+        "playerName": "Moses",
+        "trickIndex": 3,
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "Q-spades",
+          "rank": "Q",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766932391743,
+        "playerName": "Wooden",
+        "trickIndex": 4,
+        "playerIndex": 3
+      },
+      {
+        "card": {
+          "id": "K-spades",
+          "rank": "K",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766932392965,
+        "playerName": "Moses",
+        "trickIndex": 4,
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "10-hearts",
+          "rank": "10",
+          "suit": "hearts"
+        },
+        "type": "play",
+        "timestamp": 1766932394191,
+        "playerName": "J-Bock",
+        "trickIndex": 4,
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "A-hearts",
+          "rank": "A",
+          "suit": "hearts"
+        },
+        "type": "play",
+        "timestamp": 1766932395315,
+        "playerName": "Mimi",
+        "trickIndex": 4,
+        "playerIndex": 2
+      },
+      {
+        "type": "hand_result",
+        "result": {
+          "trump": "clubs",
+          "isLoner": false,
+          "timestamp": 1766932400356,
+          "tricksWon": {
+            "player-0": 2,
+            "player-1": 2,
+            "player-2": 0,
+            "player-3": 1
+          },
+          "dealerIndex": 3,
+          "winningTeam": 2,
+          "pointsScored": {
+            "team1": 0,
+            "team2": 2
+          },
+          "trumpCallerIndex": 0
+        },
+        "timestamp": 1766932400356
+      },
+      {
+        "type": "dealer",
+        "timestamp": 1766932404401,
+        "dealerName": "Moses",
+        "dealerIndex": 0
+      },
+      {
+        "type": "pass",
+        "round": 1,
+        "timestamp": 1766932405621,
+        "playerName": "J-Bock",
+        "playerIndex": 1
+      },
+      {
+        "type": "pass",
+        "round": 1,
+        "timestamp": 1766932408140,
+        "playerName": "Mimi",
+        "playerIndex": 2
+      },
+      {
+        "suit": "clubs",
+        "type": "bid",
+        "round": 1,
+        "isLoner": false,
+        "timestamp": 1766932409348,
+        "playerName": "Wooden",
+        "playerIndex": 3
+      },
+      {
+        "card": {
+          "id": "A-spades",
+          "rank": "A",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766932476238,
+        "playerName": "J-Bock",
+        "trickIndex": 0,
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "Q-spades",
+          "rank": "Q",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766932488012,
+        "playerName": "Mimi",
+        "trickIndex": 0,
+        "playerIndex": 2
+      },
+      {
+        "card": {
+          "id": "9-spades",
+          "rank": "9",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766932489221,
+        "playerName": "Wooden",
+        "trickIndex": 0,
+        "playerIndex": 3
+      },
+      {
+        "card": {
+          "id": "10-spades",
+          "rank": "10",
+          "suit": "spades"
+        },
+        "type": "play",
+        "timestamp": 1766932490446,
+        "playerName": "Moses",
+        "trickIndex": 0,
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "A-diamonds",
+          "rank": "A",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766932494711,
+        "playerName": "J-Bock",
+        "trickIndex": 1,
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "10-diamonds",
+          "rank": "10",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766932506343,
+        "playerName": "Mimi",
+        "trickIndex": 1,
+        "playerIndex": 2
+      },
+      {
+        "card": {
+          "id": "Q-hearts",
+          "rank": "Q",
+          "suit": "hearts"
+        },
+        "type": "play",
+        "timestamp": 1766932507562,
+        "playerName": "Wooden",
+        "trickIndex": 1,
+        "playerIndex": 3
+      },
+      {
+        "card": {
+          "id": "K-diamonds",
+          "rank": "K",
+          "suit": "diamonds"
+        },
+        "type": "play",
+        "timestamp": 1766932508794,
+        "playerName": "Moses",
+        "trickIndex": 1,
+        "playerIndex": 0
+      },
+      {
+        "card": {
+          "id": "10-hearts",
+          "rank": "10",
+          "suit": "hearts"
+        },
+        "type": "play",
+        "timestamp": 1766932513050,
+        "playerName": "J-Bock",
+        "trickIndex": 2,
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "K-hearts",
+          "rank": "K",
+          "suit": "hearts"
+        },
+        "type": "play",
+        "timestamp": 1766932515525,
+        "playerName": "Mimi",
+        "trickIndex": 2,
+        "playerIndex": 2
+      },
+      {
+        "card": {
+          "id": "9-clubs",
+          "rank": "9",
+          "suit": "clubs"
+        },
+        "type": "play",
+        "timestamp": 1766932516734,
+        "playerName": "Wooden",
+        "trickIndex": 2,
+        "playerIndex": 3
+      }
+    ],
+    "stepMode": false,
+    "tableCode": "589-436",
+    "tableName": "The Crimson Bower",
+    "teamNames": {
+      "team1": "Mimi & Moses",
+      "team2": "J-Bock & Wooden"
+    },
+    "tricksWon": {
+      "player-0": 0,
+      "player-1": 2,
+      "player-2": 0,
+      "player-3": 0
+    },
+    "lastActive": 1766932516734,
+    "currentUser": "Mimi",
+    "dealerIndex": 0,
+    "handsPlayed": 9,
+    "biddingRound": 1,
+    "currentTrick": [
+      {
+        "card": {
+          "id": "10-hearts",
+          "rank": "10",
+          "suit": "hearts"
+        },
+        "playerId": "player-1",
+        "playerIndex": 1
+      },
+      {
+        "card": {
+          "id": "K-hearts",
+          "rank": "K",
+          "suit": "hearts"
+        },
+        "playerId": "player-2",
+        "playerIndex": 2
+      },
+      {
+        "card": {
+          "id": "9-clubs",
+          "rank": "9",
+          "suit": "clubs"
+        },
+        "playerId": "player-3",
+        "playerIndex": 3
+      }
+    ],
+    "trumpCallLogs": [
+      {
+        "dealer": "Opponent - Wooden",
+        "gameId": "589-436",
+        "userType": "Bot",
+        "suitCount": 3,
+        "timestamp": 1766931447117,
+        "whoCalled": "Moses",
+        "bowerCount": 0,
+        "suitCalled": "Diamonds",
+        "trumpCount": 3,
+        "cardPickedUp": "n/a",
+        "handAfterDiscard": "10H, QD, KD, QH, AD"
+      },
+      {
+        "dealer": "Opponent - Moses",
+        "gameId": "589-436",
+        "userType": "Bot",
+        "suitCount": 2,
+        "timestamp": 1766931527584,
+        "whoCalled": "Wooden",
+        "bowerCount": 1,
+        "suitCalled": "Diamonds",
+        "trumpCount": 2,
+        "cardPickedUp": "10D",
+        "handAfterDiscard": "9D, JD, 10C, 10H, QS"
+      },
+      {
+        "dealer": "Opponent - J-Bock",
+        "gameId": "589-436",
+        "userType": "Bot",
+        "suitCount": 2,
+        "timestamp": 1766931607305,
+        "whoCalled": "Moses",
+        "bowerCount": 1,
+        "suitCalled": "Diamonds",
+        "trumpCount": 2,
+        "cardPickedUp": "QD",
+        "handAfterDiscard": "JD, AH, KC, QH, KD"
+      },
+      {
+        "dealer": "Opponent - Mimi",
+        "gameId": "589-436",
+        "userType": "Bot",
+        "suitCount": 3,
+        "timestamp": 1766931678365,
+        "whoCalled": "Wooden",
+        "bowerCount": 1,
+        "suitCalled": "Spades",
+        "trumpCount": 3,
+        "cardPickedUp": "n/a",
+        "handAfterDiscard": "AS, QH, JD, KS, JS"
+      },
+      {
+        "dealer": "Opponent - Wooden",
+        "gameId": "589-436",
+        "userType": "Bot",
+        "suitCount": 4,
+        "timestamp": 1766931843797,
+        "whoCalled": "Moses",
+        "bowerCount": 1,
+        "suitCalled": "Spades",
+        "trumpCount": 4,
+        "cardPickedUp": "n/a",
+        "handAfterDiscard": "JS, 9S, 10S, AS, QH"
+      },
+      {
+        "dealer": "Opponent - Moses",
+        "gameId": "589-436",
+        "userType": "Bot",
+        "suitCount": 1,
+        "timestamp": 1766931959009,
+        "whoCalled": "J-Bock",
+        "bowerCount": 2,
+        "suitCalled": "Spades",
+        "trumpCount": 2,
+        "cardPickedUp": "10S",
+        "handAfterDiscard": "10C, QD, KH, JC, JS"
+      },
+      {
+        "dealer": "Self - J-Bock",
+        "gameId": "589-436",
+        "userType": "Bot",
+        "suitCount": 2,
+        "timestamp": 1766932206114,
+        "whoCalled": "J-Bock",
+        "bowerCount": 1,
+        "suitCalled": "Clubs",
+        "trumpCount": 2,
+        "cardPickedUp": "AC",
+        "handAfterDiscard": "9S, QS, JC, QD, KC"
+      },
+      {
+        "dealer": "Teammate - Mimi",
+        "gameId": "589-436",
+        "userType": "Bot",
+        "suitCount": 2,
+        "timestamp": 1766932273990,
+        "whoCalled": "Moses",
+        "bowerCount": 1,
+        "suitCalled": "Spades",
+        "trumpCount": 2,
+        "cardPickedUp": "QS",
+        "handAfterDiscard": "JS, QH, 9H, 10S, 10D"
+      },
+      {
+        "dealer": "Opponent - Wooden",
+        "gameId": "589-436",
+        "userType": "Bot",
+        "suitCount": 3,
+        "timestamp": 1766932342892,
+        "whoCalled": "Moses",
+        "bowerCount": 0,
+        "suitCalled": "Clubs",
+        "trumpCount": 3,
+        "cardPickedUp": "n/a",
+        "handAfterDiscard": "KS, JH, AC, 9C, 10C"
+      },
+      {
+        "dealer": "Opponent - Moses",
+        "gameId": "589-436",
+        "userType": "Bot",
+        "suitCount": 2,
+        "timestamp": 1766932409348,
+        "whoCalled": "Wooden",
+        "bowerCount": 2,
+        "suitCalled": "Clubs",
+        "trumpCount": 3,
+        "cardPickedUp": "KC",
+        "handAfterDiscard": "JC, QH, JS, 9S, 9C"
+      }
+    ],
+    "overlayMessage": null,
+    "trumpCallerIndex": 3,
+    "currentPlayerIndex": 0,
+    "overlayAcknowledged": {
+      "Mimi": true,
+      "Moses": true,
+      "J-Bock": true,
+      "Wooden": true
+    },
+    "currentViewPlayerName": "Mimi"
+  }
+}

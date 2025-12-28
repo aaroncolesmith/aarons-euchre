@@ -1191,34 +1191,54 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     // Handle transition to next hand (Rotating Dealer)
     useEffect(() => {
         if (state.phase === 'waiting_for_next_deal') {
-            const timer = setTimeout(() => {
-                const nextDealer = state.players[state.dealerIndex];
+            const nextDealer = state.players[state.dealerIndex];
 
-                // The new dealer is responsible for generating the cards
-                // If dealer is a bot, ANY human player can take responsibility
-                // This prevents freeze when bot is dealer and no one deals
-                const isMyResponsibility =
-                    (nextDealer.name === state.currentUser) ||
-                    (nextDealer.isComputer && state.currentUser); // Any logged-in user can deal for bots
+            // PROGRESSIVE FALLBACK STRATEGY to ensure someone always deals:
+            // Attempt 1 (immediate): If I'm the dealer, deal now
+            // Attempt 2 (2s): If dealer is a bot and I'm connected, I'll deal for them
+            // Attempt 3 (5s): EMERGENCY - Anyone connected deals to prevent freeze
 
-                if (isMyResponsibility) {
-                    const deck = shuffleDeck(createDeck());
-                    const { hands, kitty } = dealHands(deck);
-                    const upcard = kitty[0];
+            const dealCards = () => {
+                const deck = shuffleDeck(createDeck());
+                const { hands, kitty } = dealHands(deck);
+                const upcard = kitty[0];
 
-                    broadcastDispatch({
-                        type: 'SET_DEALER',
-                        payload: {
-                            dealerIndex: state.dealerIndex,
-                            hands,
-                            upcard
-                        }
-                    });
-                }
-            }, 4000);
-            return () => clearTimeout(timer);
+                Logger.info('[DEAL] Dealing new hand', { dealer: nextDealer.name, by: state.currentUser });
+
+                broadcastDispatch({
+                    type: 'SET_DEALER',
+                    payload: {
+                        dealerIndex: state.dealerIndex,
+                        hands,
+                        upcard
+                    }
+                });
+            };
+
+            // Attempt 1: If I'm the dealer, deal immediately
+            if (nextDealer.name === state.currentUser) {
+                Logger.info('[DEAL] I am the dealer - dealing immediately');
+                const immediateTimer = setTimeout(dealCards, 100);
+                return () => clearTimeout(immediateTimer);
+            }
+
+            // Attempt 2: If dealer is a bot, any human can deal after 2 seconds
+            if (nextDealer.isComputer && state.currentUser) {
+                Logger.info('[DEAL] Dealer is bot - will deal after 2s if needed');
+                const botTimer = setTimeout(dealCards, 2000);
+                return () => clearTimeout(botTimer);
+            }
+
+            // Attempt 3: EMERGENCY FALLBACK - if we reach 5s, ANYONE deals to prevent freeze
+            Logger.warn('[DEAL] Using emergency fallback - will force deal after 5s');
+            const emergencyTimer = setTimeout(() => {
+                Logger.error('[DEAL] EMERGENCY FALLBACK TRIGGERED - forcing deal to prevent freeze');
+                dealCards();
+            }, 5000);
+
+            return () => clearTimeout(emergencyTimer);
         }
-    }, [state.phase]);
+    }, [state.phase, state.dealerIndex, state.currentUser]);
 
     useEffect(() => {
         if (state.phase === 'waiting_for_trick') {
