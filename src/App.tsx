@@ -227,6 +227,10 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
     const [freezeStats, setFreezeStats] = useState<any>(null);
     const [freezeRate, setFreezeRate] = useState<any>(null);
 
+    // Leaderboard sorting state (must be at top level - Rules of Hooks!)
+    const [sortColumn, setSortColumn] = useState<string>('winPct');
+    const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+
     // Reset to initial tab when modal opens
     useEffect(() => {
         if (isOpen) {
@@ -410,9 +414,6 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                     ) : tab === 'league' ? (
                         <div>
                             {(() => {
-                                const [sortColumn, setSortColumn] = useState<string>('winPct');
-                                const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
-
                                 const handleSort = (column: string) => {
                                     if (sortColumn === column) {
                                         setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
@@ -1101,7 +1102,7 @@ const LandingPage = () => {
                     Logout from {state.currentUser}
                 </button>
                 <div className="text-[10px] font-black text-slate-800 uppercase tracking-[0.3em]">
-                    Euchre Engine V0.50
+                    Euchre Engine V0.51
                 </div>
             </div>
 
