@@ -829,7 +829,8 @@ const gameReducer = (state: GameState, action: Action): GameState => {
                 else if (!isT1Caller === (p1 > p2)) summary = `${winnerTeam} EUCHRED ${loserTeam}! (+2)`;
 
                 logs = [summary, ...state.logs];
-                overlayMessage = summary;
+                // NO OVERLAY during scoring - prevents deadlocks, message shows in logs instead
+                overlayMessage = null;
             }
 
             // LONER FIX: After clearing trick, if next player should be skipped (partner), advance
@@ -997,38 +998,13 @@ const gameReducer = (state: GameState, action: Action): GameState => {
     }
 };
 
-// State sanitizer - fixes known deadlock scenarios
-const sanitizeGameState = (state: GameState): GameState => {
-    // FIX: Scoring phase deadlock - overlay acknowledged but game stuck
-    if (state.phase === 'scoring' && state.overlayMessage) {
-        const humanPlayers = state.players.filter(p => p.name && !p.isComputer);
-        const allAcknowledged = humanPlayers.every(p => state.overlayAcknowledged[p.name || '']);
-
-        if (allAcknowledged) {
-            // Check how long since last activity - only auto-fix if truly stuck
-            const timeSinceActive = Date.now() - (state.lastActive || 0);
-
-            if (timeSinceActive > 5000) { // 5 seconds = likely a real deadlock
-                Logger.warn('[STATE SANITIZER] Fixing scoring deadlock - running FINISH_HAND to score properly');
-                // Actually score the hand by running FINISH_HAND action
-                return gameReducer(state, { type: 'FINISH_HAND' });
-            }
-        }
-    }
-
-    return state;
-};
-
 const gameReducerFixed = (state: GameState, action: Action): GameState => {
     const newState = gameReducer(state, action);
 
-    // Sanitize state after any action
-    const sanitized = sanitizeGameState(newState);
-
-    if (sanitized !== state && action.type !== 'UPDATE_ANIMATION_DEALER') {
-        return { ...sanitized, lastActive: Date.now() };
+    if (newState !== state && action.type !== 'UPDATE_ANIMATION_DEALER') {
+        return { ...newState, lastActive: Date.now() };
     }
-    return sanitized;
+    return newState;
 };
 
 // --- Context ---
@@ -1246,6 +1222,16 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             const timer = setTimeout(() => {
                 broadcastDispatch({ type: 'CLEAR_TRICK' });
             }, 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [state.phase]);
+
+    // Auto-advance from scoring phase - no overlay blocking anymore
+    useEffect(() => {
+        if (state.phase === 'scoring') {
+            const timer = setTimeout(() => {
+                broadcastDispatch({ type: 'FINISH_HAND' });
+            }, 2000); // 2 seconds to see the log message
             return () => clearTimeout(timer);
         }
     }, [state.phase]);
