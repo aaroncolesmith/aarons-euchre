@@ -34,8 +34,8 @@ const PlayerSeat = ({
     const posClasses = {
         bottom: "bottom-4 md:bottom-10 left-1/2 -translate-x-1/2",
         top: "top-1 md:top-4 left-1/2 -translate-x-1/2",
-        left: "left-1 md:left-12 top-1/2 -translate-y-1/2 -rotate-90 origin-center",
-        right: "right-1 md:right-12 top-1/2 -translate-y-1/2 rotate-90 origin-center"
+        left: "left-0 md:left-12 top-1/2 -translate-y-1/2 -rotate-90 origin-center",
+        right: "right-0 md:right-12 top-1/2 -translate-y-1/2 rotate-90 origin-center"
     };
 
     if (!player.name && inLobby) {
@@ -75,11 +75,11 @@ const PlayerSeat = ({
 
     return (
         <motion.div
-            className={`absolute ${posClasses[position]} flex flex-col items-center gap-1 z-10`}
+            className={`absolute ${posClasses[position]} flex flex-col items-center gap-1 z-0`}
         >
             <motion.div
                 className={`
-                    relative w-48 h-24 rounded-3xl border-4 transition-all duration-300 flex flex-col items-center justify-center
+                    relative w-36 md:w-48 h-20 md:h-24 rounded-3xl border-4 transition-all duration-300 flex flex-col items-center justify-center
                     ${isAnimatingDealer
                         ? 'bg-slate-900/95 border-amber-500 shadow-[0_0_40px_rgba(245,158,11,1)]'
                         : isCurrentTurn
@@ -839,7 +839,7 @@ const LandingPage = () => {
                     Logout from {state.currentUser}
                 </button>
                 <div className="text-[10px] font-black text-slate-800 uppercase tracking-[0.3em]">
-                    Euchre Engine V0.38
+                    Euchre Engine V0.39
                 </div>
             </div>
 
@@ -1219,7 +1219,7 @@ const GameView = () => {
                             });
                         })()}
 
-                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
                             <AnimatePresence>
                                 {state.currentTrick.map((t) => {
                                     const pIdx = state.players.findIndex(p => p.id === t.playerId);
