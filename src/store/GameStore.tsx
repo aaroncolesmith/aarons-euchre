@@ -959,9 +959,17 @@ const gameReducer = (state: GameState, action: Action): GameState => {
 
             if (isGameOver) {
                 const globalStats = getGlobalStats();
-                updatedPlayers.forEach((p) => {
+
+                // CRITICAL: Track ALL 4 players to ensure wins = losses
+                // Use updatedPlayers which is created from state.players and has all 4 seats
+                updatedPlayers.forEach((p, playerIndex) => {
+                    // Skip empty seats (no name)
                     if (!p.name) return;
-                    const isGameWinner = isTeam1(state.players.indexOf(state.players.find(pl => pl.id === p.id)!)) ? newScores.team1 >= 10 : newScores.team2 >= 10;
+
+                    // Determine which team this player is on
+                    const playerTeam = isTeam1(playerIndex) ? 'team1' : 'team2';
+                    const isGameWinner = playerTeam === 'team1' ? newScores.team1 >= 10 : newScores.team2 >= 10;
+
                     const prevGlobal = globalStats[p.name] || getEmptyStats();
 
                     globalStats[p.name] = {
