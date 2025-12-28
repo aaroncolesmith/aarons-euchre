@@ -1289,14 +1289,10 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         if (!currentPlayer || !currentPlayer.isComputer || ['game_over', 'scoring', 'waiting_for_trick', 'randomizing_dealer', 'landing', 'lobby'].includes(state.phase)) return;
         if (state.stepMode) return;
 
-        // Don't let bots play if there's an overlay and not all humans have acknowledged it
-        if (state.overlayMessage) {
-            const humanPlayers = state.players.filter(p => p.name && !p.isComputer);
-            const allHumansAcknowledged = humanPlayers.every(p => state.overlayAcknowledged[p.name || '']);
-            if (!allHumansAcknowledged) {
-                return; // Wait for all humans to acknowledge the overlay
-            }
-        }
+        // Note: We used to block bots if overlay wasn't acknowledged
+        // This caused CRITICAL freeze bugs - bots would be stuck forever
+        // if a human wasn't connected or overlay state was corrupted
+        // Bots should play regardless of overlay state
 
         const timer = setTimeout(() => {
             if (state.phase === 'bidding') {
