@@ -277,8 +277,35 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
         }
     }, [tab, isOpen]);
 
-    // Load ALL trump calls from localStorage (not just current session)
-    const allTrumpCalls = JSON.parse(localStorage.getItem('euchre_trump_calls') || '[]');
+    // Load ALL trump calls from Supabase (primary) with localStorage fallback
+    const [allTrumpCalls, setAllTrumpCalls] = useState<any[]>([]);
+
+    useEffect(() => {
+        const loadTrumpCalls = async () => {
+            try {
+                const { getAllTrumpCalls } = await import('./utils/supabaseStats');
+                const supabaseCalls = await getAllTrumpCalls();
+
+                if (supabaseCalls.length > 0) {
+                    console.log('[TRUMP CALLS] Load from Supabase:', supabaseCalls.length, 'calls');
+                    setAllTrumpCalls(supabaseCalls);
+                } else {
+                    // Fallback to localStorage
+                    const localCalls = JSON.parse(localStorage.getItem('euchre_trump_calls') || '[]');
+                    console.log('[TRUMP CALLS] Using localStorage fallback:', localCalls.length, 'calls');
+                    setAllTrumpCalls(localCalls);
+                }
+            } catch (err) {
+                console.error('[TRUMP CALLS] Error loading from Supabase, using localStorage:', err);
+                const localCalls = JSON.parse(localStorage.getItem('euchre_trump_calls') || '[]');
+                setAllTrumpCalls(localCalls);
+            }
+        };
+
+        if (isOpen) {
+            loadTrumpCalls();
+        }
+    }, [isOpen]);
 
     // Get my stats - use currentUser (works everywhere) or fallback to currentViewPlayerName (in-game)
     const playerName = state.currentUser || state.currentViewPlayerName || '';
@@ -1130,7 +1157,7 @@ const LandingPage = () => {
                     Logout from {state.currentUser}
                 </button>
                 <div className="text-[10px] font-black text-slate-800 uppercase tracking-[0.3em]">
-                    Euchre Engine V0.53
+                    Euchre Engine V0.54
                 </div>
             </div>
 

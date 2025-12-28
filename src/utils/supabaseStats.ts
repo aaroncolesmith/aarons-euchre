@@ -147,3 +147,72 @@ export async function clearAllPlayerStats(): Promise<boolean> {
         return false;
     }
 }
+
+/**
+ * Save a trump call to Supabase
+ */
+export async function saveTrumpCall(trumpCall: any): Promise<boolean> {
+    try {
+        const { error } = await supabase
+            .from('trump_calls')
+            .insert({
+                game_id: trumpCall.gameId,
+                player_name: trumpCall.playerName,
+                seat_index: trumpCall.seatIndex,
+                suit: trumpCall.suit,
+                is_loner: trumpCall.isLoner,
+                picked_up: trumpCall.pickedUp,
+                round: trumpCall.round,
+                top_card: trumpCall.topCard,
+                top_card_suit: trumpCall.topCardSuit,
+                top_card_rank: trumpCall.topCardRank
+            });
+
+        if (error) {
+            console.error('[SUPABASE TRUMP] Error saving trump call:', error);
+            return false;
+        }
+
+        return true;
+    } catch (err) {
+        console.error('[SUPABASE TRUMP] Exception saving trump call:', err);
+        return false;
+    }
+}
+
+/**
+ * Get all trump calls from Supabase
+ */
+export async function getAllTrumpCalls(): Promise<any[]> {
+    try {
+        const { data, error } = await supabase
+            .from('trump_calls')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            console.error('[SUPABASE TRUMP] Error fetching trump calls:', error);
+            return [];
+        }
+
+        // Convert snake_case back to camelCase
+        return data?.map((row: any) => ({
+            id: row.id,
+            gameId: row.game_id,
+            playerName: row.player_name,
+            seatIndex: row.seat_index,
+            suit: row.suit,
+            isLoner: row.is_loner,
+            pickedUp: row.picked_up,
+            round: row.round,
+            topCard: row.top_card,
+            topCardSuit: row.top_card_suit,
+            topCardRank: row.top_card_rank,
+            timestamp: row.created_at
+        })) || [];
+    } catch (err) {
+        console.error('[SUPABASE TRUMP] Exception fetching trump calls:', err);
+        return [];
+    }
+}
+

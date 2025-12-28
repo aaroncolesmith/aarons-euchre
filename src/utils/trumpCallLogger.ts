@@ -133,12 +133,32 @@ export function getTrumpCallLogs(): TrumpCallLog[] {
 }
 
 /**
- * Save trump call log
+ * Save trump call log to both Supabase and localStorage
  */
-export function saveTrumpCallLog(log: TrumpCallLog): void {
+export async function saveTrumpCallLog(log: TrumpCallLog): Promise<void> {
+    // Save to localStorage (backup)
     const logs = getTrumpCallLogs();
     logs.push(log);
     localStorage.setItem('euchre_trump_calls', JSON.stringify(logs));
+
+    // Save to Supabase (primary) - fire and forget
+    try {
+        const { saveTrumpCall } = await import('./supabaseStats');
+        await saveTrumpCall({
+            gameId: log.gameId,
+            playerName: log.whoCalled,
+            seatIndex: 0, // We don't have this in TrumpCallLog, could add if needed
+            suit: log.suitCalled.toLowerCase(),
+            isLoner: false, // Not tracked in current TrumpCallLog
+            pickedUp: log.cardPickedUp !== 'n/a',
+            round: log.cardPickedUp !== 'n/a' ? 1 : 2,
+            topCard: log.cardPickedUp !== 'n/a' ? log.cardPickedUp : null,
+            topCardSuit: null, // Could parse from cardPickedUp if needed
+            topCardRank: null  // Could parse from cardPickedUp if needed
+        });
+    } catch (err) {
+        console.error('[TRUMP LOGGER] Failed to save to Supabase:', err);
+    }
 }
 
 /**
