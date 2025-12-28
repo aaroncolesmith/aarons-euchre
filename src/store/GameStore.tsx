@@ -5,6 +5,7 @@ import { createDeck, dealHands, shuffleDeck } from '../utils/deck';
 import { getBestBid, getEffectiveSuit, determineWinner, shouldCallTrump, getBotMove, sortHand } from '../utils/rules';
 import { createTrumpCallLog } from '../utils/trumpCallLogger';
 import { debugGameState, suggestFix } from '../utils/freezeDebugger';
+import { createHeartbeatSnapshot, detectFreeze, applyRecovery } from '../utils/heartbeat';
 import Logger from '../utils/logger';
 
 // --- Actions ---
@@ -1018,6 +1019,7 @@ const GameContext = createContext<GameContextType | undefined>(undefined);
 export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [state, dispatch] = useReducer(gameReducerFixed, INITIAL_STATE);
     const channelRef = useRef<any>(null);
+    const heartbeatSnapshotRef = useRef<ReturnType<typeof createHeartbeatSnapshot> | null>(null);
 
     // Enhanced dispatch that broadcasts to others
     const broadcastDispatch = async (action: Action) => {
@@ -1389,6 +1391,30 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
         return () => clearTimeout(timer);
     }, [state.currentPlayerIndex, state.phase, state.players, state.overlayMessage, state.currentTrick]);
+
+    // HEARTBEAT MONITOR - Runs every 10s to detect ANY freeze
+    useEffect(() => {
+        // Skip if not in active gameplay
+        if (['landing', 'login', 'lobby'].includes(state.phase)) return;
+
+        const heartbeat = setInterval(() => {
+            const currentSnapshot = createHeartbeatSnapshot(state);
+            const recoveryAction = detectFreeze(currentSnapshot, heartbeatSnapshotRef.current);
+
+            if (recoveryAction) {
+                Logger.error('[HEARTBEAT] 🚨 FREEZE DETECTED - Auto-recovering', {
+                    phase: state.phase,
+                    reason: recoveryAction.reason
+                });
+
+                applyRecovery(recoveryAction, broadcastDispatch);
+            }
+
+            heartbeatSnapshotRef.current = currentSnapshot;
+        }, 10000); // Check every 10 seconds
+
+        return () => clearInterval(heartbeat);
+    }, [state.phase, state.currentPlayerIndex, state.lastActive]);
 
     return (
         <GameContext.Provider value={{ state, dispatch: broadcastDispatch }}>
