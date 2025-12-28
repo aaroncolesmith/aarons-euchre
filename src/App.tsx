@@ -220,11 +220,19 @@ const CardComponent = ({
     );
 };
 
-const StatsModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
+
+const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; onClose: () => void; initialTab?: 'me' | 'league' | 'trumps' | 'admin' }) => {
     const { state } = useGame();
-    const [tab, setTab] = useState<'me' | 'league' | 'trumps' | 'admin'>('me');
+    const [tab, setTab] = useState<'me' | 'league' | 'trumps' | 'admin'>(initialTab);
     const [freezeStats, setFreezeStats] = useState<any>(null);
     const [freezeRate, setFreezeRate] = useState<any>(null);
+
+    // Reset to initial tab when modal opens
+    useEffect(() => {
+        if (isOpen) {
+            setTab(initialTab);
+        }
+    }, [isOpen, initialTab]);
 
     // Load global stats from localStorage
     const globalStats = JSON.parse(localStorage.getItem('euchre_global_profiles') || '{}');
@@ -749,6 +757,7 @@ const LandingPage = () => {
     const [showJoin, setShowJoin] = useState(false);
     const [_refreshKey, setRefreshKey] = useState(0);
     const [isStatsOpen, setIsStatsOpen] = useState(false);
+    const [statsInitialTab, setStatsInitialTab] = useState<'me' | 'league' | 'trumps' | 'admin'>('me');
     const [cloudGames, setCloudGames] = useState<any[]>([]);
     const [gameFilter, setGameFilter] = useState<'in-progress' | 'completed'>('in-progress');
 
@@ -840,11 +849,19 @@ const LandingPage = () => {
                     </div>
                     <div className="flex gap-2">
                         <button
-                            onClick={() => setIsStatsOpen(true)}
+                            onClick={() => { setStatsInitialTab('me'); setIsStatsOpen(true); }}
                             className="text-[10px] font-black text-slate-300 hover:text-white hover:bg-slate-800 px-4 md:px-6 py-2 md:py-3 rounded-xl md:rounded-2xl border-2 border-slate-800/50 transition-all uppercase tracking-widest"
                         >
                             Stats
                         </button>
+                        {state.currentUser === 'Aaron' && (
+                            <button
+                                onClick={() => { setStatsInitialTab('admin'); setIsStatsOpen(true); }}
+                                className="text-[10px] font-black text-red-400 hover:text-white hover:bg-red-500 px-4 md:px-6 py-2 md:py-3 rounded-xl md:rounded-2xl border-2 border-red-500/20 transition-all uppercase tracking-widest"
+                            >
+                                🔧 Admin
+                            </button>
+                        )}
                         <button
                             onClick={() => dispatch({ type: 'LOGOUT' })}
                             className="text-[10px] font-black text-red-500 hover:text-white hover:bg-red-500 px-4 md:px-6 py-2 md:py-3 rounded-xl md:rounded-2xl border-2 border-red-500/20 transition-all uppercase tracking-widest"
@@ -982,11 +999,11 @@ const LandingPage = () => {
                     Logout from {state.currentUser}
                 </button>
                 <div className="text-[10px] font-black text-slate-800 uppercase tracking-[0.3em]">
-                    Euchre Engine V0.44
+                    Euchre Engine V0.45
                 </div>
             </div>
 
-            <StatsModal isOpen={isStatsOpen} onClose={() => setIsStatsOpen(false)} />
+            <StatsModal isOpen={isStatsOpen} onClose={() => setIsStatsOpen(false)} initialTab={statsInitialTab} />
         </div>
     );
 };
@@ -1119,6 +1136,8 @@ const TabButton = ({ active, onClick, children }: any) => (
 const GameView = () => {
     const { state, dispatch } = useGame();
     const [isStatsOpen, setIsStatsOpen] = useState(false);
+    // @ts-ignore - Will be used when admin button is added to GameView
+    const [statsInitialTab, setStatsInitialTab] = useState<'me' | 'league' | 'trumps' | 'admin'>('me');
     const [activeTab, setActiveTab] = useState<'table' | 'commentary' | 'stats'>('table');
 
     const handleNextStep = () => {
@@ -1248,7 +1267,7 @@ const GameView = () => {
                     </div>
                 </div>
 
-                <StatsModal isOpen={isStatsOpen} onClose={() => setIsStatsOpen(false)} />
+                <StatsModal isOpen={isStatsOpen} onClose={() => setIsStatsOpen(false)} initialTab={statsInitialTab} />
 
                 <div className={`flex-1 bg-slate-900/95 rounded-[2rem] md:rounded-[3rem] shadow-2xl border border-slate-800/50 p-3 md:p-8 backdrop-blur-3xl flex flex-col relative overflow-hidden ${activeTab === 'table' ? 'flex' : 'hidden md:flex'}`}>
 

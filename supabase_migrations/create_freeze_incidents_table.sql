@@ -13,19 +13,21 @@ CREATE TABLE IF NOT EXISTS freeze_incidents (
     recovered BOOLEAN DEFAULT false,
     app_version TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW(),
-    
-    -- Additional diagnostic data
-    diagnostic_data JSONB,
-    
-    -- Indexes for querying
-    INDEX idx_freeze_incidents_game_code ON freeze_incidents(game_code),
-    INDEX idx_freeze_incidents_created_at ON freeze_incidents(created_at),
-    INDEX idx_freeze_incidents_freeze_type ON freeze_incidents(freeze_type),
-    INDEX idx_freeze_incidents_recovered ON freeze_incidents(recovered)
+    diagnostic_data JSONB
 );
+
+-- Create indexes for querying
+CREATE INDEX IF NOT EXISTS idx_freeze_incidents_game_code ON freeze_incidents(game_code);
+CREATE INDEX IF NOT EXISTS idx_freeze_incidents_created_at ON freeze_incidents(created_at);
+CREATE INDEX IF NOT EXISTS idx_freeze_incidents_freeze_type ON freeze_incidents(freeze_type);
+CREATE INDEX IF NOT EXISTS idx_freeze_incidents_recovered ON freeze_incidents(recovered);
 
 -- Enable Row Level Security
 ALTER TABLE freeze_incidents ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing policies if they exist
+DROP POLICY IF EXISTS "Anyone can insert freeze incidents" ON freeze_incidents;
+DROP POLICY IF EXISTS "Anyone can read freeze incidents" ON freeze_incidents;
 
 -- Policy: Anyone can insert freeze incidents
 CREATE POLICY "Anyone can insert freeze incidents"
