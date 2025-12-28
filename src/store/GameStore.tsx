@@ -584,6 +584,13 @@ const gameReducer = (state: GameState, action: Action): GameState => {
                     state.tableCode || 'unknown'
                 );
 
+                // Save trump call to Supabase + localStorage
+                import('../utils/trumpCallLogger').then(({ saveTrumpCallLog }) => {
+                    saveTrumpCallLog(trumpLog).catch((err: any) => {
+                        console.error('[GAME] Failed to save trump call:', err);
+                    });
+                });
+
                 return {
                     ...state,
                     players: updatedPlayers,
@@ -638,6 +645,13 @@ const gameReducer = (state: GameState, action: Action): GameState => {
                 state.biddingRound,
                 state.tableCode || 'unknown'
             );
+
+            // Save trump call to Supabase + localStorage
+            import('../utils/trumpCallLogger').then(({ saveTrumpCallLog }) => {
+                saveTrumpCallLog(trumpLog).catch((err: any) => {
+                    console.error('[GAME] Failed to save trump call:', err);
+                });
+            });
 
             return {
                 ...state,
