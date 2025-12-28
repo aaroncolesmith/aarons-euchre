@@ -5,6 +5,7 @@ import { getEffectiveSuit, isValidPlay } from './utils/rules';
 import { Card } from './types/game';
 import { supabase } from './lib/supabase';
 import { fetchUserCloudGames, mergeLocalAndCloudGames } from './utils/cloudGames';
+import { getFreezeStats, getFreezeRate } from './utils/cloudFreezeLogger';
 
 const getCardJitter = (id: string) => {
     let hash = 0;
@@ -221,10 +222,20 @@ const CardComponent = ({
 
 const StatsModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
     const { state } = useGame();
-    const [tab, setTab] = useState<'me' | 'league' | 'trumps'>('me');
+    const [tab, setTab] = useState<'me' | 'league' | 'trumps' | 'admin'>('me');
+    const [freezeStats, setFreezeStats] = useState<any>(null);
+    const [freezeRate, setFreezeRate] = useState<any>(null);
 
     // Load global stats from localStorage
     const globalStats = JSON.parse(localStorage.getItem('euchre_global_profiles') || '{}');
+
+    // Load freeze statistics when admin tab is selected
+    useEffect(() => {
+        if (tab === 'admin' && isOpen) {
+            getFreezeStats().then(setFreezeStats);
+            getFreezeRate(24).then(setFreezeRate);
+        }
+    }, [tab, isOpen]);
 
     // Get my stats - prioritize global stats over current game stats
     const myGlobalStats = globalStats[state.currentViewPlayerName || ''] || getEmptyStats();
@@ -288,6 +299,14 @@ const StatsModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
                                 >
                                     Trump Calls
                                 </button>
+                                {state.currentViewPlayerName === 'Aaron' && (
+                                    <button
+                                        onClick={() => setTab('admin')}
+                                        className={`px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all ${tab === 'admin' ? 'bg-red-500 text-white shadow-[0_0_20px_rgba(239,68,68,0.4)]' : 'bg-slate-800 text-red-400 hover:text-red-300'}`}
+                                    >
+                                        🔧 Admin
+                                    </button>
+                                )}
                                 <button
                                     onClick={downloadSessionLog}
                                     disabled={state.eventLog.length === 0}
@@ -493,6 +512,130 @@ const StatsModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
                                     </div>
                                 </div>
                             )}
+                        </div>
+                    ) : tab === 'admin' ? (
+                        <div className="space-y-6">
+                            <div className="text-red-400 text-sm font-bold mb-4">
+                                🔧 ADMIN DASHBOARD - Freeze Monitoring & Analytics
+                            </div>
+
+                            {/* Freeze Rate Card */}
+                            {freezeRate && (
+                                <div className="bg-gradient-to-br from-red-900/20 to-orange-900/20 border border-red-800/50 rounded-[2rem] p-6">
+                                    <div className="text-xs font-black text-red-400 uppercase tracking-widest mb-4">
+                                        Freeze Metrics (Last {freezeRate.timeRange})
+                                    </div>
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                        <div>
+                                            <div className="text-3xl font-black text-white">{freezeRate.total}</div>
+                                            <div className="text-xs text-slate-400">Total Freezes</div>
+                                        </div>
+                                        <div>
+                                            <div className="text-3xl font-black text-emerald-400">{freezeRate.recovered}</div>
+                                            <div className="text-xs text-slate-400">Recovered</div>
+                                        </div>
+                                        <div>
+                                            <div className="text-3xl font-black text-red-400">{freezeRate.unrecovered}</div>
+                                            <div className="text-xs text-slate-400">Unrecovered</div>
+                                        </div>
+                                        <div>
+                                            <div className="text-3xl font-black text-cyan-400">{freezeRate.recoveryRate}</div>
+                                            <div className="text-xs text-slate-400">Recovery Rate</div>
+                                        </div>
+                                    </div>
+                                    <div className="mt-4 pt-4 border-t border-red-800/30">
+                                        <div className="text-sm text-slate-300">
+                                            <span className="font-bold text-yellow-400">{freezeRate.freezesPerHour}</span> freezes/hour average
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Recent Freeze Incidents */}
+                            <div>
+                                <div className="flex justify-between items-center mb-4">
+                                    <div className="text-xs font-black text-slate-400 uppercase tracking-widest">
+                                        Recent Freeze Incidents
+                                    </div>
+                                    <button
+                                        onClick={() => { getFreezeStats().then(setFreezeStats); getFreezeRate(24).then(setFreezeRate); }}
+                                        className="px-4 py-2 rounded-full text-[10px] font-black bg-slate-800 text-slate-400 hover:bg-slate-700 transition-all"
+                                    >
+                                        🔄 Refresh
+                                    </button>
+                                </div>
+
+                                {!freezeStats ? (
+                                    <div className="bg-slate-800/30 border border-slate-800 rounded-[2rem] p-12 text-center">
+                                        <div className="text-slate-500">Loading freeze data...</div>
+                                    </div>
+                                ) : freezeStats.length === 0 ? (
+                                    <div className="bg-slate-800/30 border border-slate-800 rounded-[2rem] p-12 text-center">
+                                        <div className="text-emerald-500 text-lg mb-2">🎉 No Freeze Incidents!</div>
+                                        <div className="text-slate-600 text-sm">All games running smoothly</div>
+                                    </div>
+                                ) : (
+                                    <div className="bg-slate-800/30 border border-slate-800 rounded-[2rem] overflow-hidden">
+                                        <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
+                                            <table className="w-full text-left text-xs">
+                                                <thead className="bg-slate-800/50 sticky top-0">
+                                                    <tr className="text-[9px] font-black text-slate-500 uppercase">
+                                                        <th className="px-4 py-3">Time</th>
+                                                        <th className="px-4 py-3">Game</th>
+                                                        <th className="px-4 py-3">Type</th>
+                                                        <th className="px-4 py-3">Phase</th>
+                                                        <th className="px-4 py-3">Player</th>
+                                                        <th className="px-4 py-3">Duration</th>
+                                                        <th className="px-4 py-3">Recovery</th>
+                                                        <th className="px-4 py-3">Version</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y divide-slate-800">
+                                                    {freezeStats.map((incident: any) => (
+                                                        <tr key={incident.id} className="hover:bg-slate-800/30 transition-colors">
+                                                            <td className="px-4 py-3 text-slate-400 text-[10px]">
+                                                                {new Date(incident.created_at).toLocaleString()}
+                                                            </td>
+                                                            <td className="px-4 py-3 font-mono text-cyan-400 font-bold">
+                                                                {incident.game_code}
+                                                            </td>
+                                                            <td className="px-4 py-3">
+                                                                <span className="px-2 py-1 rounded text-[9px] font-black bg-red-500/20 text-red-400">
+                                                                    {incident.freeze_type}
+                                                                </span>
+                                                            </td>
+                                                            <td className="px-4 py-3 text-purple-400">{incident.phase}</td>
+                                                            <td className="px-4 py-3">
+                                                                <div className="text-white font-bold">{incident.current_player_name || 'Unknown'}</div>
+                                                                <div className="text-[9px] text-slate-500">
+                                                                    {incident.is_bot ? '🤖 Bot' : '👤 Human'}
+                                                                </div>
+                                                            </td>
+                                                            <td className="px-4 py-3 text-yellow-400 font-bold">
+                                                                {(incident.time_since_active_ms / 1000).toFixed(0)}s
+                                                            </td>
+                                                            <td className="px-4 py-3">
+                                                                {incident.recovered ? (
+                                                                    <span className="px-2 py-1 rounded text-[9px] font-black bg-emerald-500/20 text-emerald-400">
+                                                                        ✓ Recovered
+                                                                    </span>
+                                                                ) : (
+                                                                    <span className="px-2 py-1 rounded text-[9px] font-black bg-red-500/20 text-red-400">
+                                                                        ✗ Failed
+                                                                    </span>
+                                                                )}
+                                                            </td>
+                                                            <td className="px-4 py-3 text-slate-400 font-mono text-[10px]">
+                                                                {incident.app_version}
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     ) : null}
 
@@ -839,7 +982,7 @@ const LandingPage = () => {
                     Logout from {state.currentUser}
                 </button>
                 <div className="text-[10px] font-black text-slate-800 uppercase tracking-[0.3em]">
-                    Euchre Engine V0.42
+                    Euchre Engine V0.43
                 </div>
             </div>
 
