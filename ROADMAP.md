@@ -51,16 +51,30 @@ A beautiful, refined, and addictive Euchre game with a "Robinhood-style" premium
 - [x] **Bot Resource Management**: Basic bot registry and unique naming.
 - [x] **Table Metadata**: Support for various team configurations (Human+Human, Human+Bot, etc.).
 
-### Milestone 5: Multiplayer Sync & Persistence 🔄 IN PROGRESS
-**Goal:** Connect real players across sessions.
+### Milestone 5: Multiplayer Sync & Persistence ✅ COMPLETE
+**Goal:** Connect real players across sessions with centralized data.
 - [x] **User Identity**:
-    - [x] Simple login with whitelisted usernames (Aaron/Polina).
+    - [x] Simple login with whitelisted usernames (Aaron/Polina/Mimi/etc).
+    - [x] Case-insensitive login support.
     - [x] Local persistence of user session.
-- [ ] **Real-time Backend Integration**:
-    - [ ] Transition from `localStorage` to a centralized DB (Supabase/Firebase).
-    - [ ] WebSocket/PubSub for live table synchronization.
-- [ ] **ELO & Ranking**: Competitive ranking based on performance against various bot/human difficulties.
-- [ ] **Analytical Replay**: Use the `eventLog` to provide a visual playback of previous trick sequences.
+- [x] **Real-time Backend Integration**:
+    - [x] Migrated from `localStorage` to centralized Supabase.
+    - [x] **Global Player Stats** - Shared leaderboard across all users.
+    - [x] **Trump Call History** - Centralized trump call tracking.
+    - [x] **Active Game Management** - Remote game state control.
+    - [x] **Freeze Incident Tracking** - Analytics for debugging.
+    - [x] WebSocket/Realtime for live table synchronization.
+- [x] **Data Integrity**:
+    - [x] Fixed stats corruption (wins = losses guarantee).
+    - [x] Dual-save strategy (Supabase + localStorage backup).
+    - [x] Admin SQL queries for verification.
+- [x] **Game Stability**:
+    - [x] Data-driven freeze analysis and fixes.
+    - [x] Bulletproof bot play logic (3-layer fallback).
+    - [x] Auto-dismiss overlays (5s max).
+    - [x] Eliminated 100% of identified freeze patterns.
+- [ ] **ELO & Ranking**: Competitive ranking based on performance (Future).
+- [ ] **Analytical Replay**: Visual playback of previous tricks (Future).
 
 ### Milestone 6: "Premium" Polish & Visual Wow 🔄 IN PROGRESS
 **Goal:** Finalize the aesthetic to "Apple/Robinhood" standards.
