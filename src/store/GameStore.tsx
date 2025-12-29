@@ -78,6 +78,29 @@ export const getEmptyStats = (): PlayerStats => ({
     swept: 0,
 });
 
+// MIGRATION: One-time wipe of corrupted pre-V0.52 data
+const MIGRATION_VERSION = 'v0.52-migration-complete';
+
+const runDataMigration = () => {
+    const migrationComplete = localStorage.getItem(MIGRATION_VERSION);
+
+    if (!migrationComplete) {
+        console.log('[MIGRATION] Detected first run after V0.52 - wiping corrupted data');
+
+        // Wipe corrupted localStorage data
+        localStorage.removeItem('euchre_global_profiles');
+        localStorage.removeItem('euchre_trump_calls');
+
+        // Mark migration as complete
+        localStorage.setItem(MIGRATION_VERSION, 'true');
+
+        console.log('[MIGRATION] Data wipe complete. Fresh start with V0.52+ data integrity fixes.');
+    }
+};
+
+// Run migration on module load
+runDataMigration();
+
 const getGlobalStats = (): { [name: string]: PlayerStats } => {
     const saved = localStorage.getItem('euchre_global_profiles');
     return saved ? JSON.parse(saved) : {};
