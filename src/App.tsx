@@ -115,12 +115,12 @@ const PlayerSeat = ({
                 {isDealer && !isAnimatingDealer && state.phase === 'bidding' && state.biddingRound === 1 && state.upcard && (
                     <motion.div
                         layoutId={state.upcard.id}
-                        initial={{ scale: 0, opacity: 0, rotate: position === 'top' ? 195 : 15 }}
-                        animate={{ scale: 1, opacity: 1, rotate: position === 'top' ? 195 : 15 }}
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
                         className={`absolute ${position === 'bottom' ? 'bottom-full -mb-2' : 'top-full -mt-2'} left-1/2 -translate-x-1/2 z-20 pointer-events-none`}
                     >
                         <div className="relative">
-                            <CardComponent card={state.upcard} size="sm" disabled />
+                            <CardComponent card={state.upcard} size="sm" rotation={position === 'top' ? 195 : 15} disabled />
                             <div className="absolute -top-2 left-1/2 -translate-x-1/2 bg-white text-slate-950 text-[7px] md:text-[8px] font-black px-2 py-0.5 rounded shadow-xl border border-slate-200 whitespace-nowrap z-30">
                                 UPCARD
                             </div>
@@ -1221,7 +1221,7 @@ const LandingPage = () => {
                     Logout from {state.currentUser}
                 </button>
                 <div className="text-[10px] font-black text-slate-800 uppercase tracking-[0.3em]">
-                    Euchre Engine V0.71
+                    Euchre Engine V0.72
                 </div>
             </div>
 
