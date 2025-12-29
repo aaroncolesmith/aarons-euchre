@@ -63,10 +63,32 @@ export function countTrump(hand: Card[], trumpSuit: string): number {
 }
 
 /**
- * Count cards of the called suit (before trump is established)
+ * Count the number of unique effective suits in hand (distribution).
+ * Treats the Left Bower as part of the trump suit.
+ * A lower number (e.g., 2) is stronger than a higher number (e.g., 4).
  */
-export function countSuit(hand: Card[], suit: string): number {
-    return hand.filter(card => card.suit.toLowerCase() === suit.toLowerCase()).length;
+export function countSuit(hand: Card[], trumpSuit: string): number {
+    const suitMap: Record<string, string> = {
+        'hearts': 'diamonds',
+        'diamonds': 'hearts',
+        'clubs': 'spades',
+        'spades': 'clubs'
+    };
+    const oppositeSuit = suitMap[trumpSuit.toLowerCase()];
+
+    const uniqueSuits = new Set<string>();
+
+    hand.forEach(card => {
+        const s = card.suit.toLowerCase();
+        // If it's the Left Bower, it's effectively the Trump suit
+        if (card.rank === 'J' && s === oppositeSuit) {
+            uniqueSuits.add(trumpSuit.toLowerCase());
+        } else {
+            uniqueSuits.add(s);
+        }
+    });
+
+    return uniqueSuits.size;
 }
 
 /**

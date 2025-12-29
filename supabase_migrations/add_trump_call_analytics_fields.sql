@@ -20,5 +20,5 @@ COMMENT ON COLUMN public.trump_calls.dealer IS 'Name of the dealer for this hand
 COMMENT ON COLUMN public.trump_calls.dealer_relationship IS 'Relationship of dealer to caller (teammate/opponent/self/partner)';
 COMMENT ON COLUMN public.trump_calls.bower_count IS 'Number of bowers (Jacks) in hand when trump was called';
 COMMENT ON COLUMN public.trump_calls.trump_count IS 'Total number of trump cards (including bowers) in hand';
-COMMENT ON COLUMN public.trump_calls.suit_count IS 'Number of cards in the called suit before trump was established';
+COMMENT ON COLUMN public.trump_calls.suit_count IS 'Number of unique effective suits in hand (distribution analysis)';
 COMMENT ON COLUMN public.trump_calls.hand_after_discard IS 'Comma-separated list of cards in hand after discarding (for picked up calls)';
