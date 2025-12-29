@@ -115,9 +115,9 @@ const PlayerSeat = ({
                 {isDealer && !isAnimatingDealer && state.phase === 'bidding' && state.biddingRound === 1 && state.upcard && (
                     <motion.div
                         layoutId={state.upcard.id}
-                        initial={{ scale: 0, opacity: 0, rotate: 15 }}
-                        animate={{ scale: 1, opacity: 1, rotate: 15 }}
-                        className="absolute -top-24 md:-top-32 z-20 pointer-events-none"
+                        initial={{ scale: 0, opacity: 0, rotate: position === 'top' ? 195 : 15 }}
+                        animate={{ scale: 1, opacity: 1, rotate: position === 'top' ? 195 : 15 }}
+                        className={`absolute ${position === 'bottom' ? 'bottom-full -mb-2' : 'top-full -mt-2'} left-1/2 -translate-x-1/2 z-20 pointer-events-none`}
                     >
                         <div className="relative">
                             <CardComponent card={state.upcard} size="sm" disabled />
@@ -1221,7 +1221,7 @@ const LandingPage = () => {
                     Logout from {state.currentUser}
                 </button>
                 <div className="text-[10px] font-black text-slate-800 uppercase tracking-[0.3em]">
-                    Euchre Engine V0.70
+                    Euchre Engine V0.71
                 </div>
             </div>
 
@@ -1641,16 +1641,16 @@ const GameView = () => {
                                             initial={{ opacity: 0, y: 20 }}
                                             animate={{ opacity: 1, y: 0 }}
                                             exit={{ opacity: 0, scale: 0.95 }}
-                                            className="pointer-events-auto p-1.5 md:p-2 bg-slate-900/90 rounded-full border-2 border-emerald-500 shadow-[0_0_40px_rgba(16,185,129,0.4)] flex items-center gap-2 backdrop-blur-xl mx-auto w-fit shrink-0"
+                                            className="pointer-events-auto p-4 md:p-6 bg-slate-900/95 rounded-[2.5rem] md:rounded-[3rem] border-2 border-emerald-500 shadow-[0_0_50px_rgba(16,185,129,0.4)] flex flex-col gap-4 backdrop-blur-xl mx-auto w-full max-w-[320px] md:max-w-md"
                                         >
                                             {state.biddingRound === 1 ? (
-                                                <div className="flex gap-1 justify-center px-1">
-                                                    <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit: state.upcard!.suit, callerIndex: myIdx, isLoner: false } })} className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 md:px-6 py-2.5 md:py-3 rounded-full font-black text-[9px] md:text-xs uppercase shadow-lg transition-transform active:scale-95 whitespace-nowrap">Order Up</button>
-                                                    <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit: state.upcard!.suit, callerIndex: myIdx, isLoner: true } })} className="bg-amber-500 hover:bg-amber-400 text-white px-4 md:px-6 py-2.5 md:py-3 rounded-full font-black text-[9px] md:text-xs uppercase shadow-lg transition-transform active:scale-95 whitespace-nowrap">Go Alone</button>
-                                                    <button onClick={() => dispatch({ type: 'PASS_BID', payload: { playerIndex: myIdx } })} className="bg-pink-600 hover:bg-pink-500 text-white px-4 md:px-6 py-2.5 md:py-3 rounded-full font-black text-[9px] md:text-xs uppercase shadow-lg transition-transform active:scale-95 whitespace-nowrap">Pass</button>
+                                                <div className="flex gap-2 justify-center">
+                                                    <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit: state.upcard!.suit, callerIndex: myIdx, isLoner: false } })} className="bg-emerald-600 hover:bg-emerald-500 text-white flex-1 py-3 md:py-4 rounded-xl md:rounded-2xl font-black text-[10px] md:text-sm uppercase shadow-lg shadow-emerald-500/20 leading-tight transition-transform active:scale-95">Order Up</button>
+                                                    <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit: state.upcard!.suit, callerIndex: myIdx, isLoner: true } })} className="bg-amber-500 hover:bg-amber-400 text-white flex-1 py-3 md:py-4 rounded-xl md:rounded-2xl font-black text-[10px] md:text-sm uppercase shadow-lg shadow-amber-500/20 leading-tight transition-transform active:scale-95">Go Alone</button>
+                                                    <button onClick={() => dispatch({ type: 'PASS_BID', payload: { playerIndex: myIdx } })} className="bg-pink-600 hover:bg-pink-500 text-white flex-1 py-3 md:py-4 rounded-xl md:rounded-2xl font-black text-[10px] md:text-sm uppercase shadow-lg shadow-pink-500/20 leading-tight transition-transform active:scale-95 flex items-center justify-center">Pass</button>
                                                 </div>
                                             ) : (
-                                                <div className="flex flex-col gap-2 p-2">
+                                                <div className="flex flex-col gap-2">
                                                     <div className="flex flex-wrap justify-center gap-2">
                                                         {(['hearts', 'diamonds', 'clubs', 'spades'] as const).filter(s => s !== state.upcard!.suit).map(suit => (
                                                             <div key={suit} className="flex-1 flex flex-col gap-1">
