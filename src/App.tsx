@@ -117,7 +117,7 @@ const PlayerSeat = ({
                         layoutId={state.upcard.id}
                         initial={{ scale: 0, opacity: 0, rotate: 15 }}
                         animate={{ scale: 1, opacity: 1, rotate: 15 }}
-                        className="absolute -top-16 md:-top-20 z-20 pointer-events-none"
+                        className="absolute -top-24 md:-top-32 z-20 pointer-events-none"
                     >
                         <div className="relative">
                             <CardComponent card={state.upcard} size="sm" disabled />
@@ -1221,7 +1221,7 @@ const LandingPage = () => {
                     Logout from {state.currentUser}
                 </button>
                 <div className="text-[10px] font-black text-slate-800 uppercase tracking-[0.3em]">
-                    Euchre Engine V0.69
+                    Euchre Engine V0.70
                 </div>
             </div>
 
@@ -1641,7 +1641,7 @@ const GameView = () => {
                                             initial={{ opacity: 0, y: 20 }}
                                             animate={{ opacity: 1, y: 0 }}
                                             exit={{ opacity: 0, scale: 0.95 }}
-                                            className="pointer-events-auto p-1.5 md:p-2 bg-slate-900/90 rounded-full border-2 border-emerald-500 shadow-[0_0_40px_rgba(16,185,129,0.4)] flex items-center gap-2 backdrop-blur-xl mx-auto"
+                                            className="pointer-events-auto p-1.5 md:p-2 bg-slate-900/90 rounded-full border-2 border-emerald-500 shadow-[0_0_40px_rgba(16,185,129,0.4)] flex items-center gap-2 backdrop-blur-xl mx-auto w-fit shrink-0"
                                         >
                                             {state.biddingRound === 1 ? (
                                                 <div className="flex gap-1 justify-center px-1">
