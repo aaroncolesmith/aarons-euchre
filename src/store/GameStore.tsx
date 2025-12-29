@@ -588,15 +588,18 @@ const gameReducer = (state: GameState, action: Action): GameState => {
 
             if (state.biddingRound === 1 && state.upcard) {
                 const dealer = newPlayers[state.dealerIndex];
+                const dealerHandWithUpcard = [...dealer.hand, state.upcard!]; // Dealer's hand AFTER picking up
+
                 const updatedPlayers = newPlayers.map((p, i) => {
                     if (i === state.dealerIndex) {
-                        const newHand = [...dealer.hand, state.upcard!];
+                        const newHand = dealerHandWithUpcard;
                         return { ...p, hand: p.name === state.currentViewPlayerName && !p.isComputer ? sortHand(newHand, suit) : newHand };
                     }
                     return p;
                 });
 
-                // Log trump call
+                // Log trump call - for dealer pickup, log the DEALER's hand (not necessarily the caller)
+                // The dealer's hand should include the picked-up card
                 const trumpLog = createTrumpCallLog(
                     caller,
                     suit,
@@ -604,7 +607,8 @@ const gameReducer = (state: GameState, action: Action): GameState => {
                     relationship,
                     state.upcard,
                     state.biddingRound,
-                    state.tableCode || 'unknown'
+                    state.tableCode || 'unknown',
+                    dealerHandWithUpcard // Pass dealer's hand AFTER picking up the card
                 );
 
                 // Save trump call to Supabase + localStorage

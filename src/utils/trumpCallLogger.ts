@@ -84,10 +84,74 @@ export function formatCard(card: Card): string {
 }
 
 /**
- * Format hand as comma-separated cards
+ * Sort hand by suit (trump first) and rank (descending), matching UI display
  */
-export function formatHand(hand: Card[]): string {
-    return hand.map(formatCard).join(', ');
+export function sortHandForDisplay(hand: Card[], trumpSuit: string): Card[] {
+    const suitMap: Record<string, string> = {
+        'hearts': 'diamonds',
+        'diamonds': 'hearts',
+        'clubs': 'spades',
+        'spades': 'clubs'
+    };
+    const oppositeSuit = suitMap[trumpSuit.toLowerCase()];
+
+    // Rank values for sorting (Ace highest, 9 lowest)
+    const rankValue: Record<string, number> = {
+        'A': 14, 'K': 13, 'Q': 12, 'J': 11, '10': 10, '9': 9
+    };
+
+    // Suit order: trump first, then hearts, diamonds, clubs, spades
+    const suitOrder: Record<string, number> = {
+        [trumpSuit.toLowerCase()]: 0,
+        'hearts': 1,
+        'diamonds': 2,
+        'clubs': 3,
+        'spades': 4
+    };
+
+    return [...hand].sort((a, b) => {
+        // Determine effective suit (left bower counts as trump suit)
+        const getSuitForSort = (card: Card) => {
+            if (card.rank === 'J' && card.suit.toLowerCase() === oppositeSuit) {
+                return trumpSuit.toLowerCase(); // Left bower is trump
+            }
+            return card.suit.toLowerCase();
+        };
+
+        const suitA = getSuitForSort(a);
+        const suitB = getSuitForSort(b);
+
+        // Sort by suit first
+        if (suitA !== suitB) {
+            return (suitOrder[suitA] || 999) - (suitOrder[suitB] || 999);
+        }
+
+        // Within same suit, sort by rank (descending - high to low)
+        // Right bower (J of trump) is highest
+        const isRightBowerA = a.rank === 'J' && a.suit.toLowerCase() === trumpSuit.toLowerCase();
+        const isRightBowerB = b.rank === 'J' && b.suit.toLowerCase() === trumpSuit.toLowerCase();
+
+        if (isRightBowerA) return -1;
+        if (isRightBowerB) return 1;
+
+        // Left bower (J of opposite color) is second highest in trump
+        const isLeftBowerA = a.rank === 'J' && a.suit.toLowerCase() === oppositeSuit;
+        const isLeftBowerB = b.rank === 'J' && b.suit.toLowerCase() === oppositeSuit;
+
+        if (isLeftBowerA && suitA === trumpSuit.toLowerCase()) return -1;
+        if (isLeftBowerB && suitB === trumpSuit.toLowerCase()) return 1;
+
+        // Normal rank comparison (high to low)
+        return (rankValue[b.rank] || 0) - (rankValue[a.rank] || 0);
+    });
+}
+
+/**
+ * Format hand as comma-separated cards (sorted like UI display)
+ */
+export function formatHand(hand: Card[], trumpSuit: string): string {
+    const sortedHand = sortHandForDisplay(hand, trumpSuit);
+    return sortedHand.map(formatCard).join(', ');
 }
 
 /**
@@ -193,7 +257,8 @@ export function createTrumpCallLog(
     dealerRelationship: string,
     upcard: any | null,
     biddingRound: 1 | 2,
-    gameId: string
+    gameId: string,
+    handAfterPickup?: Card[] // Optional: dealer's hand AFTER picking up card (for round 1 dealer pickup)
 ): TrumpCallLog {
     const callerName = caller.name || 'Bot';
     const userType: 'Human' | 'Bot' = caller.isComputer ? 'Bot' : 'Human';
@@ -203,16 +268,17 @@ export function createTrumpCallLog(
         ? formatCard(upcard)
         : 'n/a';
 
-    // Get caller's hand before any modifications
-    const hand = caller.hand || [];
+    // Get caller's hand - use handAfterPickup if provided (dealer pickup case)
+    // Otherwise use caller's current hand
+    const hand = handAfterPickup || caller.hand || [];
 
     // Count stats
     const bowerCount = countBowers(hand, suit);
     const trumpCount = countTrump(hand, suit);
     const suitCount = countSuit(hand, suit);
 
-    // Format hand
-    const handAfterDiscard = formatHand(hand);
+    // Format hand (sorted by suit and rank like UI)
+    const handAfterDiscard = formatHand(hand, suit);
 
     // Dealer string with relationship
     const dealer = `${dealerRelationship} - ${dealerName}`;
