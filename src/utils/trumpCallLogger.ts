@@ -15,76 +15,65 @@ export interface TrumpCallLog {
 }
 
 /**
- * Count bowers in hand for a given trump suit
+ * Helper to get the opposite suit of the same color
  */
-export function countBowers(hand: Card[], trumpSuit: string): number {
-    let count = 0;
-    const suitMap: Record<string, string> = {
+function getOppositeSuit(suit: string): string {
+    const map: Record<string, string> = {
         'hearts': 'diamonds',
         'diamonds': 'hearts',
         'clubs': 'spades',
         'spades': 'clubs'
     };
-    const oppositeSuit = suitMap[trumpSuit.toLowerCase()];
-
-    hand.forEach(card => {
-        // Right bower (Jack of trump suit)
-        if (card.rank === 'J' && card.suit.toLowerCase() === trumpSuit.toLowerCase()) {
-            count++;
-        }
-        // Left bower (Jack of same color)
-        if (card.rank === 'J' && card.suit.toLowerCase() === oppositeSuit) {
-            count++;
-        }
-    });
-
-    return count;
+    return map[suit.toLowerCase()] || '';
 }
 
 /**
- * Count trump cards (including bowers)
+ * Helper to determine if a card is the Left Bower
  */
-export function countTrump(hand: Card[], trumpSuit: string): number {
-    const suitMap: Record<string, string> = {
-        'hearts': 'diamonds',
-        'diamonds': 'hearts',
-        'clubs': 'spades',
-        'spades': 'clubs'
-    };
-    const oppositeSuit = suitMap[trumpSuit.toLowerCase()];
+function isLeftBower(card: Card, trumpSuit: string): boolean {
+    return card.rank === 'J' && card.suit.toLowerCase() === getOppositeSuit(trumpSuit);
+}
 
+/**
+ * Helper to determine if a card is Trump (including both bowers)
+ */
+function isTrump(card: Card, trumpSuit: string): boolean {
+    const s = card.suit.toLowerCase();
+    const t = trumpSuit.toLowerCase();
+    return s === t || isLeftBower(card, trumpSuit);
+}
+
+/**
+ * Count bowers in hand for a given trump suit
+ */
+export function countBowers(hand: Card[], trumpSuit: string): number {
     return hand.filter(card => {
-        // Card is trump suit (but not left bower)
-        if (card.suit.toLowerCase() === trumpSuit.toLowerCase()) return true;
-        // Left bower
-        if (card.rank === 'J' && card.suit.toLowerCase() === oppositeSuit) return true;
-        return false;
+        const isRightBower = card.rank === 'J' && card.suit.toLowerCase() === trumpSuit.toLowerCase();
+        return isRightBower || isLeftBower(card, trumpSuit);
     }).length;
 }
 
 /**
- * Count the number of unique effective suits in hand (distribution).
+ * Count trump cards (including both bowers)
+ */
+export function countTrump(hand: Card[], trumpSuit: string): number {
+    return hand.filter(card => isTrump(card, trumpSuit)).length;
+}
+
+/**
+ * Count the number of unique effective suits in hand (distribution analysis).
  * Treats the Left Bower as part of the trump suit.
  * A lower number (e.g., 2) is stronger than a higher number (e.g., 4).
  */
 export function countSuit(hand: Card[], trumpSuit: string): number {
-    const suitMap: Record<string, string> = {
-        'hearts': 'diamonds',
-        'diamonds': 'hearts',
-        'clubs': 'spades',
-        'spades': 'clubs'
-    };
-    const oppositeSuit = suitMap[trumpSuit.toLowerCase()];
-
     const uniqueSuits = new Set<string>();
+    const t = trumpSuit.toLowerCase();
 
     hand.forEach(card => {
-        const s = card.suit.toLowerCase();
-        // If it's the Left Bower, it's effectively the Trump suit
-        if (card.rank === 'J' && s === oppositeSuit) {
-            uniqueSuits.add(trumpSuit.toLowerCase());
+        if (isLeftBower(card, trumpSuit)) {
+            uniqueSuits.add(t);
         } else {
-            uniqueSuits.add(s);
+            uniqueSuits.add(card.suit.toLowerCase());
         }
     });
 
