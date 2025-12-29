@@ -105,9 +105,26 @@ const PlayerSeat = ({
                     <motion.div
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
-                        className="absolute -top-3 -right-3 bg-amber-500 text-white text-sm font-black w-10 h-10 rounded-full flex items-center justify-center border-4 border-slate-900 shadow-lg"
+                        className="absolute -top-3 -right-3 bg-amber-500 text-white text-sm font-black w-10 h-10 rounded-full flex items-center justify-center border-4 border-slate-900 shadow-lg z-30"
                     >
                         D
+                    </motion.div>
+                )}
+
+                {/* UPCARD MOVED HERE - Centered on dealer during Round 1 */}
+                {isDealer && !isAnimatingDealer && state.phase === 'bidding' && state.biddingRound === 1 && state.upcard && (
+                    <motion.div
+                        layoutId={state.upcard.id}
+                        initial={{ scale: 0, opacity: 0, rotate: 15 }}
+                        animate={{ scale: 1, opacity: 1, rotate: 15 }}
+                        className="absolute -top-16 md:-top-20 z-20 pointer-events-none"
+                    >
+                        <div className="relative">
+                            <CardComponent card={state.upcard} size="sm" disabled />
+                            <div className="absolute -top-2 left-1/2 -translate-x-1/2 bg-white text-slate-950 text-[7px] md:text-[8px] font-black px-2 py-0.5 rounded shadow-xl border border-slate-200 whitespace-nowrap z-30">
+                                UPCARD
+                            </div>
+                        </div>
                     </motion.div>
                 )}
 
@@ -1204,7 +1221,7 @@ const LandingPage = () => {
                     Logout from {state.currentUser}
                 </button>
                 <div className="text-[10px] font-black text-slate-800 uppercase tracking-[0.3em]">
-                    Euchre Engine V0.68
+                    Euchre Engine V0.69
                 </div>
             </div>
 
@@ -1603,46 +1620,7 @@ const GameView = () => {
                                 })}
                             </AnimatePresence>
 
-                            {state.phase === 'bidding' && state.biddingRound === 1 && state.upcard && (
-                                (() => {
-                                    const dealerIdx = state.dealerIndex;
-                                    const myIdx = state.players.findIndex(p => p.name === state.currentViewPlayerName);
-                                    const refIdx = myIdx === -1 ? 0 : myIdx;
-                                    const relativePos = (dealerIdx - refIdx + 4) % 4;
-
-                                    // Larger offsets to put it "on" the dealer seats
-                                    const upcardOffsets = [
-                                        { x: 140, y: 100, r: 15 },    // Bottom seat (offset to side to avoid bidding UI)
-                                        { x: -180, y: 0, r: 90 },     // Left seat
-                                        { x: 0, y: -180, r: 0 },      // Top seat
-                                        { x: 180, y: 0, r: -90 },     // Right seat
-                                    ];
-                                    const { x, y, r } = upcardOffsets[relativePos];
-
-                                    return (
-                                        <motion.div
-                                            key={state.upcard.id}
-                                            layoutId={state.upcard.id}
-                                            initial={{ x: 0, y: 0, scale: 0.5, opacity: 0 }}
-                                            animate={{ x, y, scale: 1, opacity: 1, rotate: r }}
-                                            className="absolute pointer-events-auto z-30"
-                                        >
-                                            <CardComponent
-                                                card={state.upcard}
-                                                size="md"
-                                                isValid={state.phase === 'bidding'}
-                                                rotation={0}
-                                                disabled
-                                            />
-                                            {state.phase === 'bidding' && (
-                                                <div className="absolute -top-3 -right-3 bg-white text-slate-950 text-[10px] font-black px-2 py-1 rounded-sm shadow-xl z-20 border border-slate-200">
-                                                    UPCARD
-                                                </div>
-                                            )}
-                                        </motion.div>
-                                    );
-                                })()
-                            )}
+                            {/* Global Upcard Display removed - now handled in PlayerSeat */}
 
                             {state.phase === 'randomizing_dealer' && (
                                 <div className="bg-amber-500/10 border border-amber-500/50 px-8 py-4 rounded-[2rem] backdrop-blur-3xl animate-pulse">
@@ -1663,16 +1641,16 @@ const GameView = () => {
                                             initial={{ opacity: 0, y: 20 }}
                                             animate={{ opacity: 1, y: 0 }}
                                             exit={{ opacity: 0, scale: 0.95 }}
-                                            className="pointer-events-auto p-2 md:p-3 bg-slate-900/95 rounded-2xl md:rounded-3xl border-2 border-emerald-500 shadow-[0_0_40px_rgba(16,185,129,0.4)] flex flex-col gap-2 backdrop-blur-xl w-full max-w-[280px] md:max-w-xl mx-auto"
+                                            className="pointer-events-auto p-1.5 md:p-2 bg-slate-900/90 rounded-full border-2 border-emerald-500 shadow-[0_0_40px_rgba(16,185,129,0.4)] flex items-center gap-2 backdrop-blur-xl mx-auto"
                                         >
                                             {state.biddingRound === 1 ? (
-                                                <div className="flex gap-2 justify-center">
-                                                    <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit: state.upcard!.suit, callerIndex: myIdx, isLoner: false } })} className="bg-emerald-600 hover:bg-emerald-500 text-white flex-1 py-3 md:py-4 rounded-xl md:rounded-2xl font-black text-[10px] md:text-sm uppercase shadow-lg shadow-emerald-500/20 leading-tight transition-transform active:scale-95">Order Up</button>
-                                                    <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit: state.upcard!.suit, callerIndex: myIdx, isLoner: true } })} className="bg-amber-500 hover:bg-amber-400 text-white flex-1 py-3 md:py-4 rounded-xl md:rounded-2xl font-black text-[10px] md:text-sm uppercase shadow-lg shadow-amber-500/20 leading-tight transition-transform active:scale-95">Go Alone</button>
-                                                    <button onClick={() => dispatch({ type: 'PASS_BID', payload: { playerIndex: myIdx } })} className="bg-pink-600 hover:bg-pink-500 text-white flex-1 py-3 md:py-4 rounded-xl md:rounded-2xl font-black text-[10px] md:text-sm uppercase shadow-lg shadow-pink-500/20 leading-tight transition-transform active:scale-95 flex items-center justify-center">Pass</button>
+                                                <div className="flex gap-1 justify-center px-1">
+                                                    <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit: state.upcard!.suit, callerIndex: myIdx, isLoner: false } })} className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 md:px-6 py-2.5 md:py-3 rounded-full font-black text-[9px] md:text-xs uppercase shadow-lg transition-transform active:scale-95 whitespace-nowrap">Order Up</button>
+                                                    <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit: state.upcard!.suit, callerIndex: myIdx, isLoner: true } })} className="bg-amber-500 hover:bg-amber-400 text-white px-4 md:px-6 py-2.5 md:py-3 rounded-full font-black text-[9px] md:text-xs uppercase shadow-lg transition-transform active:scale-95 whitespace-nowrap">Go Alone</button>
+                                                    <button onClick={() => dispatch({ type: 'PASS_BID', payload: { playerIndex: myIdx } })} className="bg-pink-600 hover:bg-pink-500 text-white px-4 md:px-6 py-2.5 md:py-3 rounded-full font-black text-[9px] md:text-xs uppercase shadow-lg transition-transform active:scale-95 whitespace-nowrap">Pass</button>
                                                 </div>
                                             ) : (
-                                                <div className="flex flex-col gap-2">
+                                                <div className="flex flex-col gap-2 p-2">
                                                     <div className="flex flex-wrap justify-center gap-2">
                                                         {(['hearts', 'diamonds', 'clubs', 'spades'] as const).filter(s => s !== state.upcard!.suit).map(suit => (
                                                             <div key={suit} className="flex-1 flex flex-col gap-1">
