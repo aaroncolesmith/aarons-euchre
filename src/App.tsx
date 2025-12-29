@@ -1221,7 +1221,7 @@ const LandingPage = () => {
                     Logout from {state.currentUser}
                 </button>
                 <div className="text-[10px] font-black text-slate-800 uppercase tracking-[0.3em]">
-                    Euchre Engine V0.72
+                    Euchre Engine V0.73
                 </div>
             </div>
 
@@ -1641,25 +1641,25 @@ const GameView = () => {
                                             initial={{ opacity: 0, y: 20 }}
                                             animate={{ opacity: 1, y: 0 }}
                                             exit={{ opacity: 0, scale: 0.95 }}
-                                            className="pointer-events-auto p-4 md:p-6 bg-slate-900/95 rounded-[2.5rem] md:rounded-[3rem] border-2 border-emerald-500 shadow-[0_0_50px_rgba(16,185,129,0.4)] flex flex-col gap-4 backdrop-blur-xl mx-auto w-full max-w-[320px] md:max-w-md"
+                                            className="pointer-events-auto p-2 bg-slate-900/90 rounded-full border-2 border-emerald-500 shadow-[0_0_50px_rgba(16,185,129,0.4)] flex items-center backdrop-blur-xl mx-auto w-fit"
                                         >
                                             {state.biddingRound === 1 ? (
-                                                <div className="flex gap-2 justify-center">
-                                                    <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit: state.upcard!.suit, callerIndex: myIdx, isLoner: false } })} className="bg-emerald-600 hover:bg-emerald-500 text-white flex-1 py-3 md:py-4 rounded-xl md:rounded-2xl font-black text-[10px] md:text-sm uppercase shadow-lg shadow-emerald-500/20 leading-tight transition-transform active:scale-95">Order Up</button>
-                                                    <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit: state.upcard!.suit, callerIndex: myIdx, isLoner: true } })} className="bg-amber-500 hover:bg-amber-400 text-white flex-1 py-3 md:py-4 rounded-xl md:rounded-2xl font-black text-[10px] md:text-sm uppercase shadow-lg shadow-amber-500/20 leading-tight transition-transform active:scale-95">Go Alone</button>
-                                                    <button onClick={() => dispatch({ type: 'PASS_BID', payload: { playerIndex: myIdx } })} className="bg-pink-600 hover:bg-pink-500 text-white flex-1 py-3 md:py-4 rounded-xl md:rounded-2xl font-black text-[10px] md:text-sm uppercase shadow-lg shadow-pink-500/20 leading-tight transition-transform active:scale-95 flex items-center justify-center">Pass</button>
+                                                <div className="flex gap-2 p-1">
+                                                    <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit: state.upcard!.suit, callerIndex: myIdx, isLoner: false } })} className="bg-emerald-600 hover:bg-emerald-500 text-white px-6 md:px-10 py-3 md:py-4 rounded-full font-black text-[10px] md:text-sm uppercase shadow-lg shadow-emerald-500/20 leading-tight transition-transform active:scale-95 whitespace-nowrap">Order Up</button>
+                                                    <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit: state.upcard!.suit, callerIndex: myIdx, isLoner: true } })} className="bg-amber-500 hover:bg-amber-400 text-white px-6 md:px-10 py-3 md:py-4 rounded-full font-black text-[10px] md:text-sm uppercase shadow-lg shadow-amber-500/20 leading-tight transition-transform active:scale-95 whitespace-nowrap">Go Alone</button>
+                                                    <button onClick={() => dispatch({ type: 'PASS_BID', payload: { playerIndex: myIdx } })} className="bg-pink-600 hover:bg-pink-500 text-white px-6 md:px-10 py-3 md:py-4 rounded-full font-black text-[10px] md:text-sm uppercase shadow-lg shadow-pink-500/20 leading-tight transition-transform active:scale-95 flex items-center justify-center whitespace-nowrap">Pass</button>
                                                 </div>
                                             ) : (
-                                                <div className="flex flex-col gap-2">
+                                                <div className="flex flex-col gap-3 p-4 md:p-6 min-w-[300px]">
                                                     <div className="flex flex-wrap justify-center gap-2">
                                                         {(['hearts', 'diamonds', 'clubs', 'spades'] as const).filter(s => s !== state.upcard!.suit).map(suit => (
                                                             <div key={suit} className="flex-1 flex flex-col gap-1">
-                                                                <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit, callerIndex: myIdx, isLoner: false } })} className="bg-slate-800 hover:bg-slate-700 text-white w-full py-2 rounded-xl font-black text-[10px] uppercase border border-slate-700 transition-all hover:scale-105 active:scale-95">{suit}</button>
-                                                                <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit, callerIndex: myIdx, isLoner: true } })} className="bg-slate-800/50 hover:bg-amber-500/20 text-amber-500/50 hover:text-amber-500 w-full py-1 rounded text-[8px] font-black uppercase transition-all">Alone</button>
+                                                                <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit, callerIndex: myIdx, isLoner: false } })} className="bg-slate-800 hover:bg-slate-700 text-white w-full py-3 rounded-xl font-black text-[10px] uppercase border border-slate-700 transition-all hover:scale-105 active:scale-95">{suit}</button>
+                                                                <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit, callerIndex: myIdx, isLoner: true } })} className="bg-slate-800/50 hover:bg-amber-500/20 text-amber-500/50 hover:text-amber-500 w-full py-1.5 rounded text-[8px] font-black uppercase transition-all">Alone</button>
                                                             </div>
                                                         ))}
                                                     </div>
-                                                    <button onClick={() => dispatch({ type: 'PASS_BID', payload: { playerIndex: myIdx } })} className="w-full bg-pink-600 hover:bg-pink-500 text-white py-3 rounded-xl font-black text-[10px] uppercase shadow-lg transition-transform active:scale-95">Pass</button>
+                                                    <button onClick={() => dispatch({ type: 'PASS_BID', payload: { playerIndex: myIdx } })} className="w-full bg-pink-600 hover:bg-pink-500 text-white py-4 rounded-full font-black text-[10px] uppercase shadow-lg transition-transform active:scale-95">Pass</button>
                                                 </div>
                                             )}
                                         </motion.div>
