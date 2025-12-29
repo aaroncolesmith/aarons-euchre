@@ -836,6 +836,20 @@ const TableOverlay = () => {
         }
     }, [state.phase, state.overlayMessage, state.overlayAcknowledged, state.players]);
 
+    // CRITICAL: Auto-dismiss overlay after 5 seconds to prevent freeze
+    // Users were getting stuck for 20+ seconds waiting for overlays
+    React.useEffect(() => {
+        if (state.overlayMessage) {
+            console.log('[OVERLAY] Auto-dismiss timer started (5 seconds)');
+            const autoDismiss = setTimeout(() => {
+                console.log('[OVERLAY] Auto-dismissing overlay to prevent freeze');
+                dispatch({ type: 'CLEAR_OVERLAY' });
+            }, 5000); // 5 seconds max wait time
+
+            return () => clearTimeout(autoDismiss);
+        }
+    }, [state.overlayMessage]);
+
     const handleClick = () => {
         const myName = state.currentViewPlayerName;
         if (myName && !state.overlayAcknowledged[myName]) {
@@ -1157,7 +1171,7 @@ const LandingPage = () => {
                     Logout from {state.currentUser}
                 </button>
                 <div className="text-[10px] font-black text-slate-800 uppercase tracking-[0.3em]">
-                    Euchre Engine V0.56
+                    Euchre Engine V0.57
                 </div>
             </div>
 

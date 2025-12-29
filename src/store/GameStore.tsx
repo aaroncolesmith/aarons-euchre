@@ -1342,14 +1342,34 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 const cardToDiscard = [...currentPlayer.hand].sort((a, b) => a.rank.localeCompare(b.rank))[0];
                 broadcastDispatch({ type: 'DISCARD_CARD', payload: { playerIndex: state.currentPlayerIndex, cardId: cardToDiscard.id } });
             } else if (state.phase === 'playing') {
-                const cardToPlay = getBotMove(
-                    currentPlayer.hand,
-                    state.currentTrick,
-                    state.trump!,
-                    state.players.map(p => p.id),
-                    currentPlayer.id
-                );
-                broadcastDispatch({ type: 'PLAY_CARD', payload: { playerIndex: state.currentPlayerIndex, cardId: cardToPlay.id } });
+                try {
+                    // CRITICAL: Ensure bot can ALWAYS play a card, even if logic fails
+                    let cardToPlay = getBotMove(
+                        currentPlayer.hand,
+                        state.currentTrick,
+                        state.trump!,
+                        state.players.map(p => p.id),
+                        currentPlayer.id
+                    );
+
+                    // SAFETY: If getBotMove fails, just play first valid card
+                    if (!cardToPlay || !currentPlayer.hand.find(c => c.id === cardToPlay.id)) {
+                        Logger.error('[BOT PLAY] getBotMove returned invalid card, using fallback');
+                        cardToPlay = currentPlayer.hand[0]; // First card as emergency fallback
+                    }
+
+                    if (cardToPlay) {
+                        broadcastDispatch({ type: 'PLAY_CARD', payload: { playerIndex: state.currentPlayerIndex, cardId: cardToPlay.id } });
+                    } else {
+                        Logger.error('[BOT PLAY] CRITICAL: No card to play! Hand:', currentPlayer.hand);
+                    }
+                } catch (err) {
+                    Logger.error('[BOT PLAY] Exception in bot play logic:', err);
+                    // Emergency: Play first card from hand
+                    if (currentPlayer.hand.length > 0) {
+                        broadcastDispatch({ type: 'PLAY_CARD', payload: { playerIndex: state.currentPlayerIndex, cardId: currentPlayer.hand[0].id } });
+                    }
+                }
             }
         }, 1200);
 
