@@ -1204,7 +1204,7 @@ const LandingPage = () => {
                     Logout from {state.currentUser}
                 </button>
                 <div className="text-[10px] font-black text-slate-800 uppercase tracking-[0.3em]">
-                    Euchre Engine V0.67
+                    Euchre Engine V0.68
                 </div>
             </div>
 
@@ -1653,63 +1653,35 @@ const GameView = () => {
                         </div>
                     </div>
 
-                    <div className="absolute bottom-60 md:bottom-[28%] md:top-auto left-1/2 -translate-x-1/2 z-50 pointer-events-none w-full px-4 md:w-auto md:px-0">
+                    <div className="absolute bottom-[160px] md:bottom-[160px] left-1/2 -translate-x-1/2 z-50 pointer-events-none w-full px-4 md:w-auto md:px-0">
                         <AnimatePresence>
                             {(() => {
                                 const myIdx = state.players.findIndex(p => p.name === state.currentViewPlayerName);
                                 if (state.phase === 'bidding' && state.currentPlayerIndex === myIdx) {
                                     return (
                                         <motion.div
-                                            initial={{ opacity: 0, y: 50 }}
+                                            initial={{ opacity: 0, y: 20 }}
                                             animate={{ opacity: 1, y: 0 }}
-                                            exit={{ opacity: 0, scale: 0.8 }}
-                                            className="pointer-events-auto p-4 md:p-10 bg-slate-900/95 rounded-[2.5rem] md:rounded-[4rem] border-2 border-emerald-500 shadow-[0_0_50px_rgba(16,185,129,0.3)] flex flex-col gap-4 md:gap-8 backdrop-blur-xl w-full max-w-sm md:max-w-2xl mx-auto"
+                                            exit={{ opacity: 0, scale: 0.95 }}
+                                            className="pointer-events-auto p-2 md:p-3 bg-slate-900/95 rounded-2xl md:rounded-3xl border-2 border-emerald-500 shadow-[0_0_40px_rgba(16,185,129,0.4)] flex flex-col gap-2 backdrop-blur-xl w-full max-w-[280px] md:max-w-xl mx-auto"
                                         >
-                                            <div className="text-center">
-                                                <div className="text-lg md:text-xl font-black text-white italic tracking-tighter mb-1">What's the call?</div>
-
-                                                {/* Scoreboard */}
-                                                <div className="flex justify-center gap-8 mb-2 bg-slate-800/50 py-1.5 rounded-xl">
-                                                    <div className="text-center">
-                                                        <div className="text-[7px] font-black text-emerald-500 uppercase tracking-widest mb-0.5">{state.teamNames.team1}</div>
-                                                        <div className="text-lg font-black text-white leading-none">{state.scores.team1}</div>
-                                                    </div>
-                                                    <div className="text-center">
-                                                        <div className="text-[7px] font-black text-emerald-500 uppercase tracking-widest mb-0.5">{state.teamNames.team2}</div>
-                                                        <div className="text-lg font-black text-white leading-none">{state.scores.team2}</div>
-                                                    </div>
-                                                </div>
-
-                                                <div className="text-[10px] font-bold text-slate-400 mb-2">
-                                                    Your {myIdx === state.dealerIndex ? <span className="text-emerald-400">self</span> : ((myIdx + 2) % 4 === state.dealerIndex ? 'teammate' : 'opponent')} <span className="text-white">{state.players[state.dealerIndex].name}</span> is the dealer
-                                                </div>
-
-                                                {state.biddingRound === 1 && state.upcard && (
-                                                    <div className="flex justify-center mb-2">
-                                                        <div className="scale-75 origin-center">
-                                                            <CardComponent card={state.upcard} size="md" disabled />
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </div>
-
                                             {state.biddingRound === 1 ? (
                                                 <div className="flex gap-2 justify-center">
-                                                    <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit: state.upcard!.suit, callerIndex: myIdx, isLoner: false } })} className="bg-emerald-600 hover:bg-emerald-500 text-white flex-1 py-4 md:py-6 rounded-2xl font-black text-xs md:text-base uppercase shadow-lg shadow-emerald-500/20 leading-tight transition-transform active:scale-95">Order Up</button>
-                                                    <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit: state.upcard!.suit, callerIndex: myIdx, isLoner: true } })} className="bg-amber-500 hover:bg-amber-400 text-white flex-1 py-4 md:py-6 rounded-2xl font-black text-xs md:text-base uppercase shadow-lg shadow-amber-500/20 leading-tight transition-transform active:scale-95">Go Alone</button>
-                                                    <button onClick={() => dispatch({ type: 'PASS_BID', payload: { playerIndex: myIdx } })} className="bg-pink-600 hover:bg-pink-500 text-white flex-1 py-4 md:py-6 rounded-2xl font-black text-xs md:text-base uppercase shadow-lg shadow-pink-500/20 leading-tight transition-transform active:scale-95 flex items-center justify-center">Pass</button>
+                                                    <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit: state.upcard!.suit, callerIndex: myIdx, isLoner: false } })} className="bg-emerald-600 hover:bg-emerald-500 text-white flex-1 py-3 md:py-4 rounded-xl md:rounded-2xl font-black text-[10px] md:text-sm uppercase shadow-lg shadow-emerald-500/20 leading-tight transition-transform active:scale-95">Order Up</button>
+                                                    <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit: state.upcard!.suit, callerIndex: myIdx, isLoner: true } })} className="bg-amber-500 hover:bg-amber-400 text-white flex-1 py-3 md:py-4 rounded-xl md:rounded-2xl font-black text-[10px] md:text-sm uppercase shadow-lg shadow-amber-500/20 leading-tight transition-transform active:scale-95">Go Alone</button>
+                                                    <button onClick={() => dispatch({ type: 'PASS_BID', payload: { playerIndex: myIdx } })} className="bg-pink-600 hover:bg-pink-500 text-white flex-1 py-3 md:py-4 rounded-xl md:rounded-2xl font-black text-[10px] md:text-sm uppercase shadow-lg shadow-pink-500/20 leading-tight transition-transform active:scale-95 flex items-center justify-center">Pass</button>
                                                 </div>
                                             ) : (
                                                 <div className="flex flex-col gap-2">
                                                     <div className="flex flex-wrap justify-center gap-2">
                                                         {(['hearts', 'diamonds', 'clubs', 'spades'] as const).filter(s => s !== state.upcard!.suit).map(suit => (
-                                                            <div key={suit} className="flex flex-col gap-1">
-                                                                <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit, callerIndex: myIdx, isLoner: false } })} className="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-xl font-black text-[10px] uppercase border border-slate-700 transition-all hover:scale-105 active:scale-95">{suit}</button>
-                                                                <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit, callerIndex: myIdx, isLoner: true } })} className="bg-slate-800/50 hover:bg-amber-500/20 text-amber-500/50 hover:text-amber-500 px-2 py-1 rounded text-[8px] font-black uppercase transition-all">Alone</button>
+                                                            <div key={suit} className="flex-1 flex flex-col gap-1">
+                                                                <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit, callerIndex: myIdx, isLoner: false } })} className="bg-slate-800 hover:bg-slate-700 text-white w-full py-2 rounded-xl font-black text-[10px] uppercase border border-slate-700 transition-all hover:scale-105 active:scale-95">{suit}</button>
+                                                                <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit, callerIndex: myIdx, isLoner: true } })} className="bg-slate-800/50 hover:bg-amber-500/20 text-amber-500/50 hover:text-amber-500 w-full py-1 rounded text-[8px] font-black uppercase transition-all">Alone</button>
                                                             </div>
                                                         ))}
                                                     </div>
-                                                    <button onClick={() => dispatch({ type: 'PASS_BID', payload: { playerIndex: myIdx } })} className="w-full bg-pink-600 hover:bg-pink-500 text-white py-3 rounded-xl font-black text-xs uppercase shadow-lg transition-transform active:scale-95">Pass</button>
+                                                    <button onClick={() => dispatch({ type: 'PASS_BID', payload: { playerIndex: myIdx } })} className="w-full bg-pink-600 hover:bg-pink-500 text-white py-3 rounded-xl font-black text-[10px] uppercase shadow-lg transition-transform active:scale-95">Pass</button>
                                                 </div>
                                             )}
                                         </motion.div>
