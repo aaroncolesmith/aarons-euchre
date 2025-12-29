@@ -144,6 +144,13 @@ export async function saveTrumpCallLog(log: TrumpCallLog): Promise<void> {
     // Save to Supabase (primary) - fire and forget
     try {
         const { saveTrumpCall } = await import('./supabaseStats');
+
+        // Parse dealer name and relationship from dealer string
+        // Format: "relationship - dealerName" (e.g., "Teammate - Aaron")
+        const dealerParts = log.dealer.split(' - ');
+        const dealerRelationship = dealerParts.length > 1 ? dealerParts[0] : '';
+        const dealerName = dealerParts.length > 1 ? dealerParts[1] : log.dealer;
+
         await saveTrumpCall({
             gameId: log.gameId,
             playerName: log.whoCalled,
@@ -154,7 +161,15 @@ export async function saveTrumpCallLog(log: TrumpCallLog): Promise<void> {
             round: log.cardPickedUp !== 'n/a' ? 1 : 2,
             topCard: log.cardPickedUp !== 'n/a' ? log.cardPickedUp : null,
             topCardSuit: null, // Could parse from cardPickedUp if needed
-            topCardRank: null  // Could parse from cardPickedUp if needed
+            topCardRank: null,  // Could parse from cardPickedUp if needed
+            // ANALYTICS FIELDS - Now saving complete data!
+            userType: log.userType,
+            dealer: dealerName,
+            dealerRelationship: dealerRelationship,
+            bowerCount: log.bowerCount,
+            trumpCount: log.trumpCount,
+            suitCount: log.suitCount,
+            handAfterDiscard: log.handAfterDiscard
         });
     } catch (err) {
         console.error('[TRUMP LOGGER] Failed to save to Supabase:', err);

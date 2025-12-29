@@ -165,7 +165,15 @@ export async function saveTrumpCall(trumpCall: any): Promise<boolean> {
                 round: trumpCall.round,
                 top_card: trumpCall.topCard,
                 top_card_suit: trumpCall.topCardSuit,
-                top_card_rank: trumpCall.topCardRank
+                top_card_rank: trumpCall.topCardRank,
+                // NEW ANALYTICS FIELDS
+                user_type: trumpCall.userType || 'Human',
+                dealer: trumpCall.dealer,
+                dealer_relationship: trumpCall.dealerRelationship,
+                bower_count: trumpCall.bowerCount || 0,
+                trump_count: trumpCall.trumpCount || 0,
+                suit_count: trumpCall.suitCount || 0,
+                hand_after_discard: trumpCall.handAfterDiscard || ''
             });
 
         if (error) {
@@ -196,25 +204,32 @@ export async function getAllTrumpCalls(): Promise<any[]> {
         }
 
         // Convert snake_case back to camelCase AND map to TrumpCallLog format
-        return data?.map((row: any) => ({
-            // Map to TrumpCallLog interface expected by UI
-            gameId: row.game_id,
-            whoCalled: row.player_name,  // playerName → whoCalled
-            userType: 'Human', // TODO: Store this in database or infer from player list
-            dealer: 'Unknown',  // TODO: This info is not stored in current schema
-            cardPickedUp: row.picked_up ? (row.top_card || 'n/a') : 'n/a',
-            suitCalled: row.suit ? (row.suit.charAt(0).toUpperCase() + row.suit.slice(1)) : 'Unknown',  // suit → suitCalled with capitalization
-            bowerCount: 0,  // TODO: This info is not stored in current schema
-            trumpCount: 0,  // TODO: This info is not stored in current schema
-            suitCount: 0,   // TODO: This info is not stored in current schema
-            handAfterDiscard: '',  // TODO: This info is not stored in current schema
-            timestamp: row.created_at,
-            // Keep original fields for reference
-            id: row.id,
-            seatIndex: row.seat_index,
-            isLoner: row.is_loner,
-            round: row.round,
-        })) || [];
+        return data?.map((row: any) => {
+            // Reconstruct dealer string with relationship
+            const dealerStr = row.dealer_relationship
+                ? `${row.dealer_relationship} - ${row.dealer}`
+                : row.dealer || 'Unknown';
+
+            return {
+                // Map to TrumpCallLog interface expected by UI
+                gameId: row.game_id,
+                whoCalled: row.player_name,
+                userType: row.user_type || 'Human',
+                dealer: dealerStr,
+                cardPickedUp: row.picked_up ? (row.top_card || 'n/a') : 'n/a',
+                suitCalled: row.suit ? (row.suit.charAt(0).toUpperCase() + row.suit.slice(1)) : 'Unknown',
+                bowerCount: row.bower_count || 0,
+                trumpCount: row.trump_count || 0,
+                suitCount: row.suit_count || 0,
+                handAfterDiscard: row.hand_after_discard || '',
+                timestamp: row.created_at,
+                // Keep original fields for reference
+                id: row.id,
+                seatIndex: row.seat_index,
+                isLoner: row.is_loner,
+                round: row.round,
+            };
+        }) || [];
     } catch (err) {
         console.error('[SUPABASE TRUMP] Exception fetching trump calls:', err);
         return [];
