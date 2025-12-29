@@ -36,8 +36,8 @@ const PlayerSeat = ({
     const posClasses = {
         bottom: "bottom-4 md:bottom-10 left-1/2 -translate-x-1/2",
         top: "top-1 md:top-4 left-1/2 -translate-x-1/2",
-        left: "left-0 md:left-12 top-1/2 -translate-y-1/2 -rotate-90 origin-center",
-        right: "right-0 md:right-12 top-1/2 -translate-y-1/2 rotate-90 origin-center"
+        left: "-left-6 md:left-12 top-1/2 -translate-y-1/2 -rotate-90 origin-center",
+        right: "-right-6 md:right-12 top-1/2 -translate-y-1/2 rotate-90 origin-center"
     };
 
     if (!player.name && inLobby) {
@@ -1171,7 +1171,7 @@ const LandingPage = () => {
                     Logout from {state.currentUser}
                 </button>
                 <div className="text-[10px] font-black text-slate-800 uppercase tracking-[0.3em]">
-                    Euchre Engine V0.63
+                    Euchre Engine V0.64
                 </div>
             </div>
 
@@ -1378,7 +1378,7 @@ const GameView = () => {
 
     return (
         <LayoutGroup>
-            <div className="w-full h-full max-w-7xl max-h-screen flex flex-col md:flex-row p-2 md:p-6 gap-4 md:gap-6 overflow-hidden">
+            <div className="w-full h-full max-w-7xl max-h-screen flex flex-col md:flex-row px-1 py-2 md:p-6 gap-2 md:gap-6 overflow-hidden">
 
                 {/* Mobile Tabs */}
                 <div className="flex md:hidden w-full shrink-0 bg-slate-900/90 rounded-2xl p-1 mb-2 border border-slate-800">
@@ -1435,7 +1435,7 @@ const GameView = () => {
 
                 <StatsModal isOpen={isStatsOpen} onClose={() => setIsStatsOpen(false)} initialTab={statsInitialTab} />
 
-                <div className={`flex-1 bg-slate-900/95 rounded-[2rem] md:rounded-[3rem] shadow-2xl border border-slate-800/50 p-3 md:p-8 backdrop-blur-3xl flex flex-col relative overflow-hidden ${activeTab === 'table' ? 'flex' : 'hidden md:flex'}`}>
+                <div className={`flex-1 bg-slate-900/95 rounded-[2rem] md:rounded-[3rem] shadow-2xl border border-slate-800/50 px-1 py-3 md:p-8 backdrop-blur-3xl flex flex-col relative overflow-hidden ${activeTab === 'table' ? 'flex' : 'hidden md:flex'}`}>
 
                     <div className="flex justify-between items-start md:items-center mb-2 md:mb-4">
                         <div className="flex items-center gap-4">
@@ -1538,7 +1538,7 @@ const GameView = () => {
                         </div>
                     )}
 
-                    <div className="flex-1 relative bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.05)_0%,transparent_70%)] rounded-[2rem] md:rounded-[3rem] border border-slate-800/30 flex items-center justify-center overflow-hidden scale-90 md:scale-100 origin-center">
+                    <div className="flex-1 relative bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.05)_0%,transparent_70%)] rounded-[2rem] md:rounded-[3rem] border border-slate-800/30 flex items-center justify-center overflow-hidden scale-95 md:scale-100 origin-center">
 
                         <TableOverlay />
 
@@ -1734,7 +1734,7 @@ const GameView = () => {
                     </div>
 
 
-                    <div className="h-32 md:h-36 flex items-end justify-center relative mt-auto px-4 md:px-10 pt-2 pb-2 bg-slate-800/10 rounded-t-[3rem]">
+                    <div className="h-32 md:h-36 flex items-end justify-center relative mt-auto px-1 md:px-10 pt-2 pb-2 bg-slate-800/10 rounded-t-[3rem]">
                         {(() => {
                             const myIdx = state.players.findIndex(p => p.name === state.currentViewPlayerName);
                             if (myIdx === -1 || ['scoring', 'randomizing_dealer', 'game_over', 'lobby'].includes(state.phase)) return null;

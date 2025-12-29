@@ -2,7 +2,7 @@
 
 **Last Updated:** December 29, 2025  
 **Status:** Production-ready, deployed on Vercel  
-**Current Version:** V0.63  
+**Current Version:** V0.64  
 **Live URL:** [Vercel Deployment](https://aarons-euchre.vercel.app)
 
 ---

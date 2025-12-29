@@ -598,25 +598,28 @@ const gameReducer = (state: GameState, action: Action): GameState => {
                     return p;
                 });
 
-                // Log trump call - for dealer pickup, log the DEALER's hand (not necessarily the caller)
-                // The dealer's hand should include the picked-up card
-                const trumpLog = createTrumpCallLog(
-                    caller,
-                    suit,
-                    dealerName,
-                    relationship,
-                    state.upcard,
-                    state.biddingRound,
-                    state.tableCode || 'unknown',
-                    dealerHandWithUpcard // Pass dealer's hand AFTER picking up the card
-                );
+                // --- NEW LOGGING LOGIC ---
+                // Only log here if the caller is NOT the dealer. 
+                // If dealer called, we wait for the discard action to log the 5-card hand.
+                let trumpLog = null;
+                if (callerIndex !== state.dealerIndex) {
+                    trumpLog = createTrumpCallLog(
+                        caller,           // PERSON WHO CALLED
+                        suit,
+                        dealerName,
+                        relationship,
+                        state.upcard,
+                        state.biddingRound,
+                        state.tableCode || 'unknown'
+                    );
 
-                // Save trump call to Supabase + localStorage
-                import('../utils/trumpCallLogger').then(({ saveTrumpCallLog }) => {
-                    saveTrumpCallLog(trumpLog).catch((err: any) => {
-                        console.error('[GAME] Failed to save trump call:', err);
+                    // Save trump call to Supabase + localStorage
+                    import('../utils/trumpCallLogger').then(({ saveTrumpCallLog }) => {
+                        saveTrumpCallLog(trumpLog!).catch((err: any) => {
+                            console.error('[GAME] Failed to save trump call:', err);
+                        });
                     });
-                });
+                }
 
                 return {
                     ...state,
@@ -628,7 +631,7 @@ const gameReducer = (state: GameState, action: Action): GameState => {
                     currentPlayerIndex: state.dealerIndex,
                     logs: [logMsg, ...state.logs],
                     eventLog: [...state.eventLog, bidEvent],
-                    trumpCallLogs: [...state.trumpCallLogs, trumpLog]
+                    trumpCallLogs: trumpLog ? [...state.trumpCallLogs, trumpLog] : state.trumpCallLogs
                 };
             }
 
@@ -725,16 +728,9 @@ const gameReducer = (state: GameState, action: Action): GameState => {
                 eventLog: [...state.eventLog, passEvent]
             };
         }
-
         case 'DISCARD_CARD': {
             const { playerIndex, cardId } = action.payload;
             const newHand = state.players[playerIndex].hand.filter(c => c.id !== cardId);
-
-            // Track Analysis for Dealer Pickup
-            if (state.phase === 'discard' && state.trump) {
-                const caller = state.players[playerIndex];
-                trackTrumpCall(caller, state.trump, caller.name || 'Bot', 'Self', state.upcard, 1, newHand);
-            }
 
             // Generate trump announcement message for dealer pickup
             const generateDealerPickupMessage = () => {
@@ -769,6 +765,33 @@ const gameReducer = (state: GameState, action: Action): GameState => {
                 .filter(p => p.isComputer && p.name)
                 .reduce((acc, p) => ({ ...acc, [p.name!]: true }), {});
 
+            let finalTrumpCallLogs = state.trumpCallLogs;
+
+            // --- NEW LOGGING LOGIC ---
+            // If the dealer was the one who called trump, log their hand now (after discard)
+            if (state.phase === 'discard' && state.trump && state.trumpCallerIndex === state.dealerIndex) {
+                const caller = state.players[playerIndex];
+                const trumpLog = createTrumpCallLog(
+                    caller,
+                    state.trump,
+                    caller.name || 'Bot',
+                    'Self',
+                    state.upcard,
+                    1,
+                    state.tableCode || 'unknown',
+                    newHand // 5-card hand after discard
+                );
+
+                // Save trump call to Supabase + localStorage
+                import('../utils/trumpCallLogger').then(({ saveTrumpCallLog }) => {
+                    saveTrumpCallLog(trumpLog).catch((err: any) => {
+                        console.error('[GAME] Failed to save trump call:', err);
+                    });
+                });
+
+                finalTrumpCallLogs = [...state.trumpCallLogs, trumpLog];
+            }
+
             return {
                 ...state,
                 players: state.players.map((p, i) =>
@@ -777,7 +800,8 @@ const gameReducer = (state: GameState, action: Action): GameState => {
                 phase: 'playing',
                 currentPlayerIndex: (state.dealerIndex + 1) % 4,
                 overlayMessage: generateDealerPickupMessage(),
-                overlayAcknowledged: botAcknowledgments // Bots pre-acknowledged
+                overlayAcknowledged: botAcknowledgments, // Bots pre-acknowledged
+                trumpCallLogs: finalTrumpCallLogs
             };
         }
 
