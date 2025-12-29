@@ -1248,8 +1248,8 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
             // PROGRESSIVE FALLBACK STRATEGY to ensure someone always deals:
             // Attempt 1 (immediate): If I'm the dealer, deal now
-            // Attempt 2 (2s): If dealer is a bot and I'm connected, I'll deal for them
-            // Attempt 3 (5s): EMERGENCY - Anyone connected deals to prevent freeze
+            // Attempt 2 (500ms): If dealer is a bot and I'm connected, I'll deal for them
+            // Attempt 3 (2s): EMERGENCY - Anyone connected deals to prevent freeze
 
             const dealCards = () => {
                 const deck = shuffleDeck(createDeck());
@@ -1275,19 +1275,19 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 return () => clearTimeout(immediateTimer);
             }
 
-            // Attempt 2: If dealer is a bot, any human can deal after 2 seconds
+            // Attempt 2: If dealer is a bot, any human can deal after 500ms
             if (nextDealer.isComputer && state.currentUser) {
-                Logger.info('[DEAL] Dealer is bot - will deal after 2s if needed');
-                const botTimer = setTimeout(dealCards, 2000);
+                Logger.info('[DEAL] Dealer is bot - will deal after 500ms if needed');
+                const botTimer = setTimeout(dealCards, 500);
                 return () => clearTimeout(botTimer);
             }
 
-            // Attempt 3: EMERGENCY FALLBACK - if we reach 5s, ANYONE deals to prevent freeze
-            Logger.warn('[DEAL] Using emergency fallback - will force deal after 5s');
+            // Attempt 3: EMERGENCY FALLBACK - if we reach 2s, ANYONE deals to prevent freeze
+            Logger.warn('[DEAL] Using emergency fallback - will force deal after 2s');
             const emergencyTimer = setTimeout(() => {
                 Logger.error('[DEAL] EMERGENCY FALLBACK TRIGGERED - forcing deal to prevent freeze');
                 dealCards();
-            }, 5000);
+            }, 2000); // Changed from 5000ms to 2000ms for faster recovery
 
             return () => clearTimeout(emergencyTimer);
         }
