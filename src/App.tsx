@@ -222,9 +222,9 @@ const CardComponent = ({
 };
 
 
-const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; onClose: () => void; initialTab?: 'me' | 'league' | 'trumps' | 'admin' }) => {
+const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; onClose: () => void; initialTab?: 'me' | 'league' | 'trumps' | 'admin' | 'commentary' }) => {
     const { state } = useGame();
-    const [tab, setTab] = useState<'me' | 'league' | 'trumps' | 'admin'>(initialTab);
+    const [tab, setTab] = useState<'me' | 'league' | 'trumps' | 'admin' | 'commentary'>(initialTab);
     const [freezeStats, setFreezeStats] = useState<any>(null);
     const [freezeRate, setFreezeRate] = useState<any>(null);
 
@@ -378,6 +378,12 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                                         🔧 Admin
                                     </button>
                                 )}
+                                <button
+                                    onClick={() => setTab('commentary')}
+                                    className={`px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all ${tab === 'commentary' ? 'bg-emerald-500 text-white shadow-[0_0_20px_rgba(16,185,129,0.4)]' : 'bg-slate-800 text-slate-500 hover:text-slate-300'}`}
+                                >
+                                    Commentary
+                                </button>
                                 <button
                                     onClick={downloadSessionLog}
                                     disabled={state.eventLog.length === 0}
@@ -803,6 +809,33 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                                 )}
                             </div>
                         </div>
+                    ) : tab === 'commentary' ? (
+                        <div className="space-y-6">
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em] border-b border-slate-800 pb-2 flex-1">Table Commentary</h3>
+                            </div>
+                            <div className="bg-slate-950/50 rounded-[2rem] border border-slate-800 p-8 h-[50vh] overflow-y-auto space-y-4 custom-scrollbar">
+                                {state.logs.length === 0 ? (
+                                    <div className="flex flex-col items-center justify-center h-full text-slate-600 space-y-4">
+                                        <div className="w-16 h-16 rounded-full bg-slate-900 flex items-center justify-center border-2 border-slate-800">
+                                            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
+                                        </div>
+                                        <p className="font-bold">No commentary yet</p>
+                                    </div>
+                                ) : (
+                                    state.logs.map((log: string, i: number) => (
+                                        <motion.div
+                                            key={i}
+                                            initial={{ opacity: 0, x: -10 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            className={`text-sm md:text-base font-bold leading-relaxed p-4 rounded-2xl ${i === 0 ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-slate-900 text-slate-400 border border-slate-800/50'}`}
+                                        >
+                                            {log}
+                                        </motion.div>
+                                    ))
+                                )}
+                            </div>
+                        </div>
                     ) : null}
 
                     <div className="mt-10 pt-10 border-t border-slate-800 flex justify-center">
@@ -1171,7 +1204,7 @@ const LandingPage = () => {
                     Logout from {state.currentUser}
                 </button>
                 <div className="text-[10px] font-black text-slate-800 uppercase tracking-[0.3em]">
-                    Euchre Engine V0.65
+                    Euchre Engine V0.66
                 </div>
             </div>
 
@@ -1309,7 +1342,7 @@ const GameView = () => {
     const { state, dispatch } = useGame();
     const [isStatsOpen, setIsStatsOpen] = useState(false);
     // @ts-ignore - Will be used when admin button is added to GameView
-    const [statsInitialTab, setStatsInitialTab] = useState<'me' | 'league' | 'trumps' | 'admin'>('me');
+    const [statsInitialTab, setStatsInitialTab] = useState<'me' | 'league' | 'trumps' | 'admin' | 'commentary'>('me');
     const [activeTab, setActiveTab] = useState<'table' | 'commentary' | 'stats'>('table');
 
     const handleNextStep = () => {
@@ -1387,37 +1420,15 @@ const GameView = () => {
                     <TabButton active={activeTab === 'stats'} onClick={() => setActiveTab('stats')}>STATS</TabButton>
                 </div>
 
-                {/* Table Commentary Log (Sidebar) */}
-                <div className={`md:w-72 bg-slate-900/90 rounded-[3rem] border border-slate-800/50 p-6 backdrop-blur-3xl flex flex-col shadow-2xl shrink-0 ${activeTab === 'commentary' ? 'flex flex-1 w-full order-last' : 'hidden md:flex'}`}>
+                {/* Table Commentary Sidebar (Hidden on Desktop per feedback) */}
+                <div className={`md:hidden bg-slate-900/90 rounded-[2rem] border border-slate-800/50 p-6 backdrop-blur-3xl flex flex-col shadow-2xl shrink-0 ${activeTab === 'commentary' ? 'flex flex-1 w-full order-last' : 'hidden'}`}>
                     <div className="flex flex-col gap-4 mb-4">
                         <div className="flex justify-between items-center">
                             <h2 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
                                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                                 Table Commentary
                             </h2>
-                            {state.phase !== 'lobby' && (
-                                <button
-                                    onClick={() => dispatch({ type: 'EXIT_TO_LANDING' })}
-                                    className="text-[8px] font-black text-red-500/50 hover:text-red-500 uppercase tracking-widest"
-                                >
-                                    Exit
-                                </button>
-                            )}
                         </div>
-
-                        {state.tableCode && (
-                            <div className="bg-slate-950 rounded-2xl p-3 border border-slate-800 flex items-center justify-between group cursor-pointer hover:border-emerald-500/50 transition-all"
-                                onClick={() => navigator.clipboard.writeText(state.tableCode!)}
-                            >
-                                <div>
-                                    <div className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-0.5">Table Code</div>
-                                    <div className="text-xl font-black text-white tracking-widest group-hover:text-emerald-400 transition-colors">{state.tableCode}</div>
-                                </div>
-                                <div className="text-[8px] font-black text-slate-600 uppercase tracking-widest bg-slate-900 px-2 py-1 rounded group-hover:bg-emerald-500/10 group-hover:text-emerald-500 transition-colors">
-                                    COPY
-                                </div>
-                            </div>
-                        )}
                     </div>
                     <div className="flex-1 overflow-y-auto space-y-3 pr-2 scrollbar-thin scrollbar-thumb-slate-800">
                         {state.logs.map((log: string, i: number) => (
@@ -1451,7 +1462,13 @@ const GameView = () => {
                                 )}
                             </div>
                             <button
-                                onClick={() => setIsStatsOpen(true)}
+                                onClick={() => { setStatsInitialTab('commentary'); setIsStatsOpen(true); }}
+                                className="hidden md:block bg-slate-800 hover:bg-slate-700 text-emerald-400 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border border-slate-700 transition-all shadow-sm"
+                            >
+                                Commentary
+                            </button>
+                            <button
+                                onClick={() => { setStatsInitialTab('me'); setIsStatsOpen(true); }}
                                 className="hidden md:block bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border border-slate-700 transition-all shadow-sm"
                             >
                                 Stats
@@ -1497,15 +1514,7 @@ const GameView = () => {
                                 >
                                     START
                                 </button>
-                            ) : (
-                                <button
-                                    onClick={() => dispatch({ type: 'TOGGLE_STEP_MODE' })}
-                                    className={`font-black py-1 px-3 md:py-2 md:px-6 rounded-lg md:rounded-xl transition border text-[8px] md:text-[10px] flex items-center gap-2
-                                        ${state.stepMode ? 'bg-amber-500 text-white border-white/20' : 'bg-slate-800 text-slate-500 border-slate-700'}`}
-                                >
-                                    {state.stepMode ? 'Step: ON' : 'Step'}
-                                </button>
-                            )}
+                            ) : null}
                             <button
                                 onClick={() => dispatch({ type: 'EXIT_TO_LANDING' })}
                                 className="bg-slate-800 hover:bg-red-500 text-slate-400 hover:text-white px-3 py-1 md:px-4 md:py-2 rounded-lg md:rounded-xl text-[8px] md:text-[10px] font-black uppercase border border-slate-700 transition-all"
@@ -1654,7 +1663,7 @@ const GameView = () => {
                                             initial={{ opacity: 0, y: 50 }}
                                             animate={{ opacity: 1, y: 0 }}
                                             exit={{ opacity: 0, scale: 0.8 }}
-                                            className="pointer-events-auto p-3 md:p-6 bg-slate-900/90 rounded-[2rem] md:rounded-[3rem] border-2 border-emerald-500 shadow-2xl flex flex-col gap-2 md:gap-6 backdrop-blur-md w-full max-w-xs mx-auto"
+                                            className="pointer-events-auto p-3 md:p-6 bg-slate-900/90 rounded-[2rem] md:rounded-[3rem] border-2 border-emerald-500 shadow-2xl flex flex-col gap-2 md:gap-6 backdrop-blur-md w-full max-w-sm md:max-w-md mx-auto"
                                         >
                                             <div className="text-center">
                                                 <div className="text-lg md:text-xl font-black text-white italic tracking-tighter mb-1">What's the call?</div>
