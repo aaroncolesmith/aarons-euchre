@@ -195,20 +195,25 @@ export async function getAllTrumpCalls(): Promise<any[]> {
             return [];
         }
 
-        // Convert snake_case back to camelCase
+        // Convert snake_case back to camelCase AND map to TrumpCallLog format
         return data?.map((row: any) => ({
-            id: row.id,
+            // Map to TrumpCallLog interface expected by UI
             gameId: row.game_id,
-            playerName: row.player_name,
+            whoCalled: row.player_name,  // playerName → whoCalled
+            userType: 'Human', // TODO: Store this in database or infer from player list
+            dealer: 'Unknown',  // TODO: This info is not stored in current schema
+            cardPickedUp: row.picked_up ? (row.top_card || 'n/a') : 'n/a',
+            suitCalled: row.suit ? (row.suit.charAt(0).toUpperCase() + row.suit.slice(1)) : 'Unknown',  // suit → suitCalled with capitalization
+            bowerCount: 0,  // TODO: This info is not stored in current schema
+            trumpCount: 0,  // TODO: This info is not stored in current schema
+            suitCount: 0,   // TODO: This info is not stored in current schema
+            handAfterDiscard: '',  // TODO: This info is not stored in current schema
+            timestamp: row.created_at,
+            // Keep original fields for reference
+            id: row.id,
             seatIndex: row.seat_index,
-            suit: row.suit,
             isLoner: row.is_loner,
-            pickedUp: row.picked_up,
             round: row.round,
-            topCard: row.top_card,
-            topCardSuit: row.top_card_suit,
-            topCardRank: row.top_card_rank,
-            timestamp: row.created_at
         })) || [];
     } catch (err) {
         console.error('[SUPABASE TRUMP] Exception fetching trump calls:', err);
