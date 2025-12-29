@@ -1204,7 +1204,7 @@ const LandingPage = () => {
                     Logout from {state.currentUser}
                 </button>
                 <div className="text-[10px] font-black text-slate-800 uppercase tracking-[0.3em]">
-                    Euchre Engine V0.66
+                    Euchre Engine V0.67
                 </div>
             </div>
 
@@ -1663,7 +1663,7 @@ const GameView = () => {
                                             initial={{ opacity: 0, y: 50 }}
                                             animate={{ opacity: 1, y: 0 }}
                                             exit={{ opacity: 0, scale: 0.8 }}
-                                            className="pointer-events-auto p-3 md:p-6 bg-slate-900/90 rounded-[2rem] md:rounded-[3rem] border-2 border-emerald-500 shadow-2xl flex flex-col gap-2 md:gap-6 backdrop-blur-md w-full max-w-sm md:max-w-md mx-auto"
+                                            className="pointer-events-auto p-4 md:p-10 bg-slate-900/95 rounded-[2.5rem] md:rounded-[4rem] border-2 border-emerald-500 shadow-[0_0_50px_rgba(16,185,129,0.3)] flex flex-col gap-4 md:gap-8 backdrop-blur-xl w-full max-w-sm md:max-w-2xl mx-auto"
                                         >
                                             <div className="text-center">
                                                 <div className="text-lg md:text-xl font-black text-white italic tracking-tighter mb-1">What's the call?</div>
@@ -1695,9 +1695,9 @@ const GameView = () => {
 
                                             {state.biddingRound === 1 ? (
                                                 <div className="flex gap-2 justify-center">
-                                                    <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit: state.upcard!.suit, callerIndex: myIdx, isLoner: false } })} className="bg-emerald-600 hover:bg-emerald-500 text-white flex-1 py-3 rounded-xl font-black text-[10px] md:text-sm uppercase shadow-lg shadow-emerald-500/20 leading-tight transition-transform active:scale-95">Order<br />Up</button>
-                                                    <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit: state.upcard!.suit, callerIndex: myIdx, isLoner: true } })} className="bg-amber-500 hover:bg-amber-400 text-white flex-1 py-3 rounded-xl font-black text-[10px] md:text-sm uppercase shadow-lg shadow-amber-500/20 leading-tight transition-transform active:scale-95">Go<br />Alone</button>
-                                                    <button onClick={() => dispatch({ type: 'PASS_BID', payload: { playerIndex: myIdx } })} className="bg-pink-600 hover:bg-pink-500 text-white flex-1 py-3 rounded-xl font-black text-[10px] md:text-sm uppercase shadow-lg shadow-pink-500/20 leading-tight transition-transform active:scale-95 flex items-center justify-center">Pass</button>
+                                                    <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit: state.upcard!.suit, callerIndex: myIdx, isLoner: false } })} className="bg-emerald-600 hover:bg-emerald-500 text-white flex-1 py-4 md:py-6 rounded-2xl font-black text-xs md:text-base uppercase shadow-lg shadow-emerald-500/20 leading-tight transition-transform active:scale-95">Order Up</button>
+                                                    <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit: state.upcard!.suit, callerIndex: myIdx, isLoner: true } })} className="bg-amber-500 hover:bg-amber-400 text-white flex-1 py-4 md:py-6 rounded-2xl font-black text-xs md:text-base uppercase shadow-lg shadow-amber-500/20 leading-tight transition-transform active:scale-95">Go Alone</button>
+                                                    <button onClick={() => dispatch({ type: 'PASS_BID', payload: { playerIndex: myIdx } })} className="bg-pink-600 hover:bg-pink-500 text-white flex-1 py-4 md:py-6 rounded-2xl font-black text-xs md:text-base uppercase shadow-lg shadow-pink-500/20 leading-tight transition-transform active:scale-95 flex items-center justify-center">Pass</button>
                                                 </div>
                                             ) : (
                                                 <div className="flex flex-col gap-2">
