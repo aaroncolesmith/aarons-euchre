@@ -1221,7 +1221,7 @@ const LandingPage = () => {
                     Logout from {state.currentUser}
                 </button>
                 <div className="text-[10px] font-black text-slate-800 uppercase tracking-[0.3em]">
-                    Euchre Engine V0.73
+                    Euchre Engine V0.74
                 </div>
             </div>
 
@@ -1641,13 +1641,13 @@ const GameView = () => {
                                             initial={{ opacity: 0, y: 20 }}
                                             animate={{ opacity: 1, y: 0 }}
                                             exit={{ opacity: 0, scale: 0.95 }}
-                                            className="pointer-events-auto p-2 bg-slate-900/90 rounded-full border-2 border-emerald-500 shadow-[0_0_50px_rgba(16,185,129,0.4)] flex items-center backdrop-blur-xl mx-auto w-fit"
+                                            className="pointer-events-auto p-2 bg-slate-900/90 rounded-full border-2 border-emerald-500 shadow-[0_0_50px_rgba(16,185,129,0.4)] flex items-center backdrop-blur-xl mx-auto w-full max-w-[340px] md:max-w-xl"
                                         >
                                             {state.biddingRound === 1 ? (
-                                                <div className="flex gap-2 p-1">
-                                                    <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit: state.upcard!.suit, callerIndex: myIdx, isLoner: false } })} className="bg-emerald-600 hover:bg-emerald-500 text-white px-6 md:px-10 py-3 md:py-4 rounded-full font-black text-[10px] md:text-sm uppercase shadow-lg shadow-emerald-500/20 leading-tight transition-transform active:scale-95 whitespace-nowrap">Order Up</button>
-                                                    <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit: state.upcard!.suit, callerIndex: myIdx, isLoner: true } })} className="bg-amber-500 hover:bg-amber-400 text-white px-6 md:px-10 py-3 md:py-4 rounded-full font-black text-[10px] md:text-sm uppercase shadow-lg shadow-amber-500/20 leading-tight transition-transform active:scale-95 whitespace-nowrap">Go Alone</button>
-                                                    <button onClick={() => dispatch({ type: 'PASS_BID', payload: { playerIndex: myIdx } })} className="bg-pink-600 hover:bg-pink-500 text-white px-6 md:px-10 py-3 md:py-4 rounded-full font-black text-[10px] md:text-sm uppercase shadow-lg shadow-pink-500/20 leading-tight transition-transform active:scale-95 flex items-center justify-center whitespace-nowrap">Pass</button>
+                                                <div className="flex gap-2 p-1 w-full">
+                                                    <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit: state.upcard!.suit, callerIndex: myIdx, isLoner: false } })} className="bg-emerald-600 hover:bg-emerald-500 text-white flex-1 py-3 md:py-4 rounded-full font-black text-[10px] md:text-sm uppercase shadow-lg shadow-emerald-500/20 leading-tight transition-transform active:scale-95 whitespace-nowrap">Order Up</button>
+                                                    <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit: state.upcard!.suit, callerIndex: myIdx, isLoner: true } })} className="bg-amber-500 hover:bg-amber-400 text-white flex-1 py-3 md:py-4 rounded-full font-black text-[10px] md:text-sm uppercase shadow-lg shadow-amber-500/20 leading-tight transition-transform active:scale-95 whitespace-nowrap">Go Alone</button>
+                                                    <button onClick={() => dispatch({ type: 'PASS_BID', payload: { playerIndex: myIdx } })} className="bg-pink-600 hover:bg-pink-500 text-white flex-1 py-3 md:py-4 rounded-full font-black text-[10px] md:text-sm uppercase shadow-lg shadow-pink-500/20 leading-tight transition-transform active:scale-95 flex items-center justify-center whitespace-nowrap">Pass</button>
                                                 </div>
                                             ) : (
                                                 <div className="flex flex-col gap-3 p-4 md:p-6 min-w-[300px]">
