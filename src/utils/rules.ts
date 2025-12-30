@@ -175,9 +175,16 @@ export const shouldCallTrump = (
     suit: Suit,
     personality: BotPersonality = { aggressiveness: 5, riskTolerance: 5, consistency: 5, archetype: 'Generic' },
     position: number = 0, // 0: Seat 1, 1: Seat 2, 2: Seat 3, 3: Dealer
-    isRound2: boolean = false
+    isRound2: boolean = false,
+    turnedDownSuit: Suit | null = null
 ): { call: boolean; reasoning: string; strength: number } => {
     const { total, reasoning } = calculateBibleHandStrength(hand, suit);
+
+    // CRITICAL: Count actual trumps (including Left Bower)
+    const oppositeSuit = getOppositeSuit(suit);
+    const trumpCards = hand.filter(c => c.suit === suit || (c.rank === 'J' && c.suit === oppositeSuit));
+    const trumpCount = trumpCards.length;
+    const hasRight = hand.some(c => c.rank === 'J' && c.suit === suit);
 
     // Thresholds based on Aggressiveness (Bible says 7.0 is standard)
     // Range: 5.0 (Hyper-Aggressive) to 9.0 (Conservative)
@@ -191,12 +198,24 @@ export const shouldCallTrump = (
     } else if (position === 1) { // Dealer's Partner (Assist)
         threshold -= 1.0; // Assist even more aggressively
         posReason = 'Assist bonus (-1.0 threshold)';
-    } else if (isRound2 && position === 0) { // Seat 1 in Round 2 (Next Call)
-        threshold -= 1.5; // Highly aggressive on "Next"
+    }
+
+    // NEXT CALL logic: Seat 1 in Round 2 gets a bonus ONLY for the same color suit
+    const isNextSuit = isRound2 && position === 0 && turnedDownSuit && getCardColor(suit) === getCardColor(turnedDownSuit);
+    if (isNextSuit) {
+        threshold -= 1.5;
         posReason = 'Next Call bonus (-1.5 threshold)';
     }
 
-    const call = total >= threshold;
+    // MINIMUM TRUMP REQUIREMENT
+    // Calling with 1 trump is almost always a mistake unless it's the Right Bower and you have massive off-suit power
+    let call = total >= threshold;
+    if (call && trumpCount < 2) {
+        const isPowerhouseHand = hasRight && total >= 8.5; // Right Bower + 3 Aces + Voids
+        if (!isPowerhouseHand) {
+            call = false;
+        }
+    }
     const finalReasoning = [
         `Strength: ${total.toFixed(1)} (Threshold: ${threshold.toFixed(1)})`,
         reasoning,
@@ -211,7 +230,8 @@ export const getBestBid = (
     hand: Card[],
     personality: BotPersonality,
     position: number,
-    isRound2: boolean
+    isRound2: boolean,
+    turnedDownSuit: Suit | null = null
 ): { suit: Suit | null; reasoning: string; strength: number } => {
     const suits: Suit[] = ['hearts', 'diamonds', 'clubs', 'spades'];
     let bestSuit: Suit | null = null;
@@ -219,7 +239,7 @@ export const getBestBid = (
     let bestReasoning = 'No strong suits found.';
 
     suits.forEach(suit => {
-        const result = shouldCallTrump(hand, suit, personality, position, isRound2);
+        const result = shouldCallTrump(hand, suit, personality, position, isRound2, turnedDownSuit);
         if (result.call && result.strength > maxStrength) {
             maxStrength = result.strength;
             bestSuit = suit;

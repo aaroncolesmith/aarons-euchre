@@ -1436,7 +1436,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             if (state.phase === 'bidding') {
                 if (state.biddingRound === 1) {
                     if (state.upcard) {
-                        const result = shouldCallTrump(currentPlayer.hand, state.upcard.suit, personality, position, false);
+                        const result = shouldCallTrump(currentPlayer.hand, state.upcard.suit, personality, position, false, null);
                         if (result.call) {
                             broadcastDispatch({
                                 type: 'MAKE_BID',
@@ -1477,7 +1477,13 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                         }
                     }
                 } else {
-                    const result = getBestBid(currentPlayer.hand.filter(c => state.upcard && c.suit !== state.upcard.suit), personality, position, true);
+                    const result = getBestBid(
+                        currentPlayer.hand.filter(c => state.upcard && c.suit !== state.upcard.suit),
+                        personality,
+                        position,
+                        true,
+                        state.upcard?.suit || null
+                    );
                     if (result.suit) {
                         broadcastDispatch({
                             type: 'MAKE_BID',
