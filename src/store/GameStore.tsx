@@ -738,7 +738,8 @@ const gameReducer = (state: GameState, action: Action): GameState => {
                         eventLog: [...state.eventLog, passEvent]
                     };
                 } else {
-                    return gameReducer(state, { type: 'MAKE_BID', payload: { suit: 'spades', callerIndex: state.dealerIndex, isLoner: false } });
+                    const validSuits = (['hearts', 'diamonds', 'clubs', 'spades'] as Suit[]).filter(s => s !== state.upcard?.suit);
+                    return gameReducer(state, { type: 'MAKE_BID', payload: { suit: validSuits[0], callerIndex: state.dealerIndex, isLoner: false, reasoning: 'Stick the Dealer (Emergency Fallback)' } });
                 }
             }
             return {
@@ -1506,6 +1507,35 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                             currentScoreUs: myScore,
                             currentScoreThem: opponentScore,
                             gamePhase: 'bidding (round 2)',
+                            aggressiveness: personality.aggressiveness,
+                            riskTolerance: personality.riskTolerance,
+                            consistency: personality.consistency
+                        });
+                    } else if (position === 3) {
+                        // STICK THE DEALER: Bot is dealer in round 2 and nothing met threshold
+                        const forcedSuit = result.bestSuitAnyway;
+                        const forcedReason = `STICK THE DEALER: Forced to call best available suit (${forcedSuit}). ${result.bestReasoningAnyway}`;
+                        broadcastDispatch({
+                            type: 'MAKE_BID',
+                            payload: {
+                                suit: forcedSuit,
+                                callerIndex: state.currentPlayerIndex,
+                                isLoner: false,
+                                reasoning: forcedReason,
+                                strength: result.bestStrengthAnyway
+                            }
+                        });
+                        saveBotDecision({
+                            gameCode: state.tableCode || 'unknown',
+                            playerName: currentPlayer.name || 'Bot',
+                            archetype: personality.archetype,
+                            decisionType: 'bid',
+                            decision: `Call ${forcedSuit} (STUCK)`,
+                            reasoning: forcedReason,
+                            handStrength: result.bestStrengthAnyway,
+                            currentScoreUs: myScore,
+                            currentScoreThem: opponentScore,
+                            gamePhase: 'bidding (round 2 - STUCK)',
                             aggressiveness: personality.aggressiveness,
                             riskTolerance: personality.riskTolerance,
                             consistency: personality.consistency

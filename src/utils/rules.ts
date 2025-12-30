@@ -232,14 +232,25 @@ export const getBestBid = (
     position: number,
     isRound2: boolean,
     turnedDownSuit: Suit | null = null
-): { suit: Suit | null; reasoning: string; strength: number } => {
-    const suits: Suit[] = ['hearts', 'diamonds', 'clubs', 'spades'];
+): { suit: Suit | null; reasoning: string; strength: number; bestSuitAnyway: Suit; bestStrengthAnyway: number; bestReasoningAnyway: string } => {
+    const suits: Suit[] = (['hearts', 'diamonds', 'clubs', 'spades'] as Suit[]).filter(s => s !== turnedDownSuit);
     let bestSuit: Suit | null = null;
     let maxStrength = -1;
     let bestReasoning = 'No strong suits found.';
 
+    let bestSuitAnyway: Suit = suits[0];
+    let bestStrengthAnyway = -1;
+    let bestReasoningAnyway = '';
+
     suits.forEach(suit => {
         const result = shouldCallTrump(hand, suit, personality, position, isRound2, turnedDownSuit);
+
+        if (result.strength > bestStrengthAnyway) {
+            bestStrengthAnyway = result.strength;
+            bestSuitAnyway = suit;
+            bestReasoningAnyway = result.reasoning;
+        }
+
         if (result.call && result.strength > maxStrength) {
             maxStrength = result.strength;
             bestSuit = suit;
@@ -247,7 +258,14 @@ export const getBestBid = (
         }
     });
 
-    return { suit: bestSuit, reasoning: bestReasoning, strength: maxStrength };
+    return {
+        suit: bestSuit,
+        reasoning: bestReasoning,
+        strength: maxStrength,
+        bestSuitAnyway,
+        bestStrengthAnyway,
+        bestReasoningAnyway
+    };
 };
 
 // --- New AI Logic ---

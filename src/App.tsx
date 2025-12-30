@@ -1302,7 +1302,7 @@ const LandingPage = () => {
                     Logout from {state.currentUser}
                 </button>
                 <div className="text-[10px] font-black text-slate-800 uppercase tracking-[0.3em]">
-                    Euchre Engine V0.83
+                    Euchre Engine V0.84
                 </div>
             </div>
 
@@ -1740,7 +1740,13 @@ const GameView = () => {
                                                             </div>
                                                         ))}
                                                     </div>
-                                                    <button onClick={() => dispatch({ type: 'PASS_BID', payload: { playerIndex: myIdx } })} className="w-full bg-pink-600 hover:bg-pink-500 text-white py-4 rounded-full font-black text-[10px] uppercase shadow-lg transition-transform active:scale-95">Pass</button>
+                                                    {myIdx !== state.dealerIndex ? (
+                                                        <button onClick={() => dispatch({ type: 'PASS_BID', payload: { playerIndex: myIdx } })} className="w-full bg-pink-600 hover:bg-pink-500 text-white py-4 rounded-full font-black text-[10px] uppercase shadow-lg transition-transform active:scale-95">Pass</button>
+                                                    ) : (
+                                                        <div className="w-full bg-pink-600/10 border-2 border-pink-500/30 text-pink-500 py-4 rounded-full font-black text-[9px] uppercase tracking-widest text-center animate-pulse">
+                                                            STICK THE DEALER: YOU MUST CALL
+                                                        </div>
+                                                    )}
                                                 </div>
                                             )}
                                         </motion.div>
