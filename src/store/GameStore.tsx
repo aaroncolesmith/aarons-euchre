@@ -1159,6 +1159,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const [state, dispatch] = useReducer(gameReducerFixed, INITIAL_STATE);
     const channelRef = useRef<any>(null);
     const heartbeatSnapshotRef = useRef<ReturnType<typeof createHeartbeatSnapshot> | null>(null);
+    const lastBotDecisionRef = useRef<string | null>(null);
 
     // Enhanced dispatch that broadcasts to others
     const broadcastDispatch = async (action: Action) => {
@@ -1422,12 +1423,14 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const primaryHumanName = humans[0]?.name;
         if (state.currentViewPlayerName !== primaryHumanName) return;
 
-        // Note: We used to block bots if overlay wasn't acknowledged
-        // This caused CRITICAL freeze bugs - bots would be stuck forever
-        // if a human wasn't connected or overlay state was corrupted
-        // Bots should play regardless of overlay state
+        // DEDUPLICATION: Prevent duplicate bot decisions for the same state
+        const decisionKey = `${state.tableCode}-${state.phase}-${state.biddingRound}-${state.currentPlayerIndex}-${currentPlayer.hand.length}-${state.currentTrick.length}`;
+        if (lastBotDecisionRef.current === decisionKey) return;
 
         const timer = setTimeout(() => {
+            // Re-check after timeout in case state changed
+            if (lastBotDecisionRef.current === decisionKey) return;
+            lastBotDecisionRef.current = decisionKey;
             const position = (state.currentPlayerIndex - state.dealerIndex + 4) % 4;
             const personality = currentPlayer.personality || { aggressiveness: 5, riskTolerance: 5, consistency: 5, archetype: 'Generic' };
             const isT1 = state.currentPlayerIndex === 0 || state.currentPlayerIndex === 2;
@@ -1460,6 +1463,8 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                                 currentScoreUs: myScore,
                                 currentScoreThem: opponentScore,
                                 gamePhase: 'bidding (round 1)',
+                                handState: currentPlayer.hand,
+                                tableState: { upcard: state.upcard, biddingRound: state.biddingRound },
                                 aggressiveness: personality.aggressiveness,
                                 riskTolerance: personality.riskTolerance,
                                 consistency: personality.consistency
@@ -1507,6 +1512,8 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                             currentScoreUs: myScore,
                             currentScoreThem: opponentScore,
                             gamePhase: 'bidding (round 2)',
+                            handState: currentPlayer.hand,
+                            tableState: { biddingRound: state.biddingRound, turnedDownSuit: state.upcard?.suit },
                             aggressiveness: personality.aggressiveness,
                             riskTolerance: personality.riskTolerance,
                             consistency: personality.consistency
@@ -1536,6 +1543,8 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                             currentScoreUs: myScore,
                             currentScoreThem: opponentScore,
                             gamePhase: 'bidding (round 2 - STUCK)',
+                            handState: currentPlayer.hand,
+                            tableState: { biddingRound: state.biddingRound, turnedDownSuit: state.upcard?.suit },
                             aggressiveness: personality.aggressiveness,
                             riskTolerance: personality.riskTolerance,
                             consistency: personality.consistency
@@ -1579,6 +1588,8 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                     currentScoreUs: myScore,
                     currentScoreThem: opponentScore,
                     gamePhase: 'discard',
+                    handState: currentPlayer.hand, // Hand before discard
+                    tableState: { trump: state.trump, upcard: state.upcard },
                     aggressiveness: personality.aggressiveness,
                     riskTolerance: personality.riskTolerance,
                     consistency: personality.consistency
@@ -1615,6 +1626,8 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                             currentScoreUs: myScore,
                             currentScoreThem: opponentScore,
                             gamePhase: 'playing',
+                            handState: currentPlayer.hand,
+                            tableState: { currentTrick: state.currentTrick, trump: state.trump },
                             aggressiveness: personality.aggressiveness,
                             riskTolerance: personality.riskTolerance,
                             consistency: personality.consistency

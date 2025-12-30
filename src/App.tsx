@@ -256,36 +256,54 @@ const BotAuditView = ({ decisions }: { decisions: any[] }) => {
                     <thead className="bg-slate-800/50 sticky top-0 z-20">
                         <tr className="text-[9px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-700">
                             <th className="px-4 py-4">Time</th>
+                            <th className="px-4 py-4 whitespace-nowrap">Game ID</th>
                             <th className="px-4 py-4">Bot</th>
-                            <th className="px-4 py-4">Archetype</th>
+                            <th className="px-4 py-4 whitespace-nowrap">Archetype</th>
                             <th className="px-4 py-4">Phase</th>
                             <th className="px-4 py-4">Decision</th>
+                            <th className="px-4 py-4 whitespace-nowrap">Hand at Decision</th>
                             <th className="px-4 py-4">Reasoning</th>
                             <th className="px-4 py-4 text-center">Strength</th>
                             <th className="px-4 py-4 text-center">Score</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-800/50">
-                        {decisions.map((d, i) => (
-                            <tr key={i} className="hover:bg-slate-800/40 transition-colors group">
-                                <td className="px-4 py-3 text-slate-500 text-[10px] font-medium">
-                                    {new Date(d.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-                                </td>
-                                <td className="px-4 py-3 font-black text-white">{d.player_name}</td>
-                                <td className="px-4 py-3">
-                                    <span className="text-[9px] text-cyan-400 font-black px-2 py-0.5 bg-cyan-400/10 rounded-full border border-cyan-400/20 uppercase tracking-tight">
-                                        {d.archetype}
-                                    </span>
-                                </td>
-                                <td className="px-4 py-3 text-slate-500 uppercase text-[9px] font-black">{d.game_phase}</td>
-                                <td className="px-4 py-3 font-black text-emerald-400 group-hover:text-emerald-300 transition-colors">{d.decision}</td>
-                                <td className="px-4 py-3 text-slate-300 max-w-xs leading-relaxed">{d.reasoning}</td>
-                                <td className="px-4 py-3 text-center font-black text-purple-400 tabular-nums">{d.hand_strength?.toFixed(1) || '-'}</td>
-                                <td className="px-4 py-3 text-center text-slate-600 text-[9px] font-black tabular-nums">
-                                    {d.current_score_us}-{d.current_score_them}
-                                </td>
-                            </tr>
-                        ))}
+                        {decisions.map((d, i) => {
+                            const formatHand = (handData: any) => {
+                                if (!handData) return '-';
+                                try {
+                                    const cards = Array.isArray(handData) ? handData : JSON.parse(handData);
+                                    if (!Array.isArray(cards)) return '-';
+                                    const suitMap: Record<string, string> = { 'hearts': '♥', 'diamonds': '♦', 'clubs': '♣', 'spades': '♠' };
+                                    return cards.map((c: any) => `${c.rank}${suitMap[c.suit] || c.suit.charAt(0).toUpperCase()}`).join(', ');
+                                } catch (e) {
+                                    return '-';
+                                }
+                            };
+
+                            return (
+                                <tr key={`${d.id || i}`} className="hover:bg-slate-800/40 transition-colors group">
+                                    <td className="px-4 py-3 text-slate-500 text-[10px] font-medium whitespace-nowrap">
+                                        {new Date(d.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                                    </td>
+                                    <td className="px-4 py-3 text-slate-500 text-[10px] font-black tabular-nums whitespace-nowrap">{d.game_code || 'N/A'}</td>
+                                    <td className="px-4 py-3 font-black text-white whitespace-nowrap">{d.player_name}</td>
+                                    <td className="px-4 py-3 whitespace-nowrap">
+                                        <span className="text-[9px] text-cyan-400 font-black px-2 py-0.5 bg-cyan-400/10 rounded-full border border-cyan-400/20 uppercase tracking-tight">
+                                            {d.archetype}
+                                        </span>
+                                    </td>
+                                    <td className="px-4 py-3 text-slate-500 uppercase text-[9px] font-black whitespace-nowrap">{d.game_phase}</td>
+                                    <td className="px-4 py-3 font-black text-emerald-400 group-hover:text-emerald-300 transition-colors whitespace-nowrap">{d.decision}</td>
+                                    <td className="px-4 py-3 text-slate-400 font-bold text-[10px] whitespace-nowrap font-mono">{formatHand(d.hand_state)}</td>
+                                    <td className="px-4 py-3 text-slate-300 min-w-[300px] max-w-md leading-relaxed text-[11px]">{d.reasoning}</td>
+                                    <td className="px-4 py-3 text-center font-black text-purple-400 tabular-nums">{d.hand_strength?.toFixed(1) || '-'}</td>
+                                    <td className="px-4 py-3 text-center text-slate-600 text-[9px] font-black tabular-nums whitespace-nowrap">
+                                        {d.current_score_us}-{d.current_score_them}
+                                    </td>
+                                </tr>
+                            );
+                        })}
                     </tbody>
                 </table>
             </div>
@@ -1302,7 +1320,7 @@ const LandingPage = () => {
                     Logout from {state.currentUser}
                 </button>
                 <div className="text-[10px] font-black text-slate-800 uppercase tracking-[0.3em]">
-                    Euchre Engine V0.85
+                    Euchre Engine V0.86
                 </div>
             </div>
 
