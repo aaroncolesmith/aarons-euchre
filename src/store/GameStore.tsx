@@ -1331,10 +1331,10 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         if (state.phase === 'waiting_for_next_deal') {
             const nextDealer = state.players[state.dealerIndex];
 
-            // PROGRESSIVE FALLBACK STRATEGY to ensure someone always deals:
-            // Attempt 1 (immediate): If I'm the dealer, deal now
-            // Attempt 2 (500ms): If dealer is a bot and I'm connected, I'll deal for them
-            // Attempt 3 (2s): EMERGENCY - Anyone connected deals to prevent freeze
+            // AUTHORITY CHECK: Only one client should handle the state transition
+            const humans = state.players.filter(p => !p.isComputer && p.name);
+            const primaryHumanName = humans[0]?.name;
+            const isBroadcaster = state.currentViewPlayerName === primaryHumanName;
 
             const dealCards = () => {
                 const deck = shuffleDeck(createDeck());
@@ -1360,42 +1360,54 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 return () => clearTimeout(immediateTimer);
             }
 
-            // Attempt 2: If dealer is a bot, any human can deal after 500ms
-            if (nextDealer.isComputer && state.currentUser) {
-                Logger.info('[DEAL] Dealer is bot - will deal after 500ms if needed');
+            // Attempt 2: If dealer is a bot, only the primary human deals after 500ms
+            if (nextDealer.isComputer && isBroadcaster) {
+                Logger.info('[DEAL] Dealer is bot - primary human dealing after 500ms');
                 const botTimer = setTimeout(dealCards, 500);
                 return () => clearTimeout(botTimer);
             }
 
-            // Attempt 3: EMERGENCY FALLBACK - if we reach 2s, ANYONE deals to prevent freeze
-            Logger.warn('[DEAL] Using emergency fallback - will force deal after 2s');
+            // Attempt 3: EMERGENCY FALLBACK - Anyone deals after 2s if Primary fails
+            // But we still prefer the Primary if they are there
             const emergencyTimer = setTimeout(() => {
-                Logger.error('[DEAL] EMERGENCY FALLBACK TRIGGERED - forcing deal to prevent freeze');
-                dealCards();
-            }, 2000); // Changed from 5000ms to 2000ms for faster recovery
+                if (isBroadcaster || (humans.length === 0)) {
+                    Logger.error('[DEAL] EMERGENCY FALLBACK TRIGGERED');
+                    dealCards();
+                }
+            }, 2000);
 
             return () => clearTimeout(emergencyTimer);
         }
-    }, [state.phase, state.dealerIndex, state.currentUser]);
+    }, [state.phase, state.dealerIndex, state.currentUser, state.players, state.currentViewPlayerName]);
 
     useEffect(() => {
         if (state.phase === 'waiting_for_trick') {
+            // AUTHORITY CHECK: Only the primary human should advance the state
+            const humans = state.players.filter(p => !p.isComputer && p.name);
+            const primaryHumanName = humans[0]?.name;
+            if (state.currentViewPlayerName !== primaryHumanName && !state.players.every(p => p.isComputer)) return;
+
             const timer = setTimeout(() => {
                 broadcastDispatch({ type: 'CLEAR_TRICK' });
             }, 3000);
             return () => clearTimeout(timer);
         }
-    }, [state.phase]);
+    }, [state.phase, state.players, state.currentViewPlayerName]);
 
-    // Auto-advance from scoring phase - no overlay blocking anymore
+    // Auto-advance from scoring phase
     useEffect(() => {
         if (state.phase === 'scoring') {
+            // AUTHORITY CHECK: Only the primary human should advance the state
+            const humans = state.players.filter(p => !p.isComputer && p.name);
+            const primaryHumanName = humans[0]?.name;
+            if (state.currentViewPlayerName !== primaryHumanName && !state.players.every(p => p.isComputer)) return;
+
             const timer = setTimeout(() => {
                 broadcastDispatch({ type: 'FINISH_HAND' });
-            }, 2000); // 2 seconds to see the log message
+            }, 2000);
             return () => clearTimeout(timer);
         }
-    }, [state.phase]);
+    }, [state.phase, state.players, state.currentViewPlayerName]);
 
     useEffect(() => {
         const currentPlayer = state.players[state.currentPlayerIndex];
