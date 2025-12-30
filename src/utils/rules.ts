@@ -191,35 +191,38 @@ export const shouldCallTrump = (
     let threshold = 7.0 + (5 - personality.aggressiveness) * 0.4;
 
     // Positional Adjustments
+    // position: 1=S1, 2=S2 (Partner), 3=S3, 0=Dealer
     let posReason = '';
-    if (position === 3) { // Dealer
-        threshold -= 0.5; // Dealer is more aggressive
+    if (position === 0) { // Dealer
+        threshold -= 0.5;
         posReason = 'Dealer bonus (-0.5 threshold)';
-    } else if (position === 1) { // Dealer's Partner (Assist)
-        threshold -= 1.0; // Assist even more aggressively
+    } else if (position === 2) { // Dealer's Partner (Assist)
+        threshold -= 1.0;
         posReason = 'Assist bonus (-1.0 threshold)';
     }
 
     // NEXT CALL logic: Seat 1 in Round 2 gets a bonus ONLY for the same color suit
-    const isNextSuit = isRound2 && position === 0 && turnedDownSuit && getCardColor(suit) === getCardColor(turnedDownSuit);
+    const isNextSuit = isRound2 && position === 1 && turnedDownSuit && getCardColor(suit) === getCardColor(turnedDownSuit);
     if (isNextSuit) {
         threshold -= 1.5;
         posReason = 'Next Call bonus (-1.5 threshold)';
     }
 
     // MINIMUM TRUMP REQUIREMENT
-    // Calling with 1 trump is almost always a mistake unless it's the Right Bower and you have massive off-suit power
     let call = total >= threshold;
+    let fallbackReason = '';
     if (call && trumpCount < 2) {
         const isPowerhouseHand = hasRight && total >= 8.5; // Right Bower + 3 Aces + Voids
         if (!isPowerhouseHand) {
             call = false;
+            fallbackReason = ` | BLOCKED: ${trumpCount} trump is not enough without massive power`;
         }
     }
     const finalReasoning = [
         `Strength: ${total.toFixed(1)} (Threshold: ${threshold.toFixed(1)})`,
         reasoning,
         posReason,
+        fallbackReason,
         personality.archetype
     ].filter(Boolean).join(' | ');
 
