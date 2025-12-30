@@ -549,6 +549,13 @@ const gameReducer = (state: GameState, action: Action): GameState => {
 
         case 'MAKE_BID': {
             const { suit, callerIndex, isLoner } = action.payload;
+
+            // SAFETY: Only allow bid from current player
+            if (callerIndex !== state.currentPlayerIndex) {
+                Logger.warn(`[REDUCER] Ignored MAKE_BID from player ${callerIndex} (Current: ${state.currentPlayerIndex})`);
+                return state;
+            }
+
             const caller = state.players[callerIndex];
             const logMsg = `${caller.name} called ${suit}${isLoner ? ' (GOING ALONE!)' : ''}.`;
 
@@ -704,6 +711,14 @@ const gameReducer = (state: GameState, action: Action): GameState => {
         }
 
         case 'PASS_BID': {
+            const { playerIndex } = action.payload;
+
+            // SAFETY: Only allow pass from current player
+            if (playerIndex !== state.currentPlayerIndex) {
+                Logger.warn(`[REDUCER] Ignored PASS_BID from player ${playerIndex} (Current: ${state.currentPlayerIndex})`);
+                return state;
+            }
+
             const passEvent: GameEvent = {
                 type: 'pass',
                 playerIndex: state.currentPlayerIndex,
@@ -735,6 +750,13 @@ const gameReducer = (state: GameState, action: Action): GameState => {
         }
         case 'DISCARD_CARD': {
             const { playerIndex, cardId } = action.payload;
+
+            // SAFETY: Only dealer can discard
+            if (playerIndex !== state.dealerIndex || state.phase !== 'discard') {
+                Logger.warn(`[REDUCER] Ignored DISCARD_CARD from player ${playerIndex} (Dealer: ${state.dealerIndex}, Phase: ${state.phase})`);
+                return state;
+            }
+
             const newHand = state.players[playerIndex].hand.filter(c => c.id !== cardId);
 
             // Generate trump announcement message for dealer pickup
@@ -812,6 +834,13 @@ const gameReducer = (state: GameState, action: Action): GameState => {
 
         case 'PLAY_CARD': {
             const { playerIndex, cardId } = action.payload;
+
+            // SAFETY: Only allow play from current player
+            if (playerIndex !== state.currentPlayerIndex) {
+                Logger.warn(`[REDUCER] Ignored PLAY_CARD from player ${playerIndex} (Current: ${state.currentPlayerIndex})`);
+                return state;
+            }
+
             const player = state.players[playerIndex];
             const card = player.hand.find(c => c.id === cardId);
 
@@ -1373,6 +1402,13 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         if (!currentPlayer || !currentPlayer.isComputer || ['game_over', 'scoring', 'waiting_for_trick', 'randomizing_dealer', 'landing', 'lobby'].includes(state.phase)) return;
         if (state.stepMode) return;
 
+        // BOT AUTHORITY LOGIC (Multiplayer Fix)
+        // Only the first human in the player list is responsible for triggering bot moves
+        // This prevents multiple human clients from advancing a bot's turn simultaneously
+        const humans = state.players.filter(p => !p.isComputer && p.name);
+        const primaryHumanName = humans[0]?.name;
+        if (state.currentViewPlayerName !== primaryHumanName) return;
+
         // Note: We used to block bots if overlay wasn't acknowledged
         // This caused CRITICAL freeze bugs - bots would be stuck forever
         // if a human wasn't connected or overlay state was corrupted
@@ -1502,17 +1538,14 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             } else if (state.phase === 'playing') {
                 try {
                     // CRITICAL: Ensure bot can ALWAYS play a card, even if logic fails
-                    const cardToPlay = getBotMove(
+                    const { card: cardToPlay, reasoning: cardReason } = getBotMove(
                         currentPlayer.hand,
                         state.currentTrick,
                         state.trump!,
                         state.players.map(p => p.id),
-                        currentPlayer.id
+                        currentPlayer.id,
+                        state.trumpCallerIndex
                     );
-
-                    // Logic for decision reason (simplified for now)
-                    const isLeading = state.currentTrick.length === 0;
-                    const cardReason = isLeading ? "Leading best calculated card" : "Following suit/trump strategy";
 
                     if (cardToPlay) {
                         broadcastDispatch({
@@ -1654,14 +1687,15 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 } else if (fix.action === 'PASS_BID') {
                     broadcastDispatch({ type: 'PASS_BID', payload: { playerIndex: state.currentPlayerIndex } });
                 } else if (fix.action === 'PLAY_CARD' && currentPlayer.hand.length > 0) {
-                    const card = getBotMove(
+                    const { card, reasoning } = getBotMove(
                         currentPlayer.hand,
                         state.currentTrick,
                         state.trump!,
                         state.players.map(p => p.id),
-                        currentPlayer.id
+                        currentPlayer.id,
+                        state.trumpCallerIndex
                     );
-                    broadcastDispatch({ type: 'PLAY_CARD', payload: { playerIndex: state.currentPlayerIndex, cardId: card.id } });
+                    broadcastDispatch({ type: 'PLAY_CARD', payload: { playerIndex: state.currentPlayerIndex, cardId: card.id, reasoning } });
                 } else if (fix.action === 'FORCE_NEXT_PLAYER') {
                     const nextIdx = (state.currentPlayerIndex + 1) % 4;
                     broadcastDispatch({ type: 'FORCE_NEXT_PLAYER', payload: { nextPlayerIndex: nextIdx } });
