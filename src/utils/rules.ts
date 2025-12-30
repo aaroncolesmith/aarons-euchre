@@ -237,15 +237,23 @@ export const getBotMove = (
     currentTrick: { playerId: string; card: Card }[],
     trump: Suit,
     playerIds: string[],
-    myId: string
-): Card => {
+    myId: string,
+    trumpCallerIndex: number | null
+): { card: Card; reasoning: string } => {
     const leadCard = currentTrick.length > 0 ? currentTrick[0].card : null;
     const leadSuit = leadCard ? getEffectiveSuit(leadCard, trump) : null;
 
     const validCards = hand.filter(c => isValidPlay(c, hand, leadSuit, trump));
-    if (validCards.length === 0) return hand[0]; // Fallback
+    if (validCards.length === 0) return { card: hand[0], reasoning: 'Fallback: No valid cards' };
 
-    // Determine current winner
+    const myIndex = playerIds.indexOf(myId);
+    const partnerIndex = (myIndex + 2) % 4;
+    const partnerId = playerIds[partnerIndex];
+    const isMaker = trumpCallerIndex === myIndex;
+    const isPartnerOfMaker = trumpCallerIndex === partnerIndex;
+    const isDefender = !isMaker && !isPartnerOfMaker;
+
+    // Determine current winner and if partner is winning
     let currentHighValue = -1;
     let currentHighId = '';
     if (currentTrick.length > 0) {
@@ -257,35 +265,97 @@ export const getBotMove = (
             }
         });
     }
-
-    const myIndex = playerIds.indexOf(myId);
-    const partnerId = playerIds[(myIndex + 2) % 4];
     const partnerIsWinning = currentHighId === partnerId;
 
-    // 1. If leading
+    // --- STRATEGY: LEADING ---
     if (currentTrick.length === 0) {
-        // Find best non-trump Ace, else best Trump
+        // 1. If Maker or Partner of Maker: Draw Trump
+        if (isMaker || isPartnerOfMaker) {
+            const highTrumps = validCards.filter(c => getEffectiveSuit(c, trump) === trump)
+                .sort((a, b) => getCardValue(b, trump, null) - getCardValue(a, trump, null));
+
+            if (highTrumps.length > 0 && (isMaker || highTrumps[0].rank === 'J')) {
+                return {
+                    card: highTrumps[0],
+                    reasoning: `Maker/Partner drawing trump: ${highTrumps[0].rank} of ${highTrumps[0].suit}`
+                };
+            }
+        }
+
+        // 2. Lead strong non-trump Aces
         const nonTrumpAces = validCards.filter(c => c.rank === 'A' && getEffectiveSuit(c, trump) !== trump);
-        if (nonTrumpAces.length > 0) return nonTrumpAces[0];
+        if (nonTrumpAces.length > 0) {
+            return { card: nonTrumpAces[0], reasoning: 'Leading strong non-trump Ace' };
+        }
 
-        // Otherwise play highest valid card
-        return validCards.sort((a, b) => getCardValue(b, trump, null) - getCardValue(a, trump, null))[0];
+        // 3. Defenders: Lead through the maker (if maker is to our left)
+        const makerIsNext = (myIndex + 1) % 4 === trumpCallerIndex;
+        if (isDefender && makerIsNext) {
+            // Lead a weak suit to force the maker to play early
+            const weakCards = validCards.filter(c => getEffectiveSuit(c, trump) !== trump)
+                .sort((a, b) => RANK_VALUES[a.rank] - RANK_VALUES[b.rank]);
+            if (weakCards.length > 0) {
+                return { card: weakCards[0], reasoning: 'Defender leading weak through maker' };
+            }
+        }
+
+        // Default: Lowest non-trump or lowest trump if forced
+        const sortedCards = [...validCards].sort((a, b) => getCardValue(b, trump, null) - getCardValue(a, trump, null));
+        return { card: sortedCards[0], reasoning: 'Leading highest calculated card' };
     }
 
-    // 2. If partner is winning, throw away lowest card
+    // --- STRATEGY: SECOND HAND ---
+    if (currentTrick.length === 1) {
+        // "Second Hand Low" - don't waste high cards if lead is low
+        const leadVal = getCardValue(currentTrick[0].card, trump, leadSuit);
+        if (isDefender && leadVal < 100) { // Off-suit lead
+            const lowCards = validCards.sort((a, b) => getCardValue(a, trump, leadSuit) - getCardValue(b, trump, leadSuit));
+
+            // If we have the Right Bower, but lead is junk, maybe save it
+            if (validCards.some(c => getCardValue(c, trump, leadSuit) === 1000)) {
+                return { card: lowCards[0], reasoning: 'Second Hand Low: Saving Right Bower' };
+            }
+        }
+    }
+
+    // --- STRATEGY: THIRD/FOURTH HAND ---
+
+    // 1. If partner is winning, throw away lowest card
     if (partnerIsWinning) {
-        return validCards.sort((a, b) => getCardValue(a, trump, leadSuit) - getCardValue(b, trump, leadSuit))[0];
+        const lowestCard = validCards.sort((a, b) => getCardValue(a, trump, leadSuit) - getCardValue(b, trump, leadSuit))[0];
+        return { card: lowestCard, reasoning: 'Partner winning: Sluffing lowest card' };
     }
 
-    // 3. If partner is not winning, try to win with the lowest possible card
+    // 2. Try to win with the lowest possible card
     const winningCards = validCards.filter(c => getCardValue(c, trump, leadSuit) > currentHighValue);
     if (winningCards.length > 0) {
-        // Play the LOWEST card that still wins
-        return winningCards.sort((a, b) => getCardValue(a, trump, leadSuit) - getCardValue(b, trump, leadSuit))[0];
+        // Special case: If we are 3rd hand and partner didn't play a winner, we MUST go high
+        const sortedWinning = winningCards.sort((a, b) => getCardValue(a, trump, leadSuit) - getCardValue(b, trump, leadSuit));
+        return { card: sortedWinning[0], reasoning: 'Winning trick with lowest sufficient card' };
     }
 
-    // 4. Can't win, play lowest card
-    return validCards.sort((a, b) => getCardValue(a, trump, leadSuit) - getCardValue(b, trump, leadSuit))[0];
+    // 3. Can't win, sluff lowest card or create void
+    const offSuits = validCards.filter(c => getEffectiveSuit(c, trump) !== trump);
+    if (offSuits.length > 0) {
+        // Sort by suit frequency (highest frequency first to create void)
+        const suitCounts: Record<string, number> = {};
+        offSuits.forEach(c => {
+            const s = getEffectiveSuit(c, trump);
+            suitCounts[s] = (suitCounts[s] || 0) + 1;
+        });
+
+        const bestSluff = offSuits.sort((a, b) => {
+            const countA = suitCounts[getEffectiveSuit(a, trump)];
+            const countB = suitCounts[getEffectiveSuit(b, trump)];
+            if (countA !== countB) return countB - countA; // More cards in suit = better sluff
+            return RANK_VALUES[a.rank] - RANK_VALUES[b.rank]; // Else lowest rank
+        })[0];
+
+        return { card: bestSluff, reasoning: `Sluffing to create void: ${bestSluff.rank} of ${bestSluff.suit}` };
+    }
+
+    const lowest = validCards.sort((a, b) => getCardValue(a, trump, leadSuit) - getCardValue(b, trump, leadSuit))[0];
+    return { card: lowest, reasoning: 'Cannot win: Sluffing lowest card' };
 };
 
 // --- Sorting Utility ---
