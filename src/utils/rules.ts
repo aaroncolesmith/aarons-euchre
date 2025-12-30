@@ -279,7 +279,8 @@ export const getBotMove = (
     trump: Suit,
     playerIds: string[],
     myId: string,
-    trumpCallerIndex: number | null
+    trumpCallerIndex: number | null,
+    personality: BotPersonality = { aggressiveness: 5, riskTolerance: 5, consistency: 5, archetype: 'Generic' }
 ): { card: Card; reasoning: string } => {
     const leadCard = currentTrick.length > 0 ? currentTrick[0].card : null;
     const leadSuit = leadCard ? getEffectiveSuit(leadCard, trump) : null;
@@ -307,6 +308,7 @@ export const getBotMove = (
         });
     }
     const partnerIsWinning = currentHighId === partnerId;
+    const isLastPlayer = currentTrick.length === 3;
 
     // --- STRATEGY: LEADING ---
     if (currentTrick.length === 0) {
@@ -361,18 +363,33 @@ export const getBotMove = (
 
     // --- STRATEGY: THIRD/FOURTH HAND ---
 
-    // 1. If partner is winning, throw away lowest card
+    // 1. If partner is winning, sluff lowest possible card
     if (partnerIsWinning) {
-        const lowestCard = validCards.sort((a, b) => getCardValue(a, trump, leadSuit) - getCardValue(b, trump, leadSuit))[0];
-        return { card: lowestCard, reasoning: 'Partner winning: Sluffing lowest card' };
+        // If we are last, any valid card is fine, pick the absolute lowest value to save high cards
+        const sortedByValue = validCards.sort((a, b) => getCardValue(a, trump, leadSuit) - getCardValue(b, trump, leadSuit));
+        const sluffCard = sortedByValue[0];
+        const lastReason = isLastPlayer ? " (Last player, protecting partner's win)" : "";
+
+        // Use personality for reasoning flavor
+        const isConservative = personality.riskTolerance <= 4;
+        const conserveReason = isConservative ? " [Defensive Play]" : "";
+
+        return {
+            card: sluffCard,
+            reasoning: `${personality.archetype}: Partner winning trick (${currentHighValue}). Saving ${sluffCard.rank} of ${sluffCard.suit}${lastReason}${conserveReason}`
+        };
     }
 
-    // 2. Try to win with the lowest possible card
+    // 2. Try to win with the lowest possible card (Efficiency)
     const winningCards = validCards.filter(c => getCardValue(c, trump, leadSuit) > currentHighValue);
     if (winningCards.length > 0) {
-        // Special case: If we are 3rd hand and partner didn't play a winner, we MUST go high
-        const sortedWinning = winningCards.sort((a, b) => getCardValue(a, trump, leadSuit) - getCardValue(b, trump, leadSuit));
-        return { card: sortedWinning[0], reasoning: 'Winning trick with lowest sufficient card' };
+        // Sort winners by value (low to high) to pick the most efficient winner
+        const sortedWinners = winningCards.sort((a, b) => getCardValue(a, trump, leadSuit) - getCardValue(b, trump, leadSuit));
+
+        // Strategy: 3rd Hand High. If we aren't last, we might want to play a strong winner to force the 4th player.
+        // However, "low to high" winner selection is generally more efficient in Euchre.
+        const cardToPlay = sortedWinners[0];
+        return { card: cardToPlay, reasoning: `Winning trick efficiently with ${cardToPlay.rank} of ${cardToPlay.suit}` };
     }
 
     // 3. Can't win, sluff lowest card or create void
@@ -392,11 +409,12 @@ export const getBotMove = (
             return RANK_VALUES[a.rank] - RANK_VALUES[b.rank]; // Else lowest rank
         })[0];
 
-        return { card: bestSluff, reasoning: `Sluffing to create void: ${bestSluff.rank} of ${bestSluff.suit}` };
+        return { card: bestSluff, reasoning: `Cannot win trick: Sluffing to create void (${bestSluff.rank} of ${bestSluff.suit})` };
     }
 
+    // Default: Sluff lowest card (likely a trump if we reached here)
     const lowest = validCards.sort((a, b) => getCardValue(a, trump, leadSuit) - getCardValue(b, trump, leadSuit))[0];
-    return { card: lowest, reasoning: 'Cannot win: Sluffing lowest card' };
+    return { card: lowest, reasoning: 'Cannot win trick: Sluffing lowest available card' };
 };
 
 // --- Sorting Utility ---

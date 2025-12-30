@@ -1320,7 +1320,7 @@ const LandingPage = () => {
                     Logout from {state.currentUser}
                 </button>
                 <div className="text-[10px] font-black text-slate-800 uppercase tracking-[0.3em]">
-                    Euchre Engine V0.86
+                    Euchre Engine V0.87
                 </div>
             </div>
 

@@ -1603,7 +1603,8 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                         state.trump!,
                         state.players.map(p => p.id),
                         currentPlayer.id,
-                        state.trumpCallerIndex
+                        state.trumpCallerIndex,
+                        personality
                     );
 
                     if (cardToPlay) {
