@@ -236,3 +236,72 @@ export async function getAllTrumpCalls(): Promise<any[]> {
     }
 }
 
+
+/**
+ * Save a bot decision to Supabase for global auditing
+ */
+export async function saveBotDecision(decision: {
+    gameCode: string;
+    playerName: string;
+    archetype: string;
+    decisionType: 'bid' | 'play' | 'discard' | 'pass';
+    decision: string;
+    reasoning: string;
+    handStrength?: number;
+    currentScoreUs?: number;
+    currentScoreThem?: number;
+    gamePhase?: string;
+    handState?: any;
+    tableState?: any;
+    aggressiveness?: number;
+    riskTolerance?: number;
+    consistency?: number;
+}): Promise<boolean> {
+    try {
+        const { error } = await supabase
+            .from('bot_decisions')
+            .insert({
+                game_code: decision.gameCode,
+                player_name: decision.playerName,
+                archetype: decision.archetype,
+                decision_type: decision.decisionType,
+                decision: decision.decision,
+                reasoning: decision.reasoning,
+                hand_strength: decision.handStrength,
+                current_score_us: decision.currentScoreUs,
+                current_score_them: decision.currentScoreThem,
+                game_phase: decision.gamePhase,
+                hand_state: decision.handState,
+                table_state: decision.tableState,
+                aggressiveness: decision.aggressiveness,
+                risk_tolerance: decision.riskTolerance,
+                consistency: decision.consistency
+            });
+
+        if (error) {
+            console.error('[SUPABASE BOT] Error saving bot decision:', error);
+            return false;
+        }
+
+        return true;
+    } catch (err) {
+        console.error('[SUPABASE BOT] Exception saving bot decision:', err);
+        return false;
+    }
+}
+
+export const getBotDecisions = async (limit: number = 100) => {
+    try {
+        const { data, error } = await supabase
+            .from('bot_decisions')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(limit);
+
+        if (error) throw error;
+        return data || [];
+    } catch (error) {
+        console.error('Error fetching bot decisions:', error);
+        return [];
+    }
+};

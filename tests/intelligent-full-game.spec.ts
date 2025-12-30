@@ -133,36 +133,6 @@ test.describe('Complete Euchre Game Playthrough - Peter Playwright', () => {
                 }
 
                 // ────────────────────────────────────────────────────────────
-                // Handle bidding - Second round (suit selection)
-                // ────────────────────────────────────────────────────────────
-                const suitButtons = [
-                    page.locator('button').filter({ hasText: '♥' }).first(),
-                    page.locator('button').filter({ hasText: '♦' }).first(),
-                    page.locator('button').filter({ hasText: '♣' }).first(),
-                    page.locator('button').filter({ hasText: '♠' }).first(),
-                ];
-
-                for (const suitButton of suitButtons) {
-                    if (await suitButton.isVisible().catch(() => false)) {
-                        console.log('   🎯 Second round bidding - PASSING');
-                        const passButton = page.locator('button:has-text("PASS")').first();
-                        if (await passButton.isVisible().catch(() => false)) {
-                            await passButton.click();
-                            await page.waitForTimeout(1500);
-                            bidsMade++;
-                            actionTaken = true;
-                        }
-                        break;
-                    }
-                }
-
-                if (actionTaken) {
-                    actionsCount++;
-                    consecutiveNoActions = 0;
-                    continue;
-                }
-
-                // ────────────────────────────────────────────────────────────
                 // Handle bidding - First round (order up / pick it up)
                 // ────────────────────────────────────────────────────────────
                 const orderUpButton = page.locator('button:has-text("Order")').first();
@@ -178,6 +148,54 @@ test.describe('Complete Euchre Game Playthrough - Peter Playwright', () => {
                         bidsMade++;
                         actionTaken = true;
                     }
+                }
+
+                if (actionTaken) {
+                    actionsCount++;
+                    consecutiveNoActions = 0;
+                    continue;
+                }
+
+                // ────────────────────────────────────────────────────────────
+                // Handle bidding - Second round (suit selection)
+                // IMPORTANT: Call trump here to prevent infinite redeal
+                // ────────────────────────────────────────────────────────────
+                const heartButton = page.locator('button').filter({ hasText: '♥' }).first();
+                const diamondButton = page.locator('button').filter({ hasText: '♦' }).first();
+                const clubButton = page.locator('button').filter({ hasText: '♣' }).first();
+                const spadeButton = page.locator('button').filter({ hasText: '♠' }).first();
+
+                // Check if we're in second round bidding
+                if (await heartButton.isVisible().catch(() => false)) {
+                    // Call trump! Alternate between suits to ensure game progresses
+                    const suitChoice = bidsMade % 4;
+                    let chosenSuit = 'hearts';
+
+                    if (suitChoice === 0 && await heartButton.isVisible().catch(() => false)) {
+                        chosenSuit = 'hearts';
+                        console.log('   🎯 Second round bidding - CALLING HEARTS ♥');
+                        await heartButton.click();
+                    } else if (suitChoice === 1 && await diamondButton.isVisible().catch(() => false)) {
+                        chosenSuit = 'diamonds';
+                        console.log('   🎯 Second round bidding - CALLING DIAMONDS ♦');
+                        await diamondButton.click();
+                    } else if (suitChoice === 2 && await clubButton.isVisible().catch(() => false)) {
+                        chosenSuit = 'clubs';
+                        console.log('   🎯 Second round bidding - CALLING CLUBS ♣');
+                        await clubButton.click();
+                    } else if (await spadeButton.isVisible().catch(() => false)) {
+                        chosenSuit = 'spades';
+                        console.log('   🎯 Second round bidding - CALLING SPADES ♠');
+                        await spadeButton.click();
+                    } else {
+                        // Fallback - just click  hearts
+                        console.log('   🎯 Second round bidding - CALLING HEARTS ♥ (fallback)');
+                        await heartButton.click();
+                    }
+
+                    await page.waitForTimeout(2000);
+                    bidsMade++;
+                    actionTaken = true;
                 }
 
                 if (actionTaken) {

@@ -239,9 +239,63 @@ const CardComponent = ({
 };
 
 
-const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; onClose: () => void; initialTab?: 'me' | 'league' | 'trumps' | 'admin' | 'commentary' }) => {
+const BotAuditView = ({ decisions }: { decisions: any[] }) => {
+    if (decisions.length === 0) {
+        return (
+            <div className="bg-slate-800/30 border border-slate-800 rounded-[2rem] p-12 text-center">
+                <div className="text-slate-500 text-lg mb-2">No bot decisions logged yet</div>
+                <div className="text-slate-600 text-sm">Play against bots to see their decision-making process here</div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="bg-slate-800/30 border border-slate-800 rounded-[2rem] overflow-hidden">
+            <div className="overflow-x-auto max-h-[50vh] overflow-y-auto custom-scrollbar">
+                <table className="w-full text-left text-xs">
+                    <thead className="bg-slate-800/50 sticky top-0 z-20">
+                        <tr className="text-[9px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-700">
+                            <th className="px-4 py-4">Time</th>
+                            <th className="px-4 py-4">Bot</th>
+                            <th className="px-4 py-4">Archetype</th>
+                            <th className="px-4 py-4">Phase</th>
+                            <th className="px-4 py-4">Decision</th>
+                            <th className="px-4 py-4">Reasoning</th>
+                            <th className="px-4 py-4 text-center">Strength</th>
+                            <th className="px-4 py-4 text-center">Score</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-800/50">
+                        {decisions.map((d, i) => (
+                            <tr key={i} className="hover:bg-slate-800/40 transition-colors group">
+                                <td className="px-4 py-3 text-slate-500 text-[10px] font-medium">
+                                    {new Date(d.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                                </td>
+                                <td className="px-4 py-3 font-black text-white">{d.player_name}</td>
+                                <td className="px-4 py-3">
+                                    <span className="text-[9px] text-cyan-400 font-black px-2 py-0.5 bg-cyan-400/10 rounded-full border border-cyan-400/20 uppercase tracking-tight">
+                                        {d.archetype}
+                                    </span>
+                                </td>
+                                <td className="px-4 py-3 text-slate-500 uppercase text-[9px] font-black">{d.game_phase}</td>
+                                <td className="px-4 py-3 font-black text-emerald-400 group-hover:text-emerald-300 transition-colors">{d.decision}</td>
+                                <td className="px-4 py-3 text-slate-300 max-w-xs leading-relaxed">{d.reasoning}</td>
+                                <td className="px-4 py-3 text-center font-black text-purple-400 tabular-nums">{d.hand_strength?.toFixed(1) || '-'}</td>
+                                <td className="px-4 py-3 text-center text-slate-600 text-[9px] font-black tabular-nums">
+                                    {d.current_score_us}-{d.current_score_them}
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    );
+};
+
+const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; onClose: () => void; initialTab?: 'me' | 'league' | 'trumps' | 'bot_audit' | 'admin' | 'commentary' }) => {
     const { state } = useGame();
-    const [tab, setTab] = useState<'me' | 'league' | 'trumps' | 'admin' | 'commentary'>(initialTab);
+    const [tab, setTab] = useState<'me' | 'league' | 'trumps' | 'bot_audit' | 'admin' | 'commentary'>(initialTab as any);
     const [freezeStats, setFreezeStats] = useState<any>(null);
     const [freezeRate, setFreezeRate] = useState<any>(null);
 
@@ -324,6 +378,25 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
         }
     }, [isOpen]);
 
+    // Load Bot Decisions for audit
+    const [botDecisions, setBotDecisions] = useState<any[]>([]);
+
+    useEffect(() => {
+        const loadBotDecisions = async () => {
+            try {
+                const { getBotDecisions } = await import('./utils/supabaseStats');
+                const decisions = await getBotDecisions(200);
+                setBotDecisions(decisions);
+            } catch (err) {
+                console.error('[BOT AUDIT] Error loading decisions:', err);
+            }
+        };
+
+        if (isOpen && (tab === 'bot_audit' || tab === 'admin')) {
+            loadBotDecisions();
+        }
+    }, [isOpen, tab]);
+
     // Get my stats - use currentUser (works everywhere) or fallback to currentViewPlayerName (in-game)
     const playerName = state.currentUser || state.currentViewPlayerName || '';
     const myGlobalStats = globalStats[playerName] || getEmptyStats();
@@ -386,6 +459,12 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                                     className={`px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all ${tab === 'trumps' ? 'bg-emerald-500 text-white shadow-[0_0_20px_rgba(16,185,129,0.4)]' : 'bg-slate-800 text-slate-500 hover:text-slate-300'}`}
                                 >
                                     Trump Calls
+                                </button>
+                                <button
+                                    onClick={() => setTab('bot_audit')}
+                                    className={`px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all ${tab === 'bot_audit' ? 'bg-emerald-500 text-white shadow-[0_0_20px_rgba(16,185,129,0.4)]' : 'bg-slate-800 text-slate-500 hover:text-slate-300'}`}
+                                >
+                                    Bot Audit
                                 </button>
                                 {state.currentViewPlayerName === 'Aaron' && (
                                     <button
@@ -826,6 +905,8 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                                 )}
                             </div>
                         </div>
+                    ) : tab === 'bot_audit' ? (
+                        <BotAuditView decisions={botDecisions} />
                     ) : tab === 'commentary' ? (
                         <div className="space-y-6">
                             <div className="flex justify-between items-center mb-4">
@@ -1221,7 +1302,7 @@ const LandingPage = () => {
                     Logout from {state.currentUser}
                 </button>
                 <div className="text-[10px] font-black text-slate-800 uppercase tracking-[0.3em]">
-                    Euchre Engine V0.75
+                    Euchre Engine V0.80
                 </div>
             </div>
 

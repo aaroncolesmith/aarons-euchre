@@ -2,8 +2,9 @@ import { createContext, useContext, useEffect, useReducer, ReactNode, useRef } f
 import { GameState, Suit, HandResult, PlayerStats, Player, GameEvent, Card } from '../types/game';
 import { supabase } from '../lib/supabase';
 import { createDeck, dealHands, shuffleDeck } from '../utils/deck';
-import { getBestBid, getEffectiveSuit, determineWinner, shouldCallTrump, getBotMove, sortHand } from '../utils/rules';
 import { createTrumpCallLog } from '../utils/trumpCallLogger';
+import { BOT_PERSONALITIES, calculateBibleHandStrength, shouldCallTrump, getBestBid, getBotMove, sortHand, getEffectiveSuit, determineWinner, getCardValue } from '../utils/rules';
+import { saveBotDecision } from '../utils/supabaseStats';
 import { debugGameState, suggestFix } from '../utils/freezeDebugger';
 import { createHeartbeatSnapshot, detectFreeze, applyRecovery, logFreezeToCloud } from '../utils/heartbeat';
 import { saveMultiplePlayerStats } from '../utils/supabaseStats';
@@ -23,10 +24,10 @@ type Action =
     | { type: 'START_MATCH' }
     | { type: 'UPDATE_ANIMATION_DEALER'; payload: { index: number } }
     | { type: 'SET_DEALER'; payload: { dealerIndex: number; hands?: Card[][]; upcard?: Card } }
-    | { type: 'MAKE_BID'; payload: { suit: Suit; callerIndex: number; isLoner: boolean } }
-    | { type: 'PASS_BID'; payload: { playerIndex: number } }
-    | { type: 'DISCARD_CARD'; payload: { playerIndex: number; cardId: string } }
-    | { type: 'PLAY_CARD'; payload: { playerIndex: number; cardId: string } }
+    | { type: 'MAKE_BID'; payload: { suit: Suit; callerIndex: number; isLoner: boolean; reasoning?: string; strength?: number } }
+    | { type: 'PASS_BID'; payload: { playerIndex: number; reasoning?: string; strength?: number } }
+    | { type: 'DISCARD_CARD'; payload: { playerIndex: number; cardId: string; reasoning?: string } }
+    | { type: 'PLAY_CARD'; payload: { playerIndex: number; cardId: string; reasoning?: string } }
     | { type: 'CLEAR_TRICK' }
     | { type: 'FINISH_HAND' }
     | { type: 'TOGGLE_STEP_MODE' }
@@ -372,7 +373,8 @@ const gameReducer = (state: GameState, action: Action): GameState => {
                     ...p,
                     name,
                     isComputer: false,
-                    stats: globalStats[name] || getEmptyStats()
+                    stats: globalStats[name] || getEmptyStats(),
+                    personality: BOT_PERSONALITIES[name] // Assign personality if it's a known bot name
                 } : p
             );
 
@@ -392,7 +394,8 @@ const gameReducer = (state: GameState, action: Action): GameState => {
                     ...p,
                     name: botName,
                     isComputer: true,
-                    stats: globalStats[botName] || getEmptyStats()
+                    stats: globalStats[botName] || getEmptyStats(),
+                    personality: BOT_PERSONALITIES[botName]
                 } : p)
             };
         }
@@ -576,6 +579,7 @@ const gameReducer = (state: GameState, action: Action): GameState => {
                     return {
                         ...p,
                         hand: updatedHand,
+                        lastDecision: action.payload.reasoning,
                         stats: {
                             ...p.stats,
                             callsMade: p.stats.callsMade + 1,
@@ -724,6 +728,7 @@ const gameReducer = (state: GameState, action: Action): GameState => {
             }
             return {
                 ...state,
+                players: state.players.map((p, i) => i === state.currentPlayerIndex ? { ...p, lastDecision: action.payload.reasoning } : p),
                 currentPlayerIndex: nextPlayer,
                 eventLog: [...state.eventLog, passEvent]
             };
@@ -795,7 +800,7 @@ const gameReducer = (state: GameState, action: Action): GameState => {
             return {
                 ...state,
                 players: state.players.map((p, i) =>
-                    i === playerIndex ? { ...p, hand: newHand } : p
+                    i === playerIndex ? { ...p, hand: newHand, lastDecision: action.payload.reasoning } : p
                 ),
                 phase: 'playing',
                 currentPlayerIndex: (state.dealerIndex + 1) % 4,
@@ -1374,28 +1379,130 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         // Bots should play regardless of overlay state
 
         const timer = setTimeout(() => {
+            const position = (state.currentPlayerIndex - state.dealerIndex + 4) % 4;
+            const personality = currentPlayer.personality || { aggressiveness: 5, riskTolerance: 5, consistency: 5, archetype: 'Generic' };
+            const isT1 = state.currentPlayerIndex === 0 || state.currentPlayerIndex === 2;
+            const myScore = isT1 ? state.scores.team1 : state.scores.team2;
+            const opponentScore = isT1 ? state.scores.team2 : state.scores.team1;
+
             if (state.phase === 'bidding') {
                 if (state.biddingRound === 1) {
-                    if (state.upcard && shouldCallTrump(currentPlayer.hand, state.upcard.suit)) {
-                        broadcastDispatch({ type: 'MAKE_BID', payload: { suit: state.upcard.suit, callerIndex: state.currentPlayerIndex, isLoner: false } });
-                    } else {
-                        broadcastDispatch({ type: 'PASS_BID', payload: { playerIndex: state.currentPlayerIndex } });
+                    if (state.upcard) {
+                        const result = shouldCallTrump(currentPlayer.hand, state.upcard.suit, personality, position, false);
+                        if (result.call) {
+                            broadcastDispatch({
+                                type: 'MAKE_BID',
+                                payload: {
+                                    suit: state.upcard.suit,
+                                    callerIndex: state.currentPlayerIndex,
+                                    isLoner: false,
+                                    reasoning: result.reasoning,
+                                    strength: result.strength
+                                }
+                            });
+                            saveBotDecision({
+                                gameCode: state.tableCode || 'unknown',
+                                playerName: currentPlayer.name || 'Bot',
+                                archetype: personality.archetype,
+                                decisionType: 'bid',
+                                decision: `Call ${state.upcard.suit}`,
+                                reasoning: result.reasoning,
+                                handStrength: result.strength,
+                                currentScoreUs: myScore,
+                                currentScoreThem: opponentScore,
+                                gamePhase: 'bidding (round 1)',
+                                aggressiveness: personality.aggressiveness,
+                                riskTolerance: personality.riskTolerance,
+                                consistency: personality.consistency
+                            });
+                        } else {
+                            const { total: strength, reasoning: reasonFromCalc } = calculateBibleHandStrength(currentPlayer.hand, state.upcard.suit);
+                            const reason = `Hand strength ${strength.toFixed(1)} below threshold for ${personality.archetype}. ${reasonFromCalc}`;
+                            broadcastDispatch({
+                                type: 'PASS_BID',
+                                payload: {
+                                    playerIndex: state.currentPlayerIndex,
+                                    reasoning: reason,
+                                    strength: strength
+                                }
+                            });
+                        }
                     }
                 } else {
-                    const bestBid = getBestBid(currentPlayer.hand.filter(c => state.upcard && c.suit !== state.upcard.suit));
-                    if (bestBid) {
-                        broadcastDispatch({ type: 'MAKE_BID', payload: { suit: bestBid, callerIndex: state.currentPlayerIndex, isLoner: false } });
+                    const result = getBestBid(currentPlayer.hand.filter(c => state.upcard && c.suit !== state.upcard.suit), personality, position, true);
+                    if (result.suit) {
+                        broadcastDispatch({
+                            type: 'MAKE_BID',
+                            payload: {
+                                suit: result.suit,
+                                callerIndex: state.currentPlayerIndex,
+                                isLoner: false,
+                                reasoning: result.reasoning,
+                                strength: result.strength
+                            }
+                        });
+                        saveBotDecision({
+                            gameCode: state.tableCode || 'unknown',
+                            playerName: currentPlayer.name || 'Bot',
+                            archetype: personality.archetype,
+                            decisionType: 'bid',
+                            decision: `Call ${result.suit}`,
+                            reasoning: result.reasoning,
+                            handStrength: result.strength,
+                            currentScoreUs: myScore,
+                            currentScoreThem: opponentScore,
+                            gamePhase: 'bidding (round 2)',
+                            aggressiveness: personality.aggressiveness,
+                            riskTolerance: personality.riskTolerance,
+                            consistency: personality.consistency
+                        });
                     } else {
-                        broadcastDispatch({ type: 'PASS_BID', payload: { playerIndex: state.currentPlayerIndex } });
+                        broadcastDispatch({
+                            type: 'PASS_BID',
+                            payload: {
+                                playerIndex: state.currentPlayerIndex,
+                                reasoning: result.reasoning,
+                                strength: result.strength
+                            }
+                        });
                     }
                 }
             } else if (state.phase === 'discard') {
-                const cardToDiscard = [...currentPlayer.hand].sort((a, b) => a.rank.localeCompare(b.rank))[0];
-                broadcastDispatch({ type: 'DISCARD_CARD', payload: { playerIndex: state.currentPlayerIndex, cardId: cardToDiscard.id } });
+                // Dealer discard logic
+                const cardToDiscard = [...currentPlayer.hand].sort((a, b) => {
+                    const valA = getCardValue(a, state.trump, null);
+                    const valB = getCardValue(b, state.trump, null);
+                    return valA - valB;
+                })[0];
+
+                const reason = `Discarding lowest value card (${cardToDiscard.rank} of ${cardToDiscard.suit})`;
+                broadcastDispatch({
+                    type: 'DISCARD_CARD',
+                    payload: {
+                        playerIndex: state.currentPlayerIndex,
+                        cardId: cardToDiscard.id,
+                        reasoning: reason
+                    }
+                });
+
+                saveBotDecision({
+                    gameCode: state.tableCode || 'unknown',
+                    playerName: currentPlayer.name || 'Bot',
+                    archetype: personality.archetype,
+                    decisionType: 'discard',
+                    decision: `Discard ${cardToDiscard.rank}${cardToDiscard.suit}`,
+                    reasoning: reason,
+                    currentScoreUs: myScore,
+                    currentScoreThem: opponentScore,
+                    gamePhase: 'discard',
+                    aggressiveness: personality.aggressiveness,
+                    riskTolerance: personality.riskTolerance,
+                    consistency: personality.consistency
+                });
             } else if (state.phase === 'playing') {
                 try {
                     // CRITICAL: Ensure bot can ALWAYS play a card, even if logic fails
-                    let cardToPlay = getBotMove(
+                    const cardToPlay = getBotMove(
                         currentPlayer.hand,
                         state.currentTrick,
                         state.trump!,
@@ -1403,22 +1510,57 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                         currentPlayer.id
                     );
 
-                    // SAFETY: If getBotMove fails, just play first valid card
-                    if (!cardToPlay || !currentPlayer.hand.find(c => c.id === cardToPlay.id)) {
-                        Logger.error('[BOT PLAY] getBotMove returned invalid card, using fallback');
-                        cardToPlay = currentPlayer.hand[0]; // First card as emergency fallback
-                    }
+                    // Logic for decision reason (simplified for now)
+                    const isLeading = state.currentTrick.length === 0;
+                    const cardReason = isLeading ? "Leading best calculated card" : "Following suit/trump strategy";
 
                     if (cardToPlay) {
-                        broadcastDispatch({ type: 'PLAY_CARD', payload: { playerIndex: state.currentPlayerIndex, cardId: cardToPlay.id } });
+                        broadcastDispatch({
+                            type: 'PLAY_CARD',
+                            payload: {
+                                playerIndex: state.currentPlayerIndex,
+                                cardId: cardToPlay.id,
+                                reasoning: cardReason
+                            }
+                        });
+
+                        saveBotDecision({
+                            gameCode: state.tableCode || 'unknown',
+                            playerName: currentPlayer.name || 'Bot',
+                            archetype: personality.archetype,
+                            decisionType: 'play',
+                            decision: `Play ${cardToPlay.rank}${cardToPlay.suit}`,
+                            reasoning: cardReason,
+                            currentScoreUs: myScore,
+                            currentScoreThem: opponentScore,
+                            gamePhase: 'playing',
+                            aggressiveness: personality.aggressiveness,
+                            riskTolerance: personality.riskTolerance,
+                            consistency: personality.consistency
+                        });
                     } else {
-                        Logger.error('[BOT PLAY] CRITICAL: No card to play! Hand:', currentPlayer.hand);
+                        // Safety fallback
+                        const fallbackCard = currentPlayer.hand[0];
+                        broadcastDispatch({
+                            type: 'PLAY_CARD',
+                            payload: {
+                                playerIndex: state.currentPlayerIndex,
+                                cardId: fallbackCard.id,
+                                reasoning: "Emergency fallback play"
+                            }
+                        });
                     }
                 } catch (err) {
                     Logger.error('[BOT PLAY] Exception in bot play logic:', err);
-                    // Emergency: Play first card from hand
                     if (currentPlayer.hand.length > 0) {
-                        broadcastDispatch({ type: 'PLAY_CARD', payload: { playerIndex: state.currentPlayerIndex, cardId: currentPlayer.hand[0].id } });
+                        broadcastDispatch({
+                            type: 'PLAY_CARD',
+                            payload: {
+                                playerIndex: state.currentPlayerIndex,
+                                cardId: currentPlayer.hand[0].id,
+                                reasoning: "Strategic failure recovery"
+                            }
+                        });
                     }
                 }
             }

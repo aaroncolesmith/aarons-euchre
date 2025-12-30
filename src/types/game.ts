@@ -2,6 +2,13 @@ export type Suit = 'hearts' | 'diamonds' | 'clubs' | 'spades';
 export type Rank = '9' | '10' | 'J' | 'Q' | 'K' | 'A';
 export type Color = 'red' | 'black';
 
+export interface BotPersonality {
+    aggressiveness: number; // 1-10
+    riskTolerance: number; // 1-10
+    consistency: number; // 1-10
+    archetype: string;
+}
+
 export interface Card {
     suit: Suit;
     rank: Rank;
@@ -14,6 +21,8 @@ export interface Player {
     isComputer: boolean;
     hand: Card[];
     stats: PlayerStats;
+    personality?: BotPersonality;
+    lastDecision?: string; // For bot auditing
 }
 
 export interface PlayerStats {
