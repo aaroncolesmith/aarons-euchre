@@ -7,7 +7,7 @@ import { BOT_PERSONALITIES, calculateBibleHandStrength, shouldCallTrump, getBest
 import { saveBotDecision } from '../utils/supabaseStats';
 import { debugGameState, suggestFix } from '../utils/freezeDebugger';
 import { createHeartbeatSnapshot, detectFreeze, applyRecovery, logFreezeToCloud } from '../utils/heartbeat';
-import { saveMultiplePlayerStats, scrubStats } from '../utils/supabaseStats';
+import { saveMultiplePlayerStats } from '../utils/supabaseStats';
 import Logger from '../utils/logger';
 
 // --- Actions ---
@@ -1138,6 +1138,30 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
 
     useEffect(() => {
+        const performTotalWipe = async () => {
+            const WIPE_VERSION = 'total-wipe-v1-accuracy';
+            if (localStorage.getItem(WIPE_VERSION)) return;
+
+            console.log('🚨 PERFORMING TOTAL STATS WIPE FOR DATA ACCURACY...');
+
+            // 1. Clear Cloud Stats (if we are the authority or just force it once)
+            // We'll safely attempt it. Whoever hits this first will clear the DB.
+            const { clearAllPlayerStats } = await import('../utils/supabaseStats');
+            await clearAllPlayerStats();
+
+            // 2. Clear Local Stats
+            localStorage.removeItem('euchre_global_profiles');
+
+            // 3. Mark as wiped
+            localStorage.setItem(WIPE_VERSION, 'true');
+            console.log('✅ WIPE COMPLETE. STARTING WITH 100% ACCURATE DATA.');
+
+            // Reload to ensure state is clean
+            window.location.reload();
+        };
+
+        performTotalWipe();
+
         const loadStats = async () => {
             // Load local stats
             const localStats = getGlobalStats();
@@ -1149,13 +1173,14 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             // Merge local and cloud stats
             const mergedStats = mergeAllStats(localStats, cloudStats);
 
-            const cleanedStats = scrubStats(mergedStats);
+            // No more scrubbing. We trust the engine.
+            const stats = mergedStats;
 
             // Save merged stats locally
-            localStorage.setItem('euchre_global_profiles', JSON.stringify(cleanedStats));
+            localStorage.setItem('euchre_global_profiles', JSON.stringify(stats));
 
             // Load into state
-            dispatch({ type: 'LOAD_GLOBAL_STATS', payload: cleanedStats });
+            dispatch({ type: 'LOAD_GLOBAL_STATS', payload: stats });
         };
 
         loadStats();
@@ -1295,33 +1320,19 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
                     const prevGlobal = globalStats[p.name] || getEmptyStats();
 
-                    // SANITY CHECK: Fix corrupted stats (like the 8850 tricks reported)
-                    // We cap these at physically possible values based on games played
-                    const fixStat = (val: number, maxAllowed: number) => {
-                        if (val > maxAllowed) {
-                            Logger.warn(`[STATS] Sanity check triggered for ${p.name}. Capping value ${val} at ${maxAllowed}`);
-                            return Math.floor(maxAllowed * 0.8); // Cap at 80% of max if it looks corrupted
-                        }
-                        return val;
-                    };
-
-                    const matchesPlayed = (prevGlobal.gamesPlayed || 0) + 1;
-                    const maxPossibleTricks = matchesPlayed * 75; // Absolute max 75 tricks per game
-                    const maxPossibleEuchres = matchesPlayed * 15;
-
                     globalStats[p.name] = {
-                        gamesPlayed: matchesPlayed,
+                        gamesPlayed: (prevGlobal.gamesPlayed || 0) + 1,
                         gamesWon: isGameWinner ? (prevGlobal.gamesWon || 0) + 1 : (prevGlobal.gamesWon || 0),
                         handsPlayed: (prevGlobal.handsPlayed || 0) + p.stats.handsPlayed,
                         handsWon: (prevGlobal.handsWon || 0) + p.stats.handsWon,
-                        tricksPlayed: fixStat((prevGlobal.tricksPlayed || 0) + p.stats.tricksPlayed, maxPossibleTricks),
-                        tricksTaken: fixStat((prevGlobal.tricksTaken || 0) + p.stats.tricksTaken, maxPossibleTricks),
-                        tricksWonTeam: fixStat((prevGlobal.tricksWonTeam || 0) + p.stats.tricksWonTeam, maxPossibleTricks),
+                        tricksPlayed: (prevGlobal.tricksPlayed || 0) + p.stats.tricksPlayed,
+                        tricksTaken: (prevGlobal.tricksTaken || 0) + p.stats.tricksTaken,
+                        tricksWonTeam: (prevGlobal.tricksWonTeam || 0) + p.stats.tricksWonTeam,
                         callsMade: (prevGlobal.callsMade || 0) + p.stats.callsMade,
                         callsWon: (prevGlobal.callsWon || 0) + p.stats.callsWon,
                         lonersAttempted: (prevGlobal.lonersAttempted || 0) + p.stats.lonersAttempted,
                         lonersConverted: (prevGlobal.lonersConverted || 0) + p.stats.lonersConverted,
-                        euchresMade: fixStat((prevGlobal.euchresMade || 0) + p.stats.euchresMade, maxPossibleEuchres),
+                        euchresMade: (prevGlobal.euchresMade || 0) + p.stats.euchresMade,
                         euchred: (prevGlobal.euchred || 0) + p.stats.euchred,
                         sweeps: (prevGlobal.sweeps || 0) + p.stats.sweeps,
                         swept: (prevGlobal.swept || 0) + p.stats.swept,

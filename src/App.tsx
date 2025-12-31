@@ -801,8 +801,27 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                         </div>
                     ) : tab === 'admin' ? (
                         <div className="space-y-6">
-                            <div className="text-red-400 text-sm font-bold mb-4">
-                                🔧 ADMIN DASHBOARD - Freeze Monitoring & Analytics
+                            <div className="flex justify-between items-center bg-red-950/20 border border-red-900/40 p-4 rounded-3xl mb-4">
+                                <div className="text-red-400 text-sm font-bold">
+                                    🔧 ADMIN DASHBOARD - Freeze Monitoring & Analytics
+                                </div>
+                                <button
+                                    onClick={async () => {
+                                        if (confirm('🚨 NUCLEAR OPTION: Are you sure you want to WIPE ALL PLAYER STATS? This is permanent.')) {
+                                            if (confirm('FINAL CONFIRMATION: Really delete all stats for all players?')) {
+                                                const { clearAllPlayerStats } = await import('./utils/supabaseStats');
+                                                const success = await clearAllPlayerStats();
+                                                if (success) {
+                                                    alert('Global stats have been wiped.');
+                                                    window.location.reload();
+                                                }
+                                            }
+                                        }
+                                    }}
+                                    className="px-6 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-[10px] font-black uppercase tracking-widest shadow-xl transition-all active:scale-95"
+                                >
+                                    🗑️ Wipe All Stats
+                                </button>
                             </div>
 
                             {/* Freeze Rate Card */}
@@ -959,7 +978,7 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                     </div>
                 </div>
             </div>
-        </div>
+        </div >
     );
 };
 
@@ -1327,7 +1346,7 @@ const LandingPage = () => {
                     Logout from {state.currentUser}
                 </button>
                 <div className="text-[10px] font-black text-slate-800 uppercase tracking-[0.3em]">
-                    Euchre Engine V0.89
+                    Euchre Engine V1.00
                 </div>
             </div>
 
@@ -1345,7 +1364,7 @@ const StatsView = () => {
         stats: getEmptyStats()
     };
 
-    const globalStats = JSON.parse(localStorage.getItem('euchre_global_profiles') || '{}');
+    const globalStats = JSON.parse(localStorage.getItem('euchre_global_profiles') || '{ }');
     const leaguePlayers = Object.keys(globalStats).map(name => ({
         name,
         ...globalStats[name]
