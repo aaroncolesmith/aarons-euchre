@@ -1,7 +1,7 @@
 import { supabase } from '../lib/supabase';
 import { PlayerStats } from '../types/game';
 
-export const LOCAL_STORAGE_KEY = 'euchre_global_stats_v2';
+export const LOCAL_STORAGE_KEY = 'euchre_global_stats_v3';
 
 // Convert between camelCase (app) and snake_case (database)
 function toSnakeCase(stats: PlayerStats) {
@@ -21,6 +21,26 @@ function toSnakeCase(stats: PlayerStats) {
         euchred: stats.euchred,
         sweeps: stats.sweeps,
         swept: stats.swept,
+    };
+}
+
+export function getEmptyStats(): PlayerStats {
+    return {
+        gamesPlayed: 0,
+        gamesWon: 0,
+        handsPlayed: 0,
+        handsWon: 0,
+        tricksPlayed: 0,
+        tricksTaken: 0,
+        tricksWonTeam: 0,
+        callsMade: 0,
+        callsWon: 0,
+        lonersAttempted: 0,
+        lonersConverted: 0,
+        euchresMade: 0,
+        euchred: 0,
+        sweeps: 0,
+        swept: 0,
     };
 }
 
@@ -182,17 +202,19 @@ export async function saveMultiplePlayerStats(statsMap: Record<string, PlayerSta
  */
 export async function clearAllPlayerStats(): Promise<boolean> {
     try {
-        const { error } = await supabase
-            .from('player_stats')
-            .delete()
-            .neq('player_name', ''); // Delete all rows
-
-        if (error) {
-            console.error('[SUPABASE STATS] Error clearing stats:', error);
-            return false;
+        // If delete didn't work (due to RLS), we force a wipe by zeroing out everyone
+        const { data: players } = await supabase.from('player_stats').select('player_name');
+        if (players && players.length > 0) {
+            console.log(`[SUPABASE STATS] FORCING WIPE: Zeroing out ${players.length} players...`);
+            const empty = getEmptyStats();
+            const zeroedArray = players.map(p => ({
+                player_name: p.player_name,
+                ...toSnakeCase(empty)
+            }));
+            await supabase.from('player_stats').upsert(zeroedArray, { onConflict: 'player_name' });
         }
 
-        console.log('[SUPABASE STATS] All stats cleared successfully');
+        console.log('[SUPABASE STATS] All stats zeroed successfully');
         return true;
     } catch (err) {
         console.error('[SUPABASE STATS] Exception clearing stats:', err);

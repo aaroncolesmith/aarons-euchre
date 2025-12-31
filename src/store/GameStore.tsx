@@ -103,13 +103,13 @@ const runDataMigration = () => {
 runDataMigration();
 
 const getGlobalStats = (): { [name: string]: PlayerStats } => {
-    const saved = localStorage.getItem('euchre_global_stats_v2');
+    const saved = localStorage.getItem('euchre_global_stats_v3');
     return saved ? JSON.parse(saved) : {};
 };
 
 const saveGlobalStats = async (stats: { [name: string]: PlayerStats }) => {
     // Save to localStorage
-    localStorage.setItem('euchre_global_stats_v2', JSON.stringify(stats));
+    localStorage.setItem('euchre_global_stats_v3', JSON.stringify(stats));
 
     // Sync each player's stats to Supabase using unified util
     await saveMultiplePlayerStats(stats);
@@ -228,7 +228,7 @@ const INITIAL_STATE_FUNC = (): GameState => ({
     tableName: null,
     tableCode: null,
     currentViewPlayerName: null,
-    currentUser: null,
+    currentUser: localStorage.getItem('euchre_current_user'),
     players: Array(4).fill(null).map((_, i) => createEmptyPlayer(i)),
     currentPlayerIndex: -1,
     dealerIndex: -1,
@@ -1140,14 +1140,14 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         if (savedUser) dispatch({ type: 'LOGIN', payload: { userName: savedUser } });
 
         const performTotalWipe = async () => {
-            const WIPE_VERSION = 'total-wipe-v1.02-final';
+            const WIPE_VERSION = 'total-wipe-v1.03-absolute-zero';
             if (localStorage.getItem(WIPE_VERSION)) return false;
 
-            console.log('🚨 PERFORMING ABSOLUTE STATS WIPE (V1.02)...');
+            console.log('🚨 PERFORMING ABSOLUTE STATS WIPE (V1.03)...');
             await clearAllPlayerStats();
 
             // Clear ALL legacy keys
-            ['euchre_global_profiles', 'euchre_global_stats_v1', 'euchre_global_stats_v2'].forEach(k => localStorage.removeItem(k));
+            ['euchre_global_profiles', 'euchre_global_stats_v1', 'euchre_global_stats_v2', 'euchre_global_stats_v3'].forEach(k => localStorage.removeItem(k));
 
             localStorage.setItem(WIPE_VERSION, 'true');
             console.log('✅ WIPE COMPLETE.');
@@ -1159,12 +1159,12 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const init = async () => {
             if (await performTotalWipe()) return;
 
-            // Load local stats (v2)
+            // Load local stats (v3)
             const localStats = getGlobalStats();
             const cloudStats = await getAllPlayerStats();
             const mergedStats = mergeAllStats(localStats, cloudStats);
 
-            localStorage.setItem('euchre_global_stats_v2', JSON.stringify(mergedStats));
+            localStorage.setItem('euchre_global_stats_v3', JSON.stringify(mergedStats));
             dispatch({ type: 'LOAD_GLOBAL_STATS', payload: mergedStats });
         };
 
@@ -1261,23 +1261,8 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const getScoringAuthority = () => {
         const humanPlayers = state.players.filter(p => p.name !== null && !p.isComputer);
         if (humanPlayers.length > 0) return humanPlayers[0].name;
-        // Fallback to current user if all bots, but usually we care about human sessions
         return state.currentUser;
     };
-
-    useEffect(() => {
-        if (state.currentUser) {
-            localStorage.setItem('euchre_current_user', state.currentUser);
-        } else {
-            localStorage.removeItem('euchre_current_user');
-        }
-    }, [state.currentUser]);
-
-    useEffect(() => {
-        if (['lobby', 'randomizing_dealer', 'bidding', 'discard', 'playing', 'waiting_for_trick', 'scoring', 'game_over'].includes(state.phase)) {
-            saveActiveGame(state);
-        }
-    }, [state]);
 
     // Handle Match Completion and Stats Saving (Authority Based)
     useEffect(() => {
