@@ -7,7 +7,7 @@ import { BOT_PERSONALITIES, calculateBibleHandStrength, shouldCallTrump, getBest
 import { saveBotDecision } from '../utils/supabaseStats';
 import { debugGameState, suggestFix } from '../utils/freezeDebugger';
 import { createHeartbeatSnapshot, detectFreeze, applyRecovery, logFreezeToCloud } from '../utils/heartbeat';
-import { saveMultiplePlayerStats } from '../utils/supabaseStats';
+import { saveMultiplePlayerStats, clearAllPlayerStats, getAllPlayerStats, mergeAllStats } from '../utils/supabaseStats';
 import Logger from '../utils/logger';
 
 // --- Actions ---
@@ -103,19 +103,16 @@ const runDataMigration = () => {
 runDataMigration();
 
 const getGlobalStats = (): { [name: string]: PlayerStats } => {
-    const saved = localStorage.getItem('euchre_global_profiles');
+    const saved = localStorage.getItem('euchre_global_stats_v1');
     return saved ? JSON.parse(saved) : {};
 };
 
 const saveGlobalStats = async (stats: { [name: string]: PlayerStats }) => {
     // Save to localStorage
-    localStorage.setItem('euchre_global_profiles', JSON.stringify(stats));
+    localStorage.setItem('euchre_global_stats_v1', JSON.stringify(stats));
 
-    // Sync each player's stats to Supabase
-    const { savePlayerStats } = await import('../utils/cloudStats');
-    for (const [playerName, playerStats] of Object.entries(stats)) {
-        await savePlayerStats(playerName, playerStats);
-    }
+    // Sync each player's stats to Supabase using unified util
+    await saveMultiplePlayerStats(stats);
 };
 
 export const getSavedGames = (): { [id: string]: GameState } => {
@@ -1139,54 +1136,50 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     useEffect(() => {
         const performTotalWipe = async () => {
-            const WIPE_VERSION = 'total-wipe-v1-accuracy';
-            if (localStorage.getItem(WIPE_VERSION)) return;
+            const WIPE_VERSION = 'total-wipe-v1.01-absolute';
+            if (localStorage.getItem(WIPE_VERSION)) return false;
 
-            console.log('🚨 PERFORMING TOTAL STATS WIPE FOR DATA ACCURACY...');
+            console.log('🚨 PERFORMING ABSOLUTE STATS WIPE (V1.01)...');
 
-            // 1. Clear Cloud Stats (if we are the authority or just force it once)
-            // We'll safely attempt it. Whoever hits this first will clear the DB.
-            const { clearAllPlayerStats } = await import('../utils/supabaseStats');
+            // 1. Clear Cloud Stats (flat schema)
             await clearAllPlayerStats();
 
-            // 2. Clear Local Stats
+            // 2. Clear ALL Old Local Storage Keys
             localStorage.removeItem('euchre_global_profiles');
+            localStorage.removeItem('euchre_global_stats_v1'); // Clear if already exists incorrectly
 
             // 3. Mark as wiped
             localStorage.setItem(WIPE_VERSION, 'true');
-            console.log('✅ WIPE COMPLETE. STARTING WITH 100% ACCURATE DATA.');
+            console.log('✅ WIPE COMPLETE.');
 
-            // Reload to ensure state is clean
             window.location.reload();
+            return true;
         };
 
-        performTotalWipe();
+        const init = async () => {
+            const wasWiped = await performTotalWipe();
+            if (wasWiped) return;
 
-        const loadStats = async () => {
-            // Load local stats
+            // Load local stats (v1 key)
             const localStats = getGlobalStats();
 
             // Load cloud stats
-            const { fetchAllPlayersStats, mergeAllStats } = await import('../utils/cloudStats');
-            const cloudStats = await fetchAllPlayersStats();
+            const cloudStats = await getAllPlayerStats();
 
             // Merge local and cloud stats
             const mergedStats = mergeAllStats(localStats, cloudStats);
 
-            // No more scrubbing. We trust the engine.
-            const stats = mergedStats;
-
             // Save merged stats locally
-            localStorage.setItem('euchre_global_profiles', JSON.stringify(stats));
+            localStorage.setItem('euchre_global_stats_v1', JSON.stringify(mergedStats));
 
             // Load into state
-            dispatch({ type: 'LOAD_GLOBAL_STATS', payload: stats });
+            dispatch({ type: 'LOAD_GLOBAL_STATS', payload: mergedStats });
+
+            const savedUser = localStorage.getItem('euchre_current_user');
+            if (savedUser) dispatch({ type: 'LOGIN', payload: { userName: savedUser } });
         };
 
-        loadStats();
-
-        const savedUser = localStorage.getItem('euchre_current_user');
-        if (savedUser) dispatch({ type: 'LOGIN', payload: { userName: savedUser } });
+        init();
     }, []);
 
     // Multiplayer Sync Logic

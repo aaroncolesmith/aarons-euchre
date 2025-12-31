@@ -1,6 +1,8 @@
 import { supabase } from '../lib/supabase';
 import { PlayerStats } from '../types/game';
 
+export const LOCAL_STORAGE_KEY = 'euchre_global_stats_v1';
+
 // Convert between camelCase (app) and snake_case (database)
 function toSnakeCase(stats: PlayerStats) {
     return {
@@ -48,6 +50,48 @@ function fromSnakeCase(dbStats: any): PlayerStats {
  */
 export function scrubStats(stats: Record<string, PlayerStats>): Record<string, PlayerStats> {
     return stats; // No more capping. We want 100% accurate recording of what the engine produces.
+}
+
+/**
+ * Merge local and cloud stats, preferring the one with higher values
+ * (assumes stats only accumulate, never decrease)
+ */
+export function mergePlayerStats(local: PlayerStats, cloud: PlayerStats): PlayerStats {
+    return {
+        gamesPlayed: Math.max(local.gamesPlayed || 0, cloud.gamesPlayed || 0),
+        gamesWon: Math.max(local.gamesWon || 0, cloud.gamesWon || 0),
+        handsPlayed: Math.max(local.handsPlayed || 0, cloud.handsPlayed || 0),
+        handsWon: Math.max(local.handsWon || 0, cloud.handsWon || 0),
+        tricksPlayed: Math.max(local.tricksPlayed || 0, cloud.tricksPlayed || 0),
+        tricksTaken: Math.max(local.tricksTaken || 0, cloud.tricksTaken || 0),
+        tricksWonTeam: Math.max(local.tricksWonTeam || 0, cloud.tricksWonTeam || 0),
+        callsMade: Math.max(local.callsMade || 0, cloud.callsMade || 0),
+        callsWon: Math.max(local.callsWon || 0, cloud.callsWon || 0),
+        lonersAttempted: Math.max(local.lonersAttempted || 0, cloud.lonersAttempted || 0),
+        lonersConverted: Math.max(local.lonersConverted || 0, cloud.lonersConverted || 0),
+        euchresMade: Math.max(local.euchresMade || 0, cloud.euchresMade || 0),
+        euchred: Math.max(local.euchred || 0, cloud.euchred || 0),
+        sweeps: Math.max(local.sweeps || 0, cloud.sweeps || 0),
+        swept: Math.max(local.swept || 0, cloud.swept || 0),
+    };
+}
+
+/**
+ * Merge all local stats with cloud stats
+ */
+export function mergeAllStats(localStats: Record<string, PlayerStats>, cloudStats: Record<string, PlayerStats>): Record<string, PlayerStats> {
+    const merged: Record<string, PlayerStats> = { ...cloudStats };
+
+    // Merge each player's local stats with cloud
+    Object.keys(localStats).forEach(playerName => {
+        if (merged[playerName]) {
+            merged[playerName] = mergePlayerStats(localStats[playerName], merged[playerName]);
+        } else {
+            merged[playerName] = localStats[playerName];
+        }
+    });
+
+    return merged;
 }
 
 /**
