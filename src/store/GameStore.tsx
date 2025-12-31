@@ -124,33 +124,22 @@ export const getSavedGames = (): { [id: string]: GameState } => {
 };
 
 const saveActiveGame = (state: GameState) => {
-    if (!state.tableId) return;
+    if (!state.tableCode) return;
     const games = getSavedGames();
-    games[state.tableId] = state;
+    games[state.tableCode] = state;
     localStorage.setItem('euchre_active_games', JSON.stringify(games));
 };
 
 export const deleteActiveGame = async (tableCode: string) => {
+    if (!tableCode) return;
     console.log(`[DELETE] Attempting to delete game with code: ${tableCode}`);
 
-    // Delete from localStorage - localStorage uses tableId as key, not tableCode!
+    // Delete from localStorage
     const games = getSavedGames();
-    console.log(`[DELETE] Current localStorage has ${Object.keys(games).length} games`);
-
-    // Find the game by tableCode (since games are stored by tableId in localStorage)
-    let deletedFromLocal = false;
-    for (const [tableId, game] of Object.entries(games)) {
-        if (game.tableCode === tableCode) {
-            delete games[tableId];
-            localStorage.setItem('euchre_active_games', JSON.stringify(games));
-            console.log(`[DELETE] Removed from localStorage (tableId: ${tableId}). Now has ${Object.keys(games).length} games`);
-            deletedFromLocal = true;
-            break;
-        }
-    }
-
-    if (!deletedFromLocal) {
-        console.warn(`[DELETE] Game with tableCode ${tableCode} not found in localStorage!`);
+    if (games[tableCode]) {
+        delete games[tableCode];
+        localStorage.setItem('euchre_active_games', JSON.stringify(games));
+        console.log(`[DELETE] Removed from localStorage: ${tableCode}`);
     }
 
     // Delete from Supabase (uses code/tableCode as primary key)
@@ -1100,8 +1089,38 @@ const gameReducer = (state: GameState, action: Action): GameState => {
                 saveGlobalStats(globalStats); // Backup to localStorage
             }
 
-            if (isGameOver && state.tableId) {
-                deleteActiveGame(state.tableId);
+            if (isGameOver) {
+                const globalStats = getGlobalStats();
+                updatedPlayers.forEach((p, playerIndex) => {
+                    if (!p.name) return;
+                    const playerTeam = isTeam1(playerIndex) ? 'team1' : 'team2';
+                    const isGameWinner = playerTeam === 'team1' ? newScores.team1 >= 10 : newScores.team2 >= 10;
+                    const prevGlobal = globalStats[p.name] || getEmptyStats();
+
+                    globalStats[p.name] = {
+                        ...p.stats,
+                        gamesPlayed: prevGlobal.gamesPlayed + 1,
+                        gamesWon: isGameWinner ? prevGlobal.gamesWon + 1 : prevGlobal.gamesWon,
+                        handsPlayed: prevGlobal.handsPlayed + p.stats.handsPlayed,
+                        handsWon: prevGlobal.handsWon + p.stats.handsWon,
+                        tricksPlayed: prevGlobal.tricksPlayed + p.stats.tricksPlayed,
+                        tricksTaken: prevGlobal.tricksTaken + p.stats.tricksTaken,
+                        tricksWonTeam: prevGlobal.tricksWonTeam + p.stats.tricksWonTeam,
+                        callsMade: prevGlobal.callsMade + p.stats.callsMade,
+                        callsWon: prevGlobal.callsWon + p.stats.callsWon,
+                        lonersAttempted: prevGlobal.lonersAttempted + p.stats.lonersAttempted,
+                        lonersConverted: prevGlobal.lonersConverted + p.stats.lonersConverted,
+                        euchresMade: prevGlobal.euchresMade + p.stats.euchresMade,
+                        euchred: prevGlobal.euchred + p.stats.euchred,
+                        sweeps: prevGlobal.sweeps + p.stats.sweeps,
+                        swept: prevGlobal.swept + p.stats.swept,
+                    };
+                });
+
+                saveMultiplePlayerStats(globalStats).catch(err => {
+                    console.error('[GAME] Failed to save stats to Supabase:', err);
+                });
+                saveGlobalStats(globalStats);
             }
 
             return {
@@ -1257,6 +1276,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     useEffect(() => {
         if (state.tableCode && state.phase !== 'login' && state.phase !== 'landing') {
             const syncToCloud = async () => {
+                // If game is over, we still want to push the final state once, then delete
                 await supabase
                     .from('games')
                     .upsert({
@@ -1264,10 +1284,18 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                         state: state,
                         updated_at: new Date().toISOString()
                     }, { onConflict: 'code' });
+
+                if (state.phase === 'game_over') {
+                    console.log(`[SYNC] Game ${state.tableCode} is OVER. Triggering cleanup in 10s...`);
+                    // Wait a bit so other players can see the "Game Over" screen before the record vanishes
+                    setTimeout(() => {
+                        deleteActiveGame(state.tableCode!);
+                    }, 10000);
+                }
             };
             syncToCloud();
         }
-    }, [state]);
+    }, [state.tableCode, state.phase === 'game_over']);
 
     useEffect(() => {
         if (state.currentUser) {

@@ -3,29 +3,44 @@ import { GameState } from '../types/game';
 
 export async function fetchUserCloudGames(currentUser: string): Promise<GameState[]> {
     try {
+        // We fetch all recent games and filter. 
+        // Note: For a production app, we would have separate columns for players and status
+        // to filter efficiently on the server.
         const { data, error } = await supabase
             .from('games')
-            .select('state')
-            .order('updated_at', { ascending: false });
+            .select('state, updated_at')
+            .order('updated_at', { ascending: false })
+            .limit(100); // Only look at last 100 games to avoid massive payload
 
         if (error) {
             console.error('Error fetching cloud games:', error);
             return [];
         }
 
-        if (!data) {
-            return [];
-        }
+        if (!data) return [];
 
-        // Filter games where current user is involved
-        const userGames = data
-            .filter(g =>
-                g.state && (
-                    g.state.currentUser === currentUser ||
-                    g.state.players?.some((p: any) => p.name === currentUser)
-                )
-            )
-            .map(g => g.state as GameState);
+        // Filter and Deduplicate
+        const seenCodes = new Set<string>();
+        const userGames: GameState[] = [];
+
+        data.forEach(g => {
+            const state = g.state as GameState;
+            if (!state || !state.tableCode) return;
+            if (seenCodes.has(state.tableCode)) return;
+
+            const isUserInvolved =
+                state.currentUser === currentUser ||
+                state.players?.some((p: any) => p.name === currentUser);
+
+            if (isUserInvolved) {
+                seenCodes.add(state.tableCode);
+                // Ensure updated_at from DB is used as lastActive if missing
+                if (!state.lastActive && g.updated_at) {
+                    state.lastActive = new Date(g.updated_at).getTime();
+                }
+                userGames.push(state);
+            }
+        });
 
         return userGames;
     } catch (err) {

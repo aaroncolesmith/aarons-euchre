@@ -1242,7 +1242,7 @@ const LandingPage = () => {
                 {savedGames.length > 0 && (
                     <div className="space-y-2 md:space-y-4">
                         {/* Tabs for game filtering */}
-                        <div className="flex gap-2 border-b-2 border-slate-800/50">
+                        <div className="flex gap-2 border-b-2 border-slate-800/50 items-center">
                             <button
                                 onClick={() => setGameFilter('in-progress')}
                                 className={`flex-1 text-[10px] md:text-xs font-black uppercase tracking-widest py-2 px-4 transition-all ${gameFilter === 'in-progress'
@@ -1261,6 +1261,13 @@ const LandingPage = () => {
                             >
                                 Completed ({savedGames.filter(g => g.phase === 'game_over').length})
                             </button>
+                            <button
+                                onClick={() => setRefreshKey(prev => prev + 1)}
+                                className="p-2 text-slate-600 hover:text-emerald-400 transition-colors"
+                                title="Sync with Cloud"
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M4 4v5h5M20 20v-5h-5M20 5.138A9 9 0 004.862 13M4 18.862A9 9 0 0019.138 11" /></svg>
+                            </button>
                         </div>
 
                         <div className="max-h-[300px] md:max-h-[400px] overflow-y-auto space-y-2 md:space-y-3 pr-2 scrollbar-thin scrollbar-thumb-slate-800 scrollbar-track-slate-950">
@@ -1268,7 +1275,7 @@ const LandingPage = () => {
                                 .filter(g => gameFilter === 'in-progress' ? g.phase !== 'game_over' : g.phase === 'game_over')
                                 .map(game => (
                                     <div
-                                        key={game.tableId}
+                                        key={game.tableCode}
                                         className="group relative w-full bg-slate-900/40 hover:bg-emerald-500/10 border-2 border-emerald-500/30 hover:border-emerald-500 rounded-xl md:rounded-[2rem] px-3 md:px-8 py-3 md:py-6 transition-all shadow-xl"
                                     >
                                         <div className="flex items-center justify-between">
@@ -1320,7 +1327,7 @@ const LandingPage = () => {
                     Logout from {state.currentUser}
                 </button>
                 <div className="text-[10px] font-black text-slate-800 uppercase tracking-[0.3em]">
-                    Euchre Engine V0.87
+                    Euchre Engine V0.88
                 </div>
             </div>
 

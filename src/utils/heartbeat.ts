@@ -219,7 +219,7 @@ export async function logFreezeToCloud(
 
     await logFreezeIncident({
         game_code: gameState.tableCode || 'unknown',
-        table_id: gameState.tableId,
+        table_id: gameState.tableCode,
         freeze_type: freezeType,
         phase: gameState.phase,
         current_player_index: gameState.currentPlayerIndex,
