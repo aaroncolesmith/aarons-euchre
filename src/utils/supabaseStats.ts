@@ -1,7 +1,7 @@
 import { supabase } from '../lib/supabase';
 import { PlayerStats } from '../types/game';
 
-export const LOCAL_STORAGE_KEY = 'euchre_global_stats_v1';
+export const LOCAL_STORAGE_KEY = 'euchre_global_stats_v2';
 
 // Convert between camelCase (app) and snake_case (database)
 function toSnakeCase(stats: PlayerStats) {

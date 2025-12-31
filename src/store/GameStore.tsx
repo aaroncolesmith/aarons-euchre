@@ -103,13 +103,13 @@ const runDataMigration = () => {
 runDataMigration();
 
 const getGlobalStats = (): { [name: string]: PlayerStats } => {
-    const saved = localStorage.getItem('euchre_global_stats_v1');
+    const saved = localStorage.getItem('euchre_global_stats_v2');
     return saved ? JSON.parse(saved) : {};
 };
 
 const saveGlobalStats = async (stats: { [name: string]: PlayerStats }) => {
     // Save to localStorage
-    localStorage.setItem('euchre_global_stats_v1', JSON.stringify(stats));
+    localStorage.setItem('euchre_global_stats_v2', JSON.stringify(stats));
 
     // Sync each player's stats to Supabase using unified util
     await saveMultiplePlayerStats(stats);
@@ -1135,20 +1135,20 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
 
     useEffect(() => {
+        // 1. Immediate Login Restoration (No Async Wait)
+        const savedUser = localStorage.getItem('euchre_current_user');
+        if (savedUser) dispatch({ type: 'LOGIN', payload: { userName: savedUser } });
+
         const performTotalWipe = async () => {
-            const WIPE_VERSION = 'total-wipe-v1.01-absolute';
+            const WIPE_VERSION = 'total-wipe-v1.02-final';
             if (localStorage.getItem(WIPE_VERSION)) return false;
 
-            console.log('🚨 PERFORMING ABSOLUTE STATS WIPE (V1.01)...');
-
-            // 1. Clear Cloud Stats (flat schema)
+            console.log('🚨 PERFORMING ABSOLUTE STATS WIPE (V1.02)...');
             await clearAllPlayerStats();
 
-            // 2. Clear ALL Old Local Storage Keys
-            localStorage.removeItem('euchre_global_profiles');
-            localStorage.removeItem('euchre_global_stats_v1'); // Clear if already exists incorrectly
+            // Clear ALL legacy keys
+            ['euchre_global_profiles', 'euchre_global_stats_v1', 'euchre_global_stats_v2'].forEach(k => localStorage.removeItem(k));
 
-            // 3. Mark as wiped
             localStorage.setItem(WIPE_VERSION, 'true');
             console.log('✅ WIPE COMPLETE.');
 
@@ -1157,26 +1157,15 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         };
 
         const init = async () => {
-            const wasWiped = await performTotalWipe();
-            if (wasWiped) return;
+            if (await performTotalWipe()) return;
 
-            // Load local stats (v1 key)
+            // Load local stats (v2)
             const localStats = getGlobalStats();
-
-            // Load cloud stats
             const cloudStats = await getAllPlayerStats();
-
-            // Merge local and cloud stats
             const mergedStats = mergeAllStats(localStats, cloudStats);
 
-            // Save merged stats locally
-            localStorage.setItem('euchre_global_stats_v1', JSON.stringify(mergedStats));
-
-            // Load into state
+            localStorage.setItem('euchre_global_stats_v2', JSON.stringify(mergedStats));
             dispatch({ type: 'LOAD_GLOBAL_STATS', payload: mergedStats });
-
-            const savedUser = localStorage.getItem('euchre_current_user');
-            if (savedUser) dispatch({ type: 'LOGIN', payload: { userName: savedUser } });
         };
 
         init();
