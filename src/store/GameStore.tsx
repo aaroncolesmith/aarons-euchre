@@ -7,7 +7,7 @@ import { BOT_PERSONALITIES, calculateBibleHandStrength, shouldCallTrump, getBest
 import { saveBotDecision } from '../utils/supabaseStats';
 import { debugGameState, suggestFix } from '../utils/freezeDebugger';
 import { createHeartbeatSnapshot, detectFreeze, applyRecovery, logFreezeToCloud } from '../utils/heartbeat';
-import { saveMultiplePlayerStats } from '../utils/supabaseStats';
+import { saveMultiplePlayerStats, scrubStats } from '../utils/supabaseStats';
 import Logger from '../utils/logger';
 
 // --- Actions ---
@@ -1048,79 +1048,15 @@ const gameReducer = (state: GameState, action: Action): GameState => {
             });
 
             if (isGameOver) {
-                const globalStats = getGlobalStats();
+                // Determine which team won finally
+                const winnerName = newScores.team1 >= 10 ? state.teamNames.team1 : state.teamNames.team2;
 
-                // CRITICAL: Track ALL 4 players to ensure wins = losses
-                // Use updatedPlayers which is created from state.players and has all 4 seats
-                updatedPlayers.forEach((p, playerIndex) => {
-                    // Skip empty seats (no name)
-                    if (!p.name) return;
-
-                    // Determine which team this player is on
-                    const playerTeam = isTeam1(playerIndex) ? 'team1' : 'team2';
-                    const isGameWinner = playerTeam === 'team1' ? newScores.team1 >= 10 : newScores.team2 >= 10;
-
-                    const prevGlobal = globalStats[p.name] || getEmptyStats();
-
-                    globalStats[p.name] = {
-                        ...p.stats,
-                        gamesPlayed: prevGlobal.gamesPlayed + 1,
-                        gamesWon: isGameWinner ? prevGlobal.gamesWon + 1 : prevGlobal.gamesWon,
-                        handsPlayed: prevGlobal.handsPlayed + p.stats.handsPlayed,
-                        handsWon: prevGlobal.handsWon + p.stats.handsWon,
-                        tricksPlayed: prevGlobal.tricksPlayed + p.stats.tricksPlayed,
-                        tricksTaken: prevGlobal.tricksTaken + p.stats.tricksTaken,
-                        tricksWonTeam: prevGlobal.tricksWonTeam + p.stats.tricksWonTeam,
-                        callsMade: prevGlobal.callsMade + p.stats.callsMade,
-                        callsWon: prevGlobal.callsWon + p.stats.callsWon,
-                        lonersAttempted: prevGlobal.lonersAttempted + p.stats.lonersAttempted,
-                        lonersConverted: prevGlobal.lonersConverted + p.stats.lonersConverted,
-                        euchresMade: prevGlobal.euchresMade + p.stats.euchresMade,
-                        euchred: prevGlobal.euchred + p.stats.euchred,
-                        sweeps: prevGlobal.sweeps + p.stats.sweeps,
-                        swept: prevGlobal.swept + p.stats.swept,
-                    };
+                newEventLog.push({
+                    type: 'game_over',
+                    scores: newScores,
+                    winner: winnerName,
+                    timestamp: Date.now()
                 });
-
-                // Save to BOTH Supabase (primary) and localStorage (backup)
-                saveMultiplePlayerStats(globalStats).catch(err => {
-                    console.error('[GAME] Failed to save stats to Supabase:', err);
-                });
-                saveGlobalStats(globalStats); // Backup to localStorage
-            }
-
-            if (isGameOver) {
-                const globalStats = getGlobalStats();
-                updatedPlayers.forEach((p, playerIndex) => {
-                    if (!p.name) return;
-                    const playerTeam = isTeam1(playerIndex) ? 'team1' : 'team2';
-                    const isGameWinner = playerTeam === 'team1' ? newScores.team1 >= 10 : newScores.team2 >= 10;
-                    const prevGlobal = globalStats[p.name] || getEmptyStats();
-
-                    globalStats[p.name] = {
-                        ...p.stats,
-                        gamesPlayed: prevGlobal.gamesPlayed + 1,
-                        gamesWon: isGameWinner ? prevGlobal.gamesWon + 1 : prevGlobal.gamesWon,
-                        handsPlayed: prevGlobal.handsPlayed + p.stats.handsPlayed,
-                        handsWon: prevGlobal.handsWon + p.stats.handsWon,
-                        tricksPlayed: prevGlobal.tricksPlayed + p.stats.tricksPlayed,
-                        tricksTaken: prevGlobal.tricksTaken + p.stats.tricksTaken,
-                        tricksWonTeam: prevGlobal.tricksWonTeam + p.stats.tricksWonTeam,
-                        callsMade: prevGlobal.callsMade + p.stats.callsMade,
-                        callsWon: prevGlobal.callsWon + p.stats.callsWon,
-                        lonersAttempted: prevGlobal.lonersAttempted + p.stats.lonersAttempted,
-                        lonersConverted: prevGlobal.lonersConverted + p.stats.lonersConverted,
-                        euchresMade: prevGlobal.euchresMade + p.stats.euchresMade,
-                        euchred: prevGlobal.euchred + p.stats.euchred,
-                        sweeps: prevGlobal.sweeps + p.stats.sweeps,
-                        swept: prevGlobal.swept + p.stats.swept,
-                    };
-                });
-
-                saveMultiplePlayerStats(globalStats).catch(err => {
-                    console.error('[GAME] Failed to save stats to Supabase:', err);
-                });
-                saveGlobalStats(globalStats);
             }
 
             return {
@@ -1179,6 +1115,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const channelRef = useRef<any>(null);
     const heartbeatSnapshotRef = useRef<ReturnType<typeof createHeartbeatSnapshot> | null>(null);
     const lastBotDecisionRef = useRef<string | null>(null);
+    const lastGameStatsSavedRef = useRef<string | null>(null);
 
     // Enhanced dispatch that broadcasts to others
     const broadcastDispatch = async (action: Action) => {
@@ -1212,11 +1149,13 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             // Merge local and cloud stats
             const mergedStats = mergeAllStats(localStats, cloudStats);
 
+            const cleanedStats = scrubStats(mergedStats);
+
             // Save merged stats locally
-            localStorage.setItem('euchre_global_profiles', JSON.stringify(mergedStats));
+            localStorage.setItem('euchre_global_profiles', JSON.stringify(cleanedStats));
 
             // Load into state
-            dispatch({ type: 'LOAD_GLOBAL_STATS', payload: mergedStats });
+            dispatch({ type: 'LOAD_GLOBAL_STATS', payload: cleanedStats });
         };
 
         loadStats();
@@ -1311,6 +1250,98 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
     }, [state]);
 
+    // Authority Check Helper
+    const getScoringAuthority = () => {
+        const humanPlayers = state.players.filter(p => p.name !== null && !p.isComputer);
+        if (humanPlayers.length > 0) return humanPlayers[0].name;
+        // Fallback to current user if all bots, but usually we care about human sessions
+        return state.currentUser;
+    };
+
+    useEffect(() => {
+        if (state.currentUser) {
+            localStorage.setItem('euchre_current_user', state.currentUser);
+        } else {
+            localStorage.removeItem('euchre_current_user');
+        }
+    }, [state.currentUser]);
+
+    useEffect(() => {
+        if (['lobby', 'randomizing_dealer', 'bidding', 'discard', 'playing', 'waiting_for_trick', 'scoring', 'game_over'].includes(state.phase)) {
+            saveActiveGame(state);
+        }
+    }, [state]);
+
+    // Handle Match Completion and Stats Saving (Authority Based)
+    useEffect(() => {
+        if (state.phase === 'game_over' && state.tableCode && lastGameStatsSavedRef.current !== state.tableCode) {
+            const scoringAuthority = getScoringAuthority();
+
+            if (state.currentUser !== scoringAuthority) {
+                Logger.debug(`[STATS] Not the scoring authority (${scoringAuthority}). My name: ${state.currentUser}. Skipping Sync.`);
+                lastGameStatsSavedRef.current = state.tableCode;
+                return;
+            }
+
+            const syncGlobalStats = async () => {
+                Logger.info(`[STATS] AUTHORITY (${state.currentUser}): Saving final match stats for table ${state.tableCode}`);
+                const globalStats = getGlobalStats();
+
+                state.players.forEach((p, i) => {
+                    if (!p.name) return;
+                    // Team 1 is 0 & 2, Team 2 is 1 & 3
+                    const playerTeam = (i === 0 || i === 2) ? 'team1' : 'team2';
+                    const isGameWinner = playerTeam === 'team1' ? state.scores.team1 >= 10 : state.scores.team2 >= 10;
+
+                    const prevGlobal = globalStats[p.name] || getEmptyStats();
+
+                    // SANITY CHECK: Fix corrupted stats (like the 8850 tricks reported)
+                    // We cap these at physically possible values based on games played
+                    const fixStat = (val: number, maxAllowed: number) => {
+                        if (val > maxAllowed) {
+                            Logger.warn(`[STATS] Sanity check triggered for ${p.name}. Capping value ${val} at ${maxAllowed}`);
+                            return Math.floor(maxAllowed * 0.8); // Cap at 80% of max if it looks corrupted
+                        }
+                        return val;
+                    };
+
+                    const matchesPlayed = (prevGlobal.gamesPlayed || 0) + 1;
+                    const maxPossibleTricks = matchesPlayed * 75; // Absolute max 75 tricks per game
+                    const maxPossibleEuchres = matchesPlayed * 15;
+
+                    globalStats[p.name] = {
+                        gamesPlayed: matchesPlayed,
+                        gamesWon: isGameWinner ? (prevGlobal.gamesWon || 0) + 1 : (prevGlobal.gamesWon || 0),
+                        handsPlayed: (prevGlobal.handsPlayed || 0) + p.stats.handsPlayed,
+                        handsWon: (prevGlobal.handsWon || 0) + p.stats.handsWon,
+                        tricksPlayed: fixStat((prevGlobal.tricksPlayed || 0) + p.stats.tricksPlayed, maxPossibleTricks),
+                        tricksTaken: fixStat((prevGlobal.tricksTaken || 0) + p.stats.tricksTaken, maxPossibleTricks),
+                        tricksWonTeam: fixStat((prevGlobal.tricksWonTeam || 0) + p.stats.tricksWonTeam, maxPossibleTricks),
+                        callsMade: (prevGlobal.callsMade || 0) + p.stats.callsMade,
+                        callsWon: (prevGlobal.callsWon || 0) + p.stats.callsWon,
+                        lonersAttempted: (prevGlobal.lonersAttempted || 0) + p.stats.lonersAttempted,
+                        lonersConverted: (prevGlobal.lonersConverted || 0) + p.stats.lonersConverted,
+                        euchresMade: fixStat((prevGlobal.euchresMade || 0) + p.stats.euchresMade, maxPossibleEuchres),
+                        euchred: (prevGlobal.euchred || 0) + p.stats.euchred,
+                        sweeps: (prevGlobal.sweeps || 0) + p.stats.sweeps,
+                        swept: (prevGlobal.swept || 0) + p.stats.swept,
+                    };
+                });
+
+                try {
+                    await saveMultiplePlayerStats(globalStats);
+                    saveGlobalStats(globalStats);
+                    Logger.info('[STATS] Global sync successful');
+                } catch (err) {
+                    Logger.error('[STATS] Global sync failed', err);
+                }
+                lastGameStatsSavedRef.current = state.tableCode!;
+            };
+
+            syncGlobalStats();
+        }
+    }, [state.phase, state.tableCode, state.currentUser]);
+
     useEffect(() => {
         if (state.phase === 'randomizing_dealer') {
             let count = 0;
@@ -1323,8 +1354,6 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                     clearInterval(interval);
                     setTimeout(() => {
                         // Determine who should generate the dealer
-                        // The first human player (lowest seat index) generates to avoid race conditions
-                        // If all players are bots, the game creator (viewer) generates
                         const firstHumanSeat = state.players.findIndex(p => p.name && !p.isComputer);
                         const myPlayerIndex = state.players.findIndex(p => p.name === state.currentUser);
                         const allBotsGame = state.players.every(p => p.isComputer);
@@ -1346,8 +1375,6 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                                     upcard
                                 }
                             });
-                        } else {
-                            Logger.info(`Waiting for dealer selection from another player`);
                         }
                     }, 500);
                 }
@@ -1361,10 +1388,9 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         if (state.phase === 'waiting_for_next_deal') {
             const nextDealer = state.players[state.dealerIndex];
 
-            // AUTHORITY CHECK: Only one client should handle the state transition
-            const humans = state.players.filter(p => !p.isComputer && p.name);
-            const primaryHumanName = humans[0]?.name;
-            const isBroadcaster = state.currentViewPlayerName === primaryHumanName;
+            // AUTHORITY CHECK: Use unified helper
+            const scoringAuthority = getScoringAuthority();
+            const isBroadcaster = state.currentUser === scoringAuthority;
 
             const dealCards = () => {
                 const deck = shuffleDeck(createDeck());
@@ -1400,7 +1426,8 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             // Attempt 3: EMERGENCY FALLBACK - Anyone deals after 2s if Primary fails
             // But we still prefer the Primary if they are there
             const emergencyTimer = setTimeout(() => {
-                if (isBroadcaster || (humans.length === 0)) {
+                const anyHumans = state.players.some(p => !p.isComputer && p.name);
+                if (isBroadcaster || !anyHumans) {
                     Logger.error('[DEAL] EMERGENCY FALLBACK TRIGGERED');
                     dealCards();
                 }

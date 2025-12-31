@@ -43,6 +43,48 @@ function fromSnakeCase(dbStats: any): PlayerStats {
 }
 
 /**
+ * SCRUBBING: Fix physically impossible stats (e.g. Mimi's 8850 tricks)
+ * Caps tricks at 75 per game and euchres at 15 per game.
+ */
+export function scrubStats(stats: Record<string, PlayerStats>): Record<string, PlayerStats> {
+    const scrubbed = { ...stats };
+    Object.keys(scrubbed).forEach(name => {
+        const s = { ...scrubbed[name] };
+        const games = s.gamesPlayed || 0;
+        let hands = s.handsPlayed || 0;
+
+        if (games > 0) {
+            // Cap hands at 15 per game (standard game is ~10 hands)
+            const maxHands = games * 15;
+            if (hands > maxHands) {
+                hands = maxHands;
+                s.handsPlayed = hands;
+            }
+
+            // Absolute max possible: 5 tricks per hand
+            // 30 tricks per game is a very generous upper bound for a winner
+            const maxTricks = Math.max(hands * 5, games * 30);
+            const maxEuchres = Math.max(hands, games * 5);
+
+            if (s.tricksPlayed > maxTricks || s.tricksTaken > maxTricks || s.euchresMade > maxEuchres) {
+                console.warn(`[STATS SCRUB] Capping impossible stats for ${name}`);
+                s.tricksPlayed = Math.min(s.tricksPlayed, maxTricks);
+                s.tricksTaken = Math.min(s.tricksTaken, maxTricks);
+                s.tricksWonTeam = Math.min(s.tricksWonTeam, maxTricks);
+                s.euchresMade = Math.min(s.euchresMade, maxEuchres);
+            }
+
+            // Logical check: Taken cannot exceed Played
+            if (s.tricksTaken > s.tricksPlayed) {
+                s.tricksTaken = s.tricksPlayed;
+            }
+        }
+        scrubbed[name] = s;
+    });
+    return scrubbed;
+}
+
+/**
  * Get all player stats from Supabase (global leaderboard)
  */
 export async function getAllPlayerStats(): Promise<Record<string, PlayerStats>> {
@@ -61,7 +103,7 @@ export async function getAllPlayerStats(): Promise<Record<string, PlayerStats>> 
             stats[row.player_name] = fromSnakeCase(row);
         });
 
-        return stats;
+        return scrubStats(stats);
     } catch (err) {
         console.error('[SUPABASE STATS] Exception fetching stats:', err);
         return {};
