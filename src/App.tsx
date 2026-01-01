@@ -239,8 +239,13 @@ const CardComponent = ({
 };
 
 
-const BotAuditView = ({ decisions }: { decisions: any[] }) => {
-    if (decisions.length === 0) {
+const BotAuditView = ({ decisions, filterType }: { decisions: any[]; filterType?: 'all' | 'trump_calls' }) => {
+    // Filter decisions based on filterType
+    const filteredDecisions = filterType === 'trump_calls'
+        ? decisions.filter(d => d.game_phase === 'bidding' && d.decision && d.decision.toLowerCase().includes('trump'))
+        : decisions;
+
+    if (filteredDecisions.length === 0) {
         return (
             <div className="bg-slate-800/30 border border-slate-800 rounded-[2rem] p-12 text-center">
                 <div className="text-slate-500 text-lg mb-2">No bot decisions logged yet</div>
@@ -268,7 +273,7 @@ const BotAuditView = ({ decisions }: { decisions: any[] }) => {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-800/50">
-                        {decisions.map((d, i) => {
+                        {filteredDecisions.map((d, i) => {
                             const formatHand = (handData: any) => {
                                 if (!handData) return '-';
                                 try {
@@ -311,9 +316,10 @@ const BotAuditView = ({ decisions }: { decisions: any[] }) => {
     );
 };
 
-const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; onClose: () => void; initialTab?: 'me' | 'league' | 'trumps' | 'bot_audit' | 'freeze_incidents' | 'state_management' | 'commentary' }) => {
+const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; onClose: () => void; initialTab?: 'me' | 'league' | 'bot_audit' | 'freeze_incidents' | 'state_management' | 'commentary' }) => {
     const { state } = useGame();
-    const [tab, setTab] = useState<'me' | 'league' | 'trumps' | 'bot_audit' | 'freeze_incidents' | 'state_management' | 'commentary'>(initialTab as any);
+    const [tab, setTab] = useState<'me' | 'league' | 'bot_audit' | 'freeze_incidents' | 'state_management' | 'commentary'>(initialTab as any);
+    const [botAuditFilter, setBotAuditFilter] = useState<'all' | 'trump_calls'>('all');
     const [freezeStats, setFreezeStats] = useState<any>(null);
     const [freezeRate, setFreezeRate] = useState<any>(null);
 
@@ -367,35 +373,7 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
         }
     }, [tab, isOpen]);
 
-    // Load ALL trump calls from Supabase (primary) with localStorage fallback
-    const [allTrumpCalls, setAllTrumpCalls] = useState<any[]>([]);
 
-    useEffect(() => {
-        const loadTrumpCalls = async () => {
-            try {
-                const { getAllTrumpCalls } = await import('./utils/supabaseStats');
-                const supabaseCalls = await getAllTrumpCalls();
-
-                if (supabaseCalls.length > 0) {
-                    console.log('[TRUMP CALLS] Load from Supabase:', supabaseCalls.length, 'calls');
-                    setAllTrumpCalls(supabaseCalls);
-                } else {
-                    // Fallback to localStorage
-                    const localCalls = JSON.parse(localStorage.getItem('euchre_trump_calls') || '[]');
-                    console.log('[TRUMP CALLS] Using localStorage fallback:', localCalls.length, 'calls');
-                    setAllTrumpCalls(localCalls);
-                }
-            } catch (err) {
-                console.error('[TRUMP CALLS] Error loading from Supabase, using localStorage:', err);
-                const localCalls = JSON.parse(localStorage.getItem('euchre_trump_calls') || '[]');
-                setAllTrumpCalls(localCalls);
-            }
-        };
-
-        if (isOpen) {
-            loadTrumpCalls();
-        }
-    }, [isOpen]);
 
     // Load Bot Decisions for audit
     const [botDecisions, setBotDecisions] = useState<any[]>([]);
@@ -458,17 +436,7 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
         downloadAnchorNode.remove();
     };
 
-    const downloadTrumpCallsCSV = () => {
-        const { trumpCallsToCSV } = require('../utils/trumpCallLogger');
-        const csv = trumpCallsToCSV(allTrumpCalls);
-        const blob = new Blob([csv], { type: 'text/tab-separated-values' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `trump_calls_${Date.now()}.csv`;
-        a.click();
-        URL.revokeObjectURL(url);
-    };
+
 
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-950/80 backdrop-blur-xl animate-in fade-in duration-300">
@@ -490,12 +458,6 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                                         className={`px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${tab === 'league' ? 'bg-emerald-500 text-white shadow-[0_0_20px_rgba(16,185,129,0.4)]' : 'bg-slate-800 text-slate-500 hover:text-slate-300'}`}
                                     >
                                         Leaderboard
-                                    </button>
-                                    <button
-                                        onClick={() => setTab('trumps')}
-                                        className={`px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${tab === 'trumps' ? 'bg-emerald-500 text-white shadow-[0_0_20px_rgba(16,185,129,0.4)]' : 'bg-slate-800 text-slate-500 hover:text-slate-300'}`}
-                                    >
-                                        Trump Calls
                                     </button>
                                     <button
                                         onClick={() => setTab('bot_audit')}
@@ -753,75 +715,6 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                                     </div>
                                 );
                             })()}
-                        </div>
-                    ) : tab === 'trumps' ? (
-                        <div className="space-y-6">
-                            <div className="flex justify-between items-center">
-                                <div className="text-sm text-slate-400">
-                                    {allTrumpCalls.length} trump calls logged (all games)
-                                </div>
-                                <button
-                                    onClick={downloadTrumpCallsCSV}
-                                    disabled={allTrumpCalls.length === 0}
-                                    className={`px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all ${allTrumpCalls.length > 0
-                                        ? 'bg-emerald-500 text-white hover:bg-emerald-600 shadow-[0_0_20px_rgba(16,185,129,0.4)]'
-                                        : 'bg-slate-800 text-slate-600 cursor-not-allowed opacity-50'
-                                        }`}
-                                >
-                                    📥 Export CSV
-                                </button>
-                            </div>
-
-                            {allTrumpCalls.length === 0 ? (
-                                <div className="bg-slate-800/30 border border-slate-800 rounded-[2rem] p-12 text-center">
-                                    <div className="text-slate-500 text-lg mb-2">No trump calls logged yet</div>
-                                    <div className="text-slate-600 text-sm">Play some hands and trump calls will appear here for analysis</div>
-                                </div>
-                            ) : (
-                                <div className="bg-slate-800/30 border border-slate-800 rounded-[2rem] overflow-hidden">
-                                    <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
-                                        <table className="w-full text-left text-xs">
-                                            <thead className="bg-slate-800/50 sticky top-0">
-                                                <tr className="text-[9px] font-black text-slate-500 uppercase">
-                                                    <th className="px-4 py-3">Game ID</th>
-                                                    <th className="px-4 py-3">Who Called</th>
-                                                    <th className="px-4 py-3">Type</th>
-                                                    <th className="px-4 py-3">Dealer</th>
-                                                    <th className="px-4 py-3">Picked Up</th>
-                                                    <th className="px-4 py-3">Trump</th>
-                                                    <th className="px-4 py-3 text-center">Bowers</th>
-                                                    <th className="px-4 py-3 text-center">Trump #</th>
-                                                    <th className="px-4 py-3 text-center">Suit #</th>
-                                                    <th className="px-4 py-3">Hand After Discard</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody className="divide-y divide-slate-800">
-                                                {allTrumpCalls.map((log: any, i: number) => (
-                                                    <tr key={i} className="hover:bg-slate-800/30 transition-colors">
-                                                        <td className="px-4 py-3 font-mono text-cyan-400 text-[10px]">{log.gameId || 'N/A'}</td>
-                                                        <td className="px-4 py-3 font-bold text-white">{log.whoCalled}</td>
-                                                        <td className="px-4 py-3">
-                                                            <span className={`px-2 py-1 rounded text-[9px] font-black ${log.userType === 'Human'
-                                                                ? 'bg-emerald-500/20 text-emerald-400'
-                                                                : 'bg-blue-500/20 text-blue-400'
-                                                                }`}>
-                                                                {log.userType}
-                                                            </span>
-                                                        </td>
-                                                        <td className="px-4 py-3 text-slate-400 text-[10px]">{log.dealer}</td>
-                                                        <td className="px-4 py-3 text-cyan-400 font-bold">{log.cardPickedUp}</td>
-                                                        <td className="px-4 py-3 text-emerald-400 font-black">{log.suitCalled}</td>
-                                                        <td className="px-4 py-3 text-purple-400 font-bold text-center">{log.bowerCount}</td>
-                                                        <td className="px-4 py-3 text-purple-400 font-bold text-center">{log.trumpCount}</td>
-                                                        <td className="px-4 py-3 text-blue-400 font-bold text-center">{log.suitCount}</td>
-                                                        <td className="px-4 py-3 text-slate-300 font-mono text-[10px]">{log.handAfterDiscard}</td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            )}
                         </div>
                     ) : tab === 'freeze_incidents' ? (
                         <div className="space-y-6">
@@ -1109,7 +1002,25 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                             </div>
                         </div>
                     ) : tab === 'bot_audit' ? (
-                        <BotAuditView decisions={botDecisions} />
+                        <div className="space-y-6">
+                            {/* Filter Controls */}
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => setBotAuditFilter('all')}
+                                    className={`px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${botAuditFilter === 'all' ? 'bg-cyan-500 text-white shadow-[0_0_20px_rgba(6,182,212,0.4)]' : 'bg-slate-800 text-slate-500 hover:text-slate-300'}`}
+                                >
+                                    All Decisions
+                                </button>
+                                <button
+                                    onClick={() => setBotAuditFilter('trump_calls')}
+                                    className={`px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${botAuditFilter === 'trump_calls' ? 'bg-cyan-500 text-white shadow-[0_0_20px_rgba(6,182,212,0.4)]' : 'bg-slate-800 text-slate-500 hover:text-slate-300'}`}
+                                >
+                                    Trump Calls Only
+                                </button>
+                            </div>
+
+                            <BotAuditView decisions={botDecisions} filterType={botAuditFilter} />
+                        </div>
                     ) : tab === 'commentary' ? (
                         <div className="space-y-6">
                             <div className="flex justify-between items-center mb-4">
@@ -1263,7 +1174,7 @@ const LandingPage = () => {
     const [showJoin, setShowJoin] = useState(false);
     const [_refreshKey, setRefreshKey] = useState(0);
     const [isStatsOpen, setIsStatsOpen] = useState(false);
-    const [statsInitialTab, setStatsInitialTab] = useState<'me' | 'league' | 'trumps' | 'bot_audit' | 'freeze_incidents' | 'state_management' | 'commentary'>('me');
+    const [statsInitialTab, setStatsInitialTab] = useState<'me' | 'league' | 'bot_audit' | 'freeze_incidents' | 'state_management' | 'commentary'>('me');
     const [cloudGames, setCloudGames] = useState<any[]>([]);
     const [gameFilter, setGameFilter] = useState<'in-progress' | 'completed'>('in-progress');
 
@@ -1504,7 +1415,7 @@ const LandingPage = () => {
                     Logout from {state.currentUser}
                 </button>
                 <div className="text-[10px] font-black text-slate-800 uppercase tracking-[0.3em]">
-                    Euchre Engine V1.08
+                    Euchre Engine V1.09
                 </div>
             </div>
 
@@ -1642,7 +1553,7 @@ const GameView = () => {
     const { state, dispatch } = useGame();
     const [isStatsOpen, setIsStatsOpen] = useState(false);
     // @ts-ignore - Will be used when admin button is added to GameView
-    const [statsInitialTab, setStatsInitialTab] = useState<'me' | 'league' | 'trumps' | 'bot_audit' | 'freeze_incidents' | 'state_management' | 'commentary'>('me');
+    const [statsInitialTab, setStatsInitialTab] = useState<'me' | 'league' | 'bot_audit' | 'freeze_incidents' | 'state_management' | 'commentary'>('me');
     const [activeTab, setActiveTab] = useState<'table' | 'commentary' | 'stats'>('table');
 
     const handleNextStep = () => {
