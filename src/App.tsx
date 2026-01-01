@@ -477,56 +477,58 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                     <div className="flex justify-between items-start mb-10">
                         <div>
                             <h2 className="text-4xl font-black text-white italic tracking-tighter mb-2">Stats</h2>
-                            <div className="flex gap-4 mt-6">
-                                <button
-                                    onClick={() => setTab('me')}
-                                    className={`px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all ${tab === 'me' ? 'bg-emerald-500 text-white shadow-[0_0_20px_rgba(16,185,129,0.4)]' : 'bg-slate-800 text-slate-500 hover:text-slate-300'}`}
-                                >
-                                    My Stats
-                                </button>
-                                <button
-                                    onClick={() => setTab('league')}
-                                    className={`px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all ${tab === 'league' ? 'bg-emerald-500 text-white shadow-[0_0_20px_rgba(16,185,129,0.4)]' : 'bg-slate-800 text-slate-500 hover:text-slate-300'}`}
-                                >
-                                    Leaderboard
-                                </button>
-                                <button
-                                    onClick={() => setTab('trumps')}
-                                    className={`px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all ${tab === 'trumps' ? 'bg-emerald-500 text-white shadow-[0_0_20px_rgba(16,185,129,0.4)]' : 'bg-slate-800 text-slate-500 hover:text-slate-300'}`}
-                                >
-                                    Trump Calls
-                                </button>
-                                <button
-                                    onClick={() => setTab('bot_audit')}
-                                    className={`px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all ${tab === 'bot_audit' ? 'bg-emerald-500 text-white shadow-[0_0_20px_rgba(16,185,129,0.4)]' : 'bg-slate-800 text-slate-500 hover:text-slate-300'}`}
-                                >
-                                    Bot Audit
-                                </button>
-                                {state.currentViewPlayerName === 'Aaron' && (
+                            <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-slate-900">
+                                <div className="flex gap-3 mt-6 min-w-max">
                                     <button
-                                        onClick={() => setTab('admin')}
-                                        className={`px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all ${tab === 'admin' ? 'bg-red-500 text-white shadow-[0_0_20px_rgba(239,68,68,0.4)]' : 'bg-slate-800 text-red-400 hover:text-red-300'}`}
+                                        onClick={() => setTab('me')}
+                                        className={`px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${tab === 'me' ? 'bg-emerald-500 text-white shadow-[0_0_20px_rgba(16,185,129,0.4)]' : 'bg-slate-800 text-slate-500 hover:text-slate-300'}`}
                                     >
-                                        🔧 Admin
+                                        My Stats
                                     </button>
-                                )}
-                                <button
-                                    onClick={() => setTab('commentary')}
-                                    className={`px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all ${tab === 'commentary' ? 'bg-emerald-500 text-white shadow-[0_0_20px_rgba(16,185,129,0.4)]' : 'bg-slate-800 text-slate-500 hover:text-slate-300'}`}
-                                >
-                                    Commentary
-                                </button>
-                                <button
-                                    onClick={downloadSessionLog}
-                                    disabled={state.eventLog.length === 0}
-                                    className={`px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all border ${state.eventLog.length > 0
-                                        ? 'bg-slate-800 text-slate-400 hover:bg-slate-700 border-slate-700/50 cursor-pointer'
-                                        : 'bg-slate-900 text-slate-700 border-slate-800/30 cursor-not-allowed opacity-50'
-                                        }`}
-                                    title={state.eventLog.length > 0 ? `Download ${state.eventLog.length} events` : 'No events to download yet'}
-                                >
-                                    📥 Download Log {state.eventLog.length > 0 && `(${state.eventLog.length})`}
-                                </button>
+                                    <button
+                                        onClick={() => setTab('league')}
+                                        className={`px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${tab === 'league' ? 'bg-emerald-500 text-white shadow-[0_0_20px_rgba(16,185,129,0.4)]' : 'bg-slate-800 text-slate-500 hover:text-slate-300'}`}
+                                    >
+                                        Leaderboard
+                                    </button>
+                                    <button
+                                        onClick={() => setTab('trumps')}
+                                        className={`px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${tab === 'trumps' ? 'bg-emerald-500 text-white shadow-[0_0_20px_rgba(16,185,129,0.4)]' : 'bg-slate-800 text-slate-500 hover:text-slate-300'}`}
+                                    >
+                                        Trump Calls
+                                    </button>
+                                    <button
+                                        onClick={() => setTab('bot_audit')}
+                                        className={`px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${tab === 'bot_audit' ? 'bg-emerald-500 text-white shadow-[0_0_20px_rgba(16,185,129,0.4)]' : 'bg-slate-800 text-slate-500 hover:text-slate-300'}`}
+                                    >
+                                        Bot Audit
+                                    </button>
+                                    {state.currentViewPlayerName === 'Aaron' && (
+                                        <button
+                                            onClick={() => setTab('admin')}
+                                            className={`px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${tab === 'admin' ? 'bg-red-500 text-white shadow-[0_0_20px_rgba(239,68,68,0.4)]' : 'bg-slate-800 text-red-400 hover:text-red-300'}`}
+                                        >
+                                            🔧 Admin
+                                        </button>
+                                    )}
+                                    <button
+                                        onClick={() => setTab('commentary')}
+                                        className={`px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${tab === 'commentary' ? 'bg-emerald-500 text-white shadow-[0_0_20px_rgba(16,185,129,0.4)]' : 'bg-slate-800 text-slate-500 hover:text-slate-300'}`}
+                                    >
+                                        Commentary
+                                    </button>
+                                    <button
+                                        onClick={downloadSessionLog}
+                                        disabled={state.eventLog.length === 0}
+                                        className={`px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all border whitespace-nowrap ${state.eventLog.length > 0
+                                            ? 'bg-slate-800 text-slate-400 hover:bg-slate-700 border-slate-700/50 cursor-pointer'
+                                            : 'bg-slate-900 text-slate-700 border-slate-800/30 cursor-not-allowed opacity-50'
+                                            }`}
+                                        title={state.eventLog.length > 0 ? `Download ${state.eventLog.length} events` : 'No events to download yet'}
+                                    >
+                                        📥 Download Log {state.eventLog.length > 0 && `(${state.eventLog.length})`}
+                                    </button>
+                                </div>
                             </div>
                         </div>
                         <button onClick={onClose} className="bg-slate-800 hover:bg-slate-700 text-slate-400 p-4 rounded-3xl transition-colors">
