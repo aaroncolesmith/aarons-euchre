@@ -242,7 +242,7 @@ const CardComponent = ({
 const BotAuditView = ({ decisions, filterType }: { decisions: any[]; filterType?: 'all' | 'trump_calls' }) => {
     // Filter decisions based on filterType
     const filteredDecisions = filterType === 'trump_calls'
-        ? decisions.filter(d => d.game_phase === 'bidding' && d.decision && d.decision.toLowerCase().includes('trump'))
+        ? decisions.filter(d => d.game_phase && d.game_phase.includes('bidding') && d.decision && !d.decision.toLowerCase().includes('pass'))
         : decisions;
 
     if (filteredDecisions.length === 0) {
@@ -1415,7 +1415,7 @@ const LandingPage = () => {
                     Logout from {state.currentUser}
                 </button>
                 <div className="text-[10px] font-black text-slate-800 uppercase tracking-[0.3em]">
-                    Euchre Engine V1.09
+                    Euchre Engine V1.10
                 </div>
             </div>
 
