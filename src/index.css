@@ -13,8 +13,9 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  /* Dot Grid Pattern - Subtle */
-  background-image: radial-gradient(#cbd5e1 1.5px, transparent 1.5px);
+  /* Background */
+  background-color: #f8fafc;
+  /* background-image: radial-gradient(#cbd5e1 1.5px, transparent 1.5px); */
   background-size: 24px 24px;
 }
 

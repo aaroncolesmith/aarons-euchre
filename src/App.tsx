@@ -1240,27 +1240,6 @@ const LandingPage = () => {
     return (
         <div className="flex flex-col items-center justify-start min-h-full w-full max-w-2xl p-4 md:p-8 pt-2 md:pt-8 animate-in fade-in zoom-in duration-700 overflow-y-auto pb-20 no-scrollbar">
             {/* Header with Branding */}
-            <div className="w-full mb-8">
-                <div className="flex justify-between items-start mb-8">
-                    <div className="transform -rotate-2">
-                        <h1 className="text-6xl font-black text-slate-800 italic leading-none tracking-widest uppercase">
-                            EUCHRE
-                        </h1>
-                        <p className="text-[12px] font-bold text-emerald-600 uppercase tracking-widest mt-1 ml-1 transform rotate-1">
-                            Hello, {state.currentUser}
-                        </p>
-                    </div>
-                </div>
-                {/* Header Actions */}
-                <div className="flex gap-3 justify-between items-center mb-8">
-                    <div>
-                        {/* Space filler if needed or move title here? 
-                            Actually mockup has Title left, Stats right. 
-                            I'll restructure the header block below. 
-                        */}
-                    </div>
-                </div>
-            </div>
 
             {/* Revised Header Structure */}
             <div className="w-full mb-8">
