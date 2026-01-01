@@ -456,9 +456,9 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                                     <button
                                         key={t.id}
                                         onClick={() => setTab(t.id as any)}
-                                        className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap border-2 ${tab === t.id
-                                            ? 'bg-emerald-400 text-slate-900 border-slate-900 shadow-[2px_2px_0px_0px_rgba(30,41,59,1)] -translate-y-0.5'
-                                            : 'bg-transparent border-transparent text-slate-400 hover:text-slate-600 hover:bg-slate-50'
+                                        className={`px-2 py-2 mx-1 text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap border-b-4 ${tab === t.id
+                                            ? 'text-emerald-600 border-emerald-500'
+                                            : 'text-slate-400 hover:text-emerald-600 border-transparent'
                                             }`}
                                     >
                                         {t.label}
