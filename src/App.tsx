@@ -482,7 +482,7 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                     </div>
 
                     {tab === 'me' ? (
-                        <div className="space-y-10 overflow-y-auto pr-4 custom-scrollbar flex-1">
+                        <div className="space-y-10 overflow-y-auto pr-4 custom-scrollbar flex-1 min-h-0 pb-6">
                             <div>
                                 <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em] mb-4 border-b border-slate-800 pb-2">Efficiency & Global</h3>
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -552,7 +552,7 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                             </div>
                         </div>
                     ) : tab === 'league' ? (
-                        <div>
+                        <div className="flex-1 overflow-y-auto min-h-0 custom-scrollbar pr-2 pb-6">
                             {(() => {
                                 const handleSort = (column: string) => {
                                     if (sortColumn === column) {
