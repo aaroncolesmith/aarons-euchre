@@ -439,71 +439,54 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
 
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-950/80 backdrop-blur-xl animate-in fade-in duration-300">
-            <div className="bg-slate-900 border-2 border-slate-800 w-full max-w-4xl rounded-[3rem] shadow-2xl overflow-hidden animate-in zoom-in duration-300">
-                <div className="p-10">
-                    <div className="flex justify-between items-start mb-10">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/10 backdrop-blur-sm animate-in fade-in duration-300 font-hand">
+            <div className="bg-white border-4 border-slate-800 w-full max-w-4xl rounded-[2rem] shadow-[12px_12px_0px_0px_rgba(30,41,59,1)] overflow-hidden animate-in zoom-in duration-300 transform rotate-1 max-h-[90vh] flex flex-col">
+                <div className="p-6 md:p-8 flex flex-col h-full bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] [background-size:16px_16px]">
+                    <div className="flex justify-between items-start mb-6 shrink-0 border-b-2 border-dashed border-slate-300 pb-4">
                         <div className="flex-1 min-w-0 mr-4">
-                            <h2 className="text-4xl font-black text-white italic tracking-tighter mb-2">Stats</h2>
-                            <div className="overflow-x-auto overflow-y-hidden -mx-2 px-2" style={{ scrollbarWidth: 'thin' }}>
-                                <div className="flex gap-3 mt-6 flex-nowrap">
-                                    <button
-                                        onClick={() => setTab('me')}
-                                        className={`px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${tab === 'me' ? 'bg-emerald-500 text-white shadow-[0_0_20px_rgba(16,185,129,0.4)]' : 'bg-slate-800 text-slate-500 hover:text-slate-300'}`}
-                                    >
-                                        My Stats
-                                    </button>
-                                    <button
-                                        onClick={() => setTab('league')}
-                                        className={`px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${tab === 'league' ? 'bg-emerald-500 text-white shadow-[0_0_20px_rgba(16,185,129,0.4)]' : 'bg-slate-800 text-slate-500 hover:text-slate-300'}`}
-                                    >
-                                        Leaderboard
-                                    </button>
-                                    <button
-                                        onClick={() => setTab('bot_audit')}
-                                        className={`px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${tab === 'bot_audit' ? 'bg-emerald-500 text-white shadow-[0_0_20px_rgba(16,185,129,0.4)]' : 'bg-slate-800 text-slate-500 hover:text-slate-300'}`}
-                                    >
-                                        Bot Audit
-                                    </button>
-                                    <button
-                                        onClick={() => setTab('freeze_incidents')}
-                                        className={`px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${tab === 'freeze_incidents' ? 'bg-emerald-500 text-white shadow-[0_0_20px_rgba(16,185,129,0.4)]' : 'bg-slate-800 text-slate-500 hover:text-slate-300'}`}
-                                    >
-                                        Freeze Incidents
-                                    </button>
-                                    <button
-                                        onClick={() => setTab('state_management')}
-                                        className={`px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${tab === 'state_management' ? 'bg-emerald-500 text-white shadow-[0_0_20px_rgba(16,185,129,0.4)]' : 'bg-slate-800 text-slate-500 hover:text-slate-300'}`}
-                                    >
-                                        State Management
-                                    </button>
-                                    <button
-                                        onClick={() => setTab('commentary')}
-                                        className={`px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${tab === 'commentary' ? 'bg-emerald-500 text-white shadow-[0_0_20px_rgba(16,185,129,0.4)]' : 'bg-slate-800 text-slate-500 hover:text-slate-300'}`}
-                                    >
-                                        Commentary
-                                    </button>
-                                    <button
-                                        onClick={downloadSessionLog}
-                                        disabled={state.eventLog.length === 0}
-                                        className={`px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all border whitespace-nowrap ${state.eventLog.length > 0
-                                            ? 'bg-slate-800 text-slate-400 hover:bg-slate-700 border-slate-700/50 cursor-pointer'
-                                            : 'bg-slate-900 text-slate-700 border-slate-800/30 cursor-not-allowed opacity-50'
-                                            }`}
-                                        title={state.eventLog.length > 0 ? `Download ${state.eventLog.length} events` : 'No events to download yet'}
-                                    >
-                                        📥 Download Log {state.eventLog.length > 0 && `(${state.eventLog.length})`}
-                                    </button>
-                                </div>
-                            </div>
+                            <h2 className="text-4xl font-black text-slate-800 uppercase tracking-widest transform -rotate-1">Stats</h2>
                         </div>
-                        <button onClick={onClose} className="bg-slate-800 hover:bg-slate-700 text-slate-400 p-4 rounded-3xl transition-colors">
+                        <button onClick={onClose} className="bg-white hover:bg-slate-100 text-slate-800 border-2 border-slate-800 p-2 rounded-full transition-all shadow-[2px_2px_0px_0px_rgba(30,41,59,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none">
                             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M6 18L18 6M6 6l12 12" /></svg>
                         </button>
                     </div>
 
+                    <div className="overflow-x-auto overflow-y-hidden -mx-2 px-2 shrink-0 mb-6 scrollbar-hide">
+                        <div className="flex gap-2 flex-nowrap pb-2">
+                            {[
+                                { id: 'me', label: 'My Stats' },
+                                { id: 'league', label: 'Leaderboard' },
+                                { id: 'bot_audit', label: 'Bot Audit' },
+                                { id: 'freeze_incidents', label: 'Freeze Logs' },
+                                { id: 'state_management', label: 'Admin' },
+                                { id: 'commentary', label: 'Chat' }
+                            ].map((t) => (
+                                <button
+                                    key={t.id}
+                                    onClick={() => setTab(t.id as any)}
+                                    className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap border-2 ${tab === t.id
+                                        ? 'bg-emerald-400 border-slate-900 text-slate-900 shadow-[4px_4px_0px_0px_rgba(30,41,59,1)] -translate-y-1'
+                                        : 'bg-white border-slate-300 text-slate-400 hover:border-slate-500 hover:text-slate-600 shadow-[2px_2px_0px_0px_rgba(203,213,225,1)]'
+                                        }`}
+                                >
+                                    {t.label}
+                                </button>
+                            ))}
+                            <button
+                                onClick={downloadSessionLog}
+                                disabled={state.eventLog.length === 0}
+                                className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all border-2 whitespace-nowrap ${state.eventLog.length > 0
+                                    ? 'bg-white text-slate-800 border-slate-800 hover:bg-slate-50 cursor-pointer shadow-[2px_2px_0px_0px_rgba(30,41,59,1)]'
+                                    : 'bg-slate-50 text-slate-300 border-slate-200 cursor-not-allowed'
+                                    }`}
+                            >
+                                📥 Log {state.eventLog.length > 0 && `(${state.eventLog.length})`}
+                            </button>
+                        </div>
+                    </div>
+
                     {tab === 'me' ? (
-                        <div className="space-y-10 overflow-y-auto max-h-[60vh] pr-4 custom-scrollbar">
+                        <div className="space-y-10 overflow-y-auto pr-4 custom-scrollbar flex-1">
                             <div>
                                 <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em] mb-4 border-b border-slate-800 pb-2">Efficiency & Global</h3>
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -1138,26 +1121,27 @@ const LoginPage = () => {
 
     return (
         <div className="flex flex-col items-center justify-center h-full w-full max-w-lg p-8 animate-in fade-in zoom-in duration-700">
-            <h1 className="text-7xl font-black bg-gradient-to-br from-emerald-400 via-cyan-400 to-blue-500 bg-clip-text text-transparent italic leading-none mb-12 tracking-tighter">
+            <h1 className="text-6xl font-black text-slate-800 italic leading-none mb-12 tracking-widest uppercase transform -rotate-2">
                 EUCHRE
+                <span className="block text-xl text-emerald-600 font-bold tracking-normal not-italic mt-2">Engine V1.20</span>
             </h1>
 
-            <div className="w-full bg-slate-900/50 p-10 rounded-[3rem] border-2 border-slate-800 backdrop-blur-3xl shadow-2xl">
+            <div className="w-full bg-white p-10 rounded-[2rem] border-2 border-slate-800 shadow-[8px_8px_0px_0px_rgba(30,41,59,1)] transform rotate-1">
                 <form onSubmit={handleLogin} className="space-y-6">
                     <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-4">RESTRICTED ACCESS</label>
+                        <label className="text-[12px] font-black text-slate-500 uppercase tracking-widest ml-4">Authorized Personnel Only</label>
                         <input
                             autoFocus
                             value={name}
                             onChange={(e) => { setName(e.target.value); setError(''); }}
-                            className="w-full bg-slate-950 border-2 border-slate-800 rounded-3xl px-8 py-5 text-xl font-black text-white focus:border-emerald-500 outline-none transition-all placeholder:text-slate-700"
+                            className="w-full bg-white border-2 border-slate-800 rounded-2xl px-8 py-5 text-xl font-black text-slate-800 focus:outline-none focus:ring-4 focus:ring-emerald-500/20 transition-all placeholder:text-slate-400 uppercase shadow-[4px_4px_0px_0px_#cbd5e1]"
                             placeholder="Enter Username"
                         />
-                        {error && <p className="text-red-400 text-[10px] font-black uppercase tracking-widest ml-4 mt-2">Error: {error}</p>}
+                        {error && <p className="text-red-500 text-[10px] font-black uppercase tracking-widest ml-4 mt-2">Error: {error}</p>}
                     </div>
                     <button
                         type="submit"
-                        className="w-full bg-emerald-500 text-white font-black py-6 rounded-3xl text-xl shadow-[0_0_30px_rgba(16,185,129,0.2)] hover:scale-105 active:scale-95 transition-all"
+                        className="w-full bg-emerald-400 text-slate-900 font-black py-6 rounded-2xl text-xl border-2 border-slate-900 shadow-[6px_6px_0px_0px_rgba(30,41,59,1)] active:shadow-none active:translate-x-[6px] active:translate-y-[6px] transition-all hover:-translate-y-1 hover:shadow-[8px_8px_0px_0px_rgba(30,41,59,1)] uppercase tracking-widest"
                     >
                         LOGIN
                     </button>
@@ -1254,26 +1238,28 @@ const LandingPage = () => {
     };
 
     return (
-        <div className="flex flex-col items-center justify-start min-h-full w-full max-w-2xl p-4 md:p-8 pt-2 md:pt-8 animate-in fade-in zoom-in duration-700 overflow-y-auto pb-20">
+        <div className="flex flex-col items-center justify-start min-h-full w-full max-w-2xl p-4 md:p-8 pt-2 md:pt-8 animate-in fade-in zoom-in duration-700 overflow-y-auto pb-20 no-scrollbar">
             {/* Header with Branding */}
-            <div className="w-full mb-4 md:mb-12">
-                <div className="flex justify-between items-start mb-6">
-                    <div>
-                        <h1 className="text-5xl md:text-6xl font-black bg-gradient-to-br from-emerald-400 via-cyan-400 to-blue-500 bg-clip-text text-transparent italic leading-none tracking-tighter">
+            <div className="w-full mb-8">
+                <div className="flex justify-between items-start mb-8">
+                    <div className="transform -rotate-2">
+                        <h1 className="text-6xl font-black text-slate-800 italic leading-none tracking-widest uppercase">
                             EUCHRE
                         </h1>
-                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-2 ml-1">Authenticated: {state.currentUser}</p>
+                        <p className="text-[12px] font-bold text-emerald-600 uppercase tracking-widest mt-1 ml-1 transform rotate-1">
+                            Hello, {state.currentUser}
+                        </p>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-3 mt-2">
                         <button
                             onClick={() => { setStatsInitialTab('me'); setIsStatsOpen(true); }}
-                            className="text-[10px] font-black text-slate-300 hover:text-white hover:bg-slate-800 px-4 md:px-6 py-2 md:py-3 rounded-xl md:rounded-2xl border-2 border-slate-800/50 transition-all uppercase tracking-widest"
+                            className="bg-white text-xs font-black text-slate-800 px-4 py-2 rounded-lg border-2 border-slate-800 shadow-[2px_2px_0px_0px_rgba(30,41,59,1)] hover:translate-y-px hover:shadow-[1px_1px_0px_0px_rgba(30,41,59,1)] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] transition-all uppercase tracking-wider"
                         >
                             Stats
                         </button>
                         <button
                             onClick={() => dispatch({ type: 'LOGOUT' })}
-                            className="text-[10px] font-black text-red-500 hover:text-white hover:bg-red-500 px-4 md:px-6 py-2 md:py-3 rounded-xl md:rounded-2xl border-2 border-red-500/20 transition-all uppercase tracking-widest"
+                            className="bg-red-50 text-xs font-black text-red-500 px-4 py-2 rounded-lg border-2 border-red-500 shadow-[2px_2px_0px_0px_rgba(239,68,68,1)] hover:translate-y-px hover:shadow-[1px_1px_0px_0px_rgba(239,68,68,1)] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] transition-all uppercase tracking-wider"
                         >
                             Logout
                         </button>
@@ -1282,45 +1268,51 @@ const LandingPage = () => {
 
                 {/* Main Action Buttons */}
                 {!showJoin ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 mb-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
                         <button
                             onClick={() => dispatch({ type: 'CREATE_TABLE', payload: { userName: state.currentUser! } })}
-                            className="bg-white text-slate-950 font-black py-8 md:py-10 rounded-2xl md:rounded-[2.5rem] text-base md:text-xl shadow-2xl hover:scale-105 active:scale-95 transition-all text-center uppercase tracking-tight"
+                            className="bg-white group relative overflow-hidden rounded-2xl border-2 border-slate-800 shadow-[6px_6px_0px_0px_rgba(30,41,59,1)] hover:-translate-y-1 hover:shadow-[8px_8px_0px_0px_rgba(30,41,59,1)] active:shadow-none active:translate-x-[6px] active:translate-y-[6px] transition-all p-8 text-left"
                         >
-                            CREATE GAME
+                            <div className="relative z-10 flex flex-col items-center justify-center h-full gap-2">
+                                <span className="text-4xl">🎲</span>
+                                <span className="text-xl font-black text-slate-800 uppercase tracking-widest">Create Game</span>
+                            </div>
                         </button>
                         <button
                             onClick={() => setShowJoin(true)}
-                            className="bg-slate-900 text-white font-black py-8 md:py-10 rounded-2xl md:rounded-[2.5rem] text-base md:text-xl border-2 border-slate-800 hover:bg-slate-800 active:scale-95 transition-all uppercase tracking-tight"
+                            className="bg-emerald-400 group relative overflow-hidden rounded-2xl border-2 border-slate-900 shadow-[6px_6px_0px_0px_rgba(30,41,59,1)] hover:-translate-y-1 hover:shadow-[8px_8px_0px_0px_rgba(30,41,59,1)] active:shadow-none active:translate-x-[6px] active:translate-y-[6px] transition-all p-8 text-left"
                         >
-                            JOIN TABLE
+                            <div className="relative z-10 flex flex-col items-center justify-center h-full gap-2">
+                                <span className="text-4xl">🔓</span>
+                                <span className="text-xl font-black text-slate-900 uppercase tracking-widest">Join Table</span>
+                            </div>
                         </button>
                     </div>
                 ) : (
-                    <div className="space-y-4 animate-in slide-in-from-right-8 duration-500 bg-slate-900/50 p-6 md:p-8 rounded-2xl md:rounded-[3rem] border-2 border-slate-800 mb-8">
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-4">6-DIGIT CODE</label>
+                    <div className="bg-white p-6 rounded-[2rem] border-2 border-slate-800 shadow-[8px_8px_0px_0px_rgba(30,41,59,1)] mb-10 animate-in slide-in-from-right-8 fade-in duration-300">
+                        <div className="space-y-4">
+                            <label className="text-xs font-black text-slate-500 uppercase tracking-widest ml-2">Enter 6-Digit Code</label>
                             <input
                                 autoFocus
                                 value={code}
                                 onChange={(e) => handleCodeChange(e.target.value)}
                                 maxLength={7}
-                                className="w-full bg-slate-950 border-2 border-slate-800 rounded-2xl md:rounded-3xl px-6 md:px-8 py-4 md:py-5 text-3xl md:text-4xl font-black text-white text-center focus:border-emerald-500 outline-none transition-all placeholder:text-slate-800"
+                                className="w-full bg-slate-50 border-2 border-slate-800 rounded-2xl px-6 py-4 text-4xl font-black text-slate-800 text-center focus:outline-none focus:ring-4 focus:ring-emerald-500/20 transition-all placeholder:text-slate-300 tracking-widest shadow-inner"
                                 placeholder="000-000"
                             />
                         </div>
-                        <div className="grid grid-cols-2 gap-3 md:gap-4">
+                        <div className="grid grid-cols-2 gap-4 mt-6">
                             <button
                                 onClick={() => { setShowJoin(false); setCode(''); }}
-                                className="bg-slate-800 text-white font-black py-4 md:py-6 rounded-2xl md:rounded-3xl text-base md:text-xl border-2 border-slate-700 hover:bg-slate-700 transition-all uppercase"
+                                className="bg-slate-100 text-slate-600 font-black py-4 rounded-xl text-lg border-2 border-slate-300 hover:bg-slate-200 transition-all uppercase tracking-widest"
                             >
-                                CANCEL
+                                Cancel
                             </button>
                             <button
                                 onClick={handleJoinTable}
-                                className="bg-emerald-500 text-white font-black py-4 md:py-6 rounded-2xl md:rounded-3xl text-base md:text-xl shadow-2xl hover:scale-105 active:scale-95 transition-all uppercase"
+                                className="bg-emerald-500 text-white font-black py-4 rounded-xl text-lg border-2 border-emerald-700 shadow-[4px_4px_0px_0px_rgba(6,95,70,1)] hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_rgba(6,95,70,1)] active:shadow-none active:translate-x-[4px] active:translate-y-[4px] transition-all uppercase tracking-widest"
                             >
-                                JOIN TABLE
+                                Join
                             </button>
                         </div>
                     </div>
@@ -1328,74 +1320,80 @@ const LandingPage = () => {
 
                 {/* Continue Progress Section */}
                 {savedGames.length > 0 && (
-                    <div className="space-y-2 md:space-y-4">
+                    <div className="space-y-4">
                         {/* Tabs for game filtering */}
-                        <div className="flex gap-2 border-b-2 border-slate-800/50 items-center">
+                        <div className="flex gap-6 border-b-2 border-slate-200 pb-px px-2">
                             <button
                                 onClick={() => setGameFilter('in-progress')}
-                                className={`flex-1 text-[10px] md:text-xs font-black uppercase tracking-widest py-2 px-4 transition-all ${gameFilter === 'in-progress'
-                                    ? 'text-emerald-400 border-b-2 border-emerald-500 -mb-[2px]'
-                                    : 'text-slate-600 hover:text-slate-400'
+                                className={`text-xs font-black uppercase tracking-widest pb-3 transition-all relative ${gameFilter === 'in-progress'
+                                    ? 'text-emerald-600'
+                                    : 'text-slate-400 hover:text-slate-600'
                                     }`}
                             >
                                 In Progress ({savedGames.filter(g => g.phase !== 'game_over').length})
+                                {gameFilter === 'in-progress' && (
+                                    <span className="absolute bottom-[-2px] left-0 w-full h-[3px] bg-emerald-500 rounded-full" />
+                                )}
                             </button>
                             <button
                                 onClick={() => setGameFilter('completed')}
-                                className={`flex-1 text-[10px] md:text-xs font-black uppercase tracking-widest py-2 px-4 transition-all ${gameFilter === 'completed'
-                                    ? 'text-emerald-400 border-b-2 border-emerald-500 -mb-[2px]'
-                                    : 'text-slate-600 hover:text-slate-400'
+                                className={`text-xs font-black uppercase tracking-widest pb-3 transition-all relative ${gameFilter === 'completed'
+                                    ? 'text-emerald-600'
+                                    : 'text-slate-400 hover:text-slate-600'
                                     }`}
                             >
                                 Completed ({savedGames.filter(g => g.phase === 'game_over').length})
+                                {gameFilter === 'completed' && (
+                                    <span className="absolute bottom-[-2px] left-0 w-full h-[3px] bg-emerald-500 rounded-full" />
+                                )}
                             </button>
                             <button
                                 onClick={() => setRefreshKey(prev => prev + 1)}
-                                className="p-2 text-slate-600 hover:text-emerald-400 transition-colors"
+                                className="ml-auto text-slate-400 hover:text-emerald-500 transition-colors"
                                 title="Sync with Cloud"
                             >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M4 4v5h5M20 20v-5h-5M20 5.138A9 9 0 004.862 13M4 18.862A9 9 0 0019.138 11" /></svg>
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M4 4v5h5M20 20v-5h-5M20 5.138A9 9 0 004.862 13M4 18.862A9 9 0 0019.138 11" /></svg>
                             </button>
                         </div>
 
-                        <div className="max-h-[300px] md:max-h-[400px] overflow-y-auto space-y-2 md:space-y-3 pr-2 scrollbar-thin scrollbar-thumb-slate-800 scrollbar-track-slate-950">
+                        <div className="space-y-3 pb-4">
                             {savedGames
                                 .filter(g => gameFilter === 'in-progress' ? g.phase !== 'game_over' : g.phase === 'game_over')
                                 .map(game => (
                                     <div
                                         key={game.tableCode}
-                                        className="group relative w-full bg-slate-900/40 hover:bg-emerald-500/10 border-2 border-emerald-500/30 hover:border-emerald-500 rounded-xl md:rounded-[2rem] px-3 md:px-8 py-3 md:py-6 transition-all shadow-xl"
+                                        className="group relative bg-white border-2 border-dashed border-slate-300 hover:border-solid hover:border-emerald-500 rounded-xl p-4 transition-all hover:shadow-[4px_4px_0px_0px_rgba(16,185,129,0.2)] cursor-pointer"
+                                        onClick={() => dispatch({ type: 'LOAD_EXISTING_GAME', payload: { gameState: game } })}
                                     >
                                         <div className="flex items-center justify-between">
-                                            <div
-                                                className="text-left flex-1 cursor-pointer"
-                                                onClick={() => dispatch({ type: 'LOAD_EXISTING_GAME', payload: { gameState: game } })}
-                                            >
-                                                <div className="text-lg md:text-2xl font-black text-emerald-400 group-hover:text-emerald-300 transition-colors italic tracking-tight leading-tight">
-                                                    {game.tableName}
+                                            <div className="flex-1">
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <div className="bg-emerald-100 text-emerald-700 text-[10px] font-black px-2 py-0.5 rounded border border-emerald-200 uppercase tracking-wider">
+                                                        {game.tableCode}
+                                                    </div>
+                                                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                                                        {getTimeAgo(game)}
+                                                    </div>
                                                 </div>
-                                                <div className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-0.5 md:mt-1.5 opacity-80">
-                                                    {game.phase} • Team A: {game.scores.team1} Team B: {game.scores.team2}
+                                                <div className="text-lg font-black text-slate-800 leading-tight mb-1">
+                                                    {game.tableName || 'Untitled Game'}
                                                 </div>
-                                                <div className="text-[8px] md:text-[9px] font-bold text-slate-600 mt-0.5 md:mt-1">
-                                                    Last Activity: {getTimeAgo(game)}
+                                                <div className="text-xs font-bold text-slate-500 flex items-center gap-3">
+                                                    <span className={game.scores.team1 >= 10 ? 'text-emerald-600' : ''}>Team A: {game.scores.team1}</span>
+                                                    <span className="text-slate-300">•</span>
+                                                    <span className={game.scores.team2 >= 10 ? 'text-emerald-600' : ''}>Team B: {game.scores.team2}</span>
                                                 </div>
                                             </div>
-                                            <div className="flex items-center gap-1 md:gap-3">
+
+                                            <div className="flex items-center gap-2 pl-4 border-l-2 border-slate-100">
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); handleDelete(game.tableCode); }}
-                                                    className="text-slate-600 hover:text-red-500 transition-colors p-1 md:p-2"
-                                                    title="Delete Game"
+                                                    className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
                                                 >
-                                                    <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                    </svg>
+                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                                                 </button>
-                                                <button
-                                                    onClick={() => dispatch({ type: 'LOAD_EXISTING_GAME', payload: { gameState: game } })}
-                                                    className="bg-emerald-500 hover:bg-emerald-400 text-white font-black px-3 md:px-6 py-1.5 md:py-3 rounded-lg md:rounded-2xl text-[9px] md:text-xs uppercase tracking-widest transition-all shadow-md"
-                                                >
-                                                    Resume
+                                                <button className="bg-emerald-50 text-emerald-600 hover:bg-emerald-500 hover:text-white border-2 border-emerald-200 hover:border-emerald-600 p-2 rounded-lg transition-all">
+                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
                                                 </button>
                                             </div>
                                         </div>
@@ -1407,15 +1405,9 @@ const LandingPage = () => {
             </div>
 
             {/* Footer Version */}
-            <div className="mt-auto pt-4 md:pt-12 text-center space-y-3 md:space-y-4">
-                <button
-                    onClick={() => dispatch({ type: 'LOGOUT' })}
-                    className="w-full bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white font-black px-6 md:px-8 py-3 md:py-4 rounded-xl md:rounded-2xl text-xs md:text-sm uppercase tracking-widest border-2 border-red-500/30 hover:border-red-500 transition-all shadow-lg"
-                >
-                    Logout from {state.currentUser}
-                </button>
-                <div className="text-[10px] font-black text-slate-800 uppercase tracking-[0.3em]">
-                    Euchre Engine V1.10
+            <div className="mt-auto pt-8 text-center w-full">
+                <div className="text-[10px] font-black text-slate-300 uppercase tracking-[0.5em] transform rotate-180">
+                    Euchre Engine V1.20
                 </div>
             </div>
 
@@ -1657,30 +1649,30 @@ const GameView = () => {
 
                 <StatsModal isOpen={isStatsOpen} onClose={() => setIsStatsOpen(false)} initialTab={statsInitialTab} />
 
-                <div className={`flex-1 bg-slate-900/95 rounded-[2rem] md:rounded-[3rem] shadow-2xl border border-slate-800/50 px-1 py-3 md:p-8 backdrop-blur-3xl flex flex-col relative overflow-hidden ${activeTab === 'table' ? 'flex' : 'hidden md:flex'}`}>
+                <div className={`flex-1 bg-white/90 rounded-[2rem] md:rounded-[3rem] shadow-[12px_12px_0px_0px_rgba(30,41,59,1)] border-4 border-slate-800 px-1 py-3 md:p-8 backdrop-blur-sm flex flex-col relative overflow-hidden ${activeTab === 'table' ? 'flex' : 'hidden md:flex'}`}>
 
                     <div className="flex justify-between items-start md:items-center mb-2 md:mb-4">
                         <div className="flex items-center gap-4">
-                            <div className="flex flex-col">
-                                <h1 className="text-lg md:text-2xl font-black bg-gradient-to-br from-emerald-400 to-blue-500 bg-clip-text text-transparent italic leading-none">
+                            <div className="flex flex-col transform -rotate-1">
+                                <h1 className="text-lg md:text-3xl font-black text-slate-800 italic leading-none uppercase tracking-wider">
                                     {state.tableName || 'Euchre'}
                                 </h1>
                                 {state.tableCode && (
                                     <>
-                                        <div className="hidden md:block text-[10px] font-black text-slate-500 tracking-[0.2em] mt-1">CODE: {state.tableCode}</div>
-                                        <div className="md:hidden text-[8px] font-bold text-slate-600 tracking-wider mt-0.5">{state.tableCode}</div>
+                                        <div className="hidden md:block text-[10px] font-black text-emerald-600 tracking-[0.2em] mt-1 bg-emerald-100 px-2 rounded-lg inline-block w-fit">CODE: {state.tableCode}</div>
+                                        <div className="md:hidden text-[8px] font-bold text-emerald-600 tracking-wider mt-0.5 bg-emerald-100 px-1.5 rounded inline-block w-fit">{state.tableCode}</div>
                                     </>
                                 )}
                             </div>
                             <button
                                 onClick={() => { setStatsInitialTab('commentary'); setIsStatsOpen(true); }}
-                                className="hidden md:block bg-slate-800 hover:bg-slate-700 text-emerald-400 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border border-slate-700 transition-all shadow-sm"
+                                className="hidden md:block bg-white hover:bg-slate-50 text-slate-800 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border-2 border-slate-800 transition-all shadow-[2px_2px_0px_0px_rgba(30,41,59,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
                             >
-                                Commentary
+                                Chat
                             </button>
                             <button
                                 onClick={() => { setStatsInitialTab('me'); setIsStatsOpen(true); }}
-                                className="hidden md:block bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border border-slate-700 transition-all shadow-sm"
+                                className="hidden md:block bg-white hover:bg-slate-50 text-slate-800 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border-2 border-slate-800 transition-all shadow-[2px_2px_0px_0px_rgba(30,41,59,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
                             >
                                 Stats
                             </button>
@@ -2015,7 +2007,7 @@ function App() {
 
     return (
         <div
-            className="w-screen h-screen bg-slate-950 text-white flex items-center justify-center selection:bg-emerald-500 overflow-hidden"
+            className="w-screen h-screen bg-transparent text-slate-800 flex items-center justify-center selection:bg-emerald-200 overflow-hidden font-hand"
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}

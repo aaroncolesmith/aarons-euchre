@@ -3,11 +3,51 @@
 @tailwind utilities;
 
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: 'Architects Daughter', cursive;
+  background-color: #ffffff;
+  color: #1e293b;
+  /* slate-800 */
 }
 
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  /* Dot Grid Pattern */
+  background-image: radial-gradient(#94a3b8 1.5px, transparent 1.5px);
+  background-size: 24px 24px;
+}
+
+/* Custom Scrollbar for that 'sketchy' feel */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Global inputs reset to look like handwriting */
+input {
+  font-family: 'Architects Daughter', cursive;
+}
+
+/* Utility to hide scrollbar but keep functionality */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
