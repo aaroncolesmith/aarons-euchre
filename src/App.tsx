@@ -1250,42 +1250,59 @@ const LandingPage = () => {
                             Hello, {state.currentUser}
                         </p>
                     </div>
-                    <div className="flex gap-3 mt-2">
+                </div>
+                {/* Header Actions */}
+                <div className="flex gap-3 justify-between items-center mb-8">
+                    <div>
+                        {/* Space filler if needed or move title here? 
+                            Actually mockup has Title left, Stats right. 
+                            I'll restructure the header block below. 
+                        */}
+                    </div>
+                </div>
+            </div>
+
+            {/* Revised Header Structure */}
+            <div className="w-full mb-8">
+                <div className="flex justify-between items-center mb-2">
+                    <div>
+                        <h1 className="text-6xl font-black text-slate-800 tracking-wide uppercase italic">
+                            EUCHRE
+                        </h1>
+                        <p className="text-xs font-bold text-emerald-600 tracking-[0.2em] mt-1 ml-1 uppercase">
+                            Hello, {state.currentUser}
+                        </p>
+                    </div>
+                    <div className="flex gap-2">
                         <button
                             onClick={() => { setStatsInitialTab('me'); setIsStatsOpen(true); }}
-                            className="bg-white text-xs font-black text-slate-800 px-4 py-2 rounded-lg border-2 border-slate-800 shadow-[2px_2px_0px_0px_rgba(30,41,59,1)] hover:translate-y-px hover:shadow-[1px_1px_0px_0px_rgba(30,41,59,1)] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] transition-all uppercase tracking-wider"
+                            className="bg-white hover:bg-slate-50 text-[10px] font-bold text-slate-800 px-4 py-2 rounded-xl border-2 border-slate-800 uppercase tracking-widest transition-all shadow-[2px_2px_0px_0px_rgba(30,41,59,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
                         >
-                            Stats
+                            STATS
                         </button>
                         <button
                             onClick={() => dispatch({ type: 'LOGOUT' })}
-                            className="bg-red-50 text-xs font-black text-red-500 px-4 py-2 rounded-lg border-2 border-red-500 shadow-[2px_2px_0px_0px_rgba(239,68,68,1)] hover:translate-y-px hover:shadow-[1px_1px_0px_0px_rgba(239,68,68,1)] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] transition-all uppercase tracking-wider"
+                            className="bg-white hover:bg-slate-50 text-[10px] font-bold text-red-500 px-4 py-2 rounded-xl border-2 border-red-500 uppercase tracking-widest transition-all shadow-[2px_2px_0px_0px_rgba(239,68,68,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
                         >
-                            Logout
+                            LOGOUT
                         </button>
                     </div>
                 </div>
 
                 {/* Main Action Buttons */}
                 {!showJoin ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
+                    <div className="flex flex-col gap-6 mt-8">
                         <button
                             onClick={() => dispatch({ type: 'CREATE_TABLE', payload: { userName: state.currentUser! } })}
-                            className="bg-white group relative overflow-hidden rounded-2xl border-2 border-slate-800 shadow-[6px_6px_0px_0px_rgba(30,41,59,1)] hover:-translate-y-1 hover:shadow-[8px_8px_0px_0px_rgba(30,41,59,1)] active:shadow-none active:translate-x-[6px] active:translate-y-[6px] transition-all p-8 text-left"
+                            className="bg-white text-slate-800 font-black py-8 rounded-3xl text-2xl border-4 border-slate-800 shadow-[8px_8px_0px_0px_rgba(30,41,59,1)] hover:translate-y-px hover:shadow-[6px_6px_0px_0px_rgba(30,41,59,1)] active:shadow-none active:translate-x-[4px] active:translate-y-[4px] transition-all uppercase tracking-[0.2em]"
                         >
-                            <div className="relative z-10 flex flex-col items-center justify-center h-full gap-2">
-                                <span className="text-4xl">🎲</span>
-                                <span className="text-xl font-black text-slate-800 uppercase tracking-widest">Create Game</span>
-                            </div>
+                            CREATE GAME
                         </button>
                         <button
                             onClick={() => setShowJoin(true)}
-                            className="bg-emerald-400 group relative overflow-hidden rounded-2xl border-2 border-slate-900 shadow-[6px_6px_0px_0px_rgba(30,41,59,1)] hover:-translate-y-1 hover:shadow-[8px_8px_0px_0px_rgba(30,41,59,1)] active:shadow-none active:translate-x-[6px] active:translate-y-[6px] transition-all p-8 text-left"
+                            className="bg-emerald-400 text-slate-900 font-black py-8 rounded-3xl text-2xl border-4 border-slate-900 shadow-[8px_8px_0px_0px_rgba(30,41,59,1)] hover:translate-y-px hover:shadow-[6px_6px_0px_0px_rgba(30,41,59,1)] active:shadow-none active:translate-x-[4px] active:translate-y-[4px] transition-all uppercase tracking-[0.2em]"
                         >
-                            <div className="relative z-10 flex flex-col items-center justify-center h-full gap-2">
-                                <span className="text-4xl">🔓</span>
-                                <span className="text-xl font-black text-slate-900 uppercase tracking-widest">Join Table</span>
-                            </div>
+                            JOIN TABLE
                         </button>
                     </div>
                 ) : (
