@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Euchre localStorage Inspector</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: #0f172a;
+            color: #e2e8f0;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #10b981;
+            border-bottom: 2px solid #334155;
+            padding-bottom: 10px;
+        }
+
+        .section {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        button {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 5px;
+        }
+
+        button:hover {
+            background: #059669;
+        }
+
+        button.danger {
+            background: #ef4444;
+        }
+
+        button.danger:hover {
+            background: #dc2626;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #334155;
+        }
+
+        th {
+            background: #334155;
+            font-weight: bold;
+            color: #10b981;
+        }
+
+        .phase-game_over {
+            color: #64748b;
+        }
+
+        .phase-active {
+            color: #10b981;
+        }
+
+        pre {
+            background: #0f172a;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            border: 1px solid #334155;
+        }
+
+        .warning {
+            background: #fbbf24;
+            color: #78350f;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+
+        .info {
+            background: #3b82f6;
+            color: white;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+        }
+
+        .device-info {
+            color: #94a3b8;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🎮 Euchre localStorage Inspector</h1>
+
+    <div class="info">
+        <strong>Instructions:</strong> Open this file on each device (phone and laptop) to compare localStorage data.
+        This will help identify which games are stored locally vs in the cloud.
+    </div>
+
+    <div class="device-info" id="deviceInfo"></div>
+
+    <div class="section">
+        <h2>Actions</h2>
+        <button onclick="loadData()">🔄 Refresh Data</button>
+        <button onclick="exportData()">📥 Export to JSON</button>
+        <button onclick="clearLocalStorage()" class="danger">🗑️ Clear localStorage (Dangerous!)</button>
+    </div>
+
+    <div class="section">
+        <h2>Summary</h2>
+        <div id="summary"></div>
+    </div>
+
+    <div class="section">
+        <h2>All Games in localStorage</h2>
+        <div id="gamesTable"></div>
+    </div>
+
+    <div class="section">
+        <h2>Raw JSON Data</h2>
+        <pre id="rawData"></pre>
+    </div>
+
+    <script>
+        function loadData() {
+            // Get localStorage data
+            const activeGamesRaw = localStorage.getItem('euchre_active_games');
+
+            if (!activeGamesRaw) {
+                document.getElementById('summary').innerHTML = '<p style="color: #ef4444;">❌ No localStorage data found!</p>';
+                document.getElementById('gamesTable').innerHTML = '<p>No games in localStorage.</p>';
+                document.getElementById('rawData').textContent = 'null';
+                return;
+            }
+
+            try {
+                const games = JSON.parse(activeGamesRaw);
+                const gamesArray = Object.values(games);
+
+                // Find Aaron's games
+                const aaronGames = gamesArray.filter(g =>
+                    g.currentUser === 'Aaron' ||
+                    g.players?.some(p => p.name === 'Aaron')
+                );
+
+                const inProgress = aaronGames.filter(g => g.phase !== 'game_over');
+                const completed = aaronGames.filter(g => g.phase === 'game_over');
+
+                // Summary
+                let summary = `
+                    <p><strong>Total Games in localStorage:</strong> ${gamesArray.length}</p>
+                    <p><strong>Aaron's Games:</strong> ${aaronGames.length}</p>
+                    <p style="color: #10b981;"><strong>In Progress:</strong> ${inProgress.length}</p>
+                    <p style="color: #64748b;"><strong>Completed:</strong> ${completed.length}</p>
+                `;
+                document.getElementById('summary').innerHTML = summary;
+
+                // Table
+                if (aaronGames.length === 0) {
+                    document.getElementById('gamesTable').innerHTML = '<p>No games for Aaron found.</p>';
+                } else {
+                    let table = '<table><thead><tr><th>Table Name</th><th>Code</th><th>Phase</th><th>Score</th><th>Players</th><th>Last Active</th></tr></thead><tbody>';
+
+                    // Sort by lastActive (most recent first)
+                    aaronGames.sort((a, b) => {
+                        const aTime = a.lastActive || 0;
+                        const bTime = b.lastActive || 0;
+                        return bTime - aTime;
+                    });
+
+                    aaronGames.forEach(g => {
+                        const players = g.players?.filter(p => p.name).map(p => p.name).join(', ') || 'Unknown';
+                        const score = `${g.scores?.team1 || 0}-${g.scores?.team2 || 0}`;
+                        const lastActive = g.lastActive
+                            ? new Date(g.lastActive).toLocaleString()
+                            : 'Unknown';
+                        const phaseClass = g.phase === 'game_over' ? 'phase-game_over' : 'phase-active';
+
+                        table += `
+                            <tr>
+                                <td><strong>${g.tableName || 'Unnamed'}</strong></td>
+                                <td>${g.tableCode || 'N/A'}</td>
+                                <td class="${phaseClass}">${g.phase || 'Unknown'}</td>
+                                <td>${score}</td>
+                                <td style="font-size: 12px;">${players}</td>
+                                <td style="font-size: 12px;">${lastActive}</td>
+                            </tr>
+                        `;
+                    });
+
+                    table += '</tbody></table>';
+                    document.getElementById('gamesTable').innerHTML = table;
+                }
+
+                // Raw data
+                document.getElementById('rawData').textContent = JSON.stringify(games, null, 2);
+
+            } catch (e) {
+                document.getElementById('summary').innerHTML = `<p style="color: #ef4444;">❌ Error parsing localStorage: ${e.message}</p>`;
+                document.getElementById('rawData').textContent = activeGamesRaw;
+            }
+        }
+
+        function exportData() {
+            const data = localStorage.getItem('euchre_active_games');
+            if (!data) {
+                alert('No data to export!');
+                return;
+            }
+
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            const deviceName = navigator.userAgent.includes('Mobile') ? 'mobile' : 'desktop';
+            a.href = url;
+            a.download = `euchre_localstorage_${deviceName}_${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function clearLocalStorage() {
+            if (!confirm('⚠️ WARNING: This will delete ALL saved games from this device!\n\nAre you ABSOLUTELY sure?\n\nGames synced to cloud will be re-downloaded, but any local-only games will be lost forever!')) {
+                return;
+            }
+
+            if (!confirm('Last chance! This cannot be undone. Continue?')) {
+                return;
+            }
+
+            localStorage.removeItem('euchre_active_games');
+            alert('✅ localStorage cleared! Refresh the Euchre app to sync from cloud.');
+            loadData();
+        }
+
+        // Device info
+        function detectDevice() {
+            const ua = navigator.userAgent;
+            let device = 'Unknown Device';
+            let browser = 'Unknown Browser';
+
+            if (/Mobile|Android|iPhone|iPad/.test(ua)) {
+                device = '📱 Mobile Device';
+            } else {
+                device = '💻 Desktop/Laptop';
+            }
+
+            if (ua.includes('Chrome') && !ua.includes('Edg')) {
+                browser = 'Chrome';
+            } else if (ua.includes('Safari') && !ua.includes('Chrome')) {
+                browser = 'Safari';
+            } else if (ua.includes('Firefox')) {
+                browser = 'Firefox';
+            } else if (ua.includes('Edg')) {
+                browser = 'Edge';
+            } else if (ua.includes('Brave')) {
+                browser = 'Brave';
+            }
+
+            document.getElementById('deviceInfo').innerHTML = `
+                <strong>Device:</strong> ${device} | <strong>Browser:</strong> ${browser}
+            `;
+        }
+
+        // Load on page load
+        detectDevice();
+        loadData();
+    </script>
+</body>
+
+</html>

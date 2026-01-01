@@ -320,6 +320,7 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
     // Leaderboard sorting state (must be at top level - Rules of Hooks!)
     const [sortColumn, setSortColumn] = useState<string>('winPct');
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+    const [cloudGames, setCloudGames] = useState<any[]>([]);
 
     // Reset to initial tab when modal opens
     useEffect(() => {
@@ -414,6 +415,23 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
             loadBotDecisions();
         }
     }, [isOpen, tab]);
+
+    // Load cloud games for localStorage comparison in admin
+    useEffect(() => {
+        const loadCloudGames = async () => {
+            if (!state.currentUser) return;
+            try {
+                const games = await fetchUserCloudGames(state.currentUser);
+                setCloudGames(games);
+            } catch (err) {
+                console.error('[ADMIN] Error loading cloud games:', err);
+            }
+        };
+
+        if (isOpen && tab === 'admin') {
+            loadCloudGames();
+        }
+    }, [isOpen, tab, state.currentUser]);
 
     // Get my stats - use currentUser (works everywhere) or fallback to currentViewPlayerName (in-game)
     const playerName = state.currentUser || state.currentViewPlayerName || '';
@@ -941,6 +959,143 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                                     </div>
                                 )}
                             </div>
+
+                            {/* localStorage Management */}
+                            <div>
+                                <div className="flex justify-between items-center mb-4">
+                                    <div className="text-xs font-black text-slate-400 uppercase tracking-widest">
+                                        localStorage Management
+                                    </div>
+                                </div>
+
+                                {(() => {
+                                    const activeGamesRaw = localStorage.getItem('euchre_active_games');
+                                    const localGames = activeGamesRaw ? JSON.parse(activeGamesRaw) : {};
+                                    const gamesArray = Object.values(localGames) as any[];
+                                    const aaronGames = gamesArray.filter((g: any) =>
+                                        g.currentUser === state.currentUser ||
+                                        g.players?.some((p: any) => p.name === state.currentUser)
+                                    );
+                                    const inProgress = aaronGames.filter((g: any) => g.phase !== 'game_over');
+                                    const completed = aaronGames.filter((g: any) => g.phase === 'game_over');
+
+                                    return (
+                                        <div className="space-y-4">
+                                            {/* Summary Card */}
+                                            <div className="bg-blue-950/20 border border-blue-900/40 rounded-[2rem] p-6">
+                                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                                    <div>
+                                                        <div className="text-2xl font-black text-white">{gamesArray.length}</div>
+                                                        <div className="text-xs text-slate-400">Total in localStorage</div>
+                                                    </div>
+                                                    <div>
+                                                        <div className="text-2xl font-black text-emerald-400">{aaronGames.length}</div>
+                                                        <div className="text-xs text-slate-400">Your Games</div>
+                                                    </div>
+                                                    <div>
+                                                        <div className="text-2xl font-black text-cyan-400">{inProgress.length}</div>
+                                                        <div className="text-xs text-slate-400">In Progress (Local)</div>
+                                                    </div>
+                                                    <div>
+                                                        <div className="text-2xl font-black text-purple-400">{completed.length}</div>
+                                                        <div className="text-xs text-slate-400">Completed (Local)</div>
+                                                    </div>
+                                                </div>
+                                                <div className="mt-4 pt-4 border-t border-blue-800/30">
+                                                    <div className="text-sm text-slate-300">
+                                                        <span className="font-bold text-yellow-400">Cloud Games:</span> {cloudGames.length} (source of truth)
+                                                    </div>
+                                                    <div className="text-xs text-slate-500 mt-2">
+                                                        💡 If counts don't match cloud, clear localStorage to sync fresh data
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Actions */}
+                                            <div className="flex gap-3">
+                                                <button
+                                                    onClick={() => {
+                                                        const data = JSON.stringify(localGames, null, 2);
+                                                        const blob = new Blob([data], { type: 'application/json' });
+                                                        const url = URL.createObjectURL(blob);
+                                                        const a = document.createElement('a');
+                                                        a.href = url;
+                                                        a.download = `euchre_localStorage_backup_${Date.now()}.json`;
+                                                        a.click();
+                                                        URL.revokeObjectURL(url);
+                                                    }}
+                                                    className="flex-1 px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-black uppercase tracking-widest shadow-xl transition-all active:scale-95"
+                                                >
+                                                    💾 Export Backup
+                                                </button>
+                                                <button
+                                                    onClick={async () => {
+                                                        if (!confirm('⚠️ WARNING: This will delete ALL games from localStorage on THIS device!\n\nGames will be re-synced from cloud on next refresh.\n\nContinue?')) {
+                                                            return;
+                                                        }
+                                                        localStorage.removeItem('euchre_active_games');
+                                                        alert('✅ localStorage cleared! Refreshing to sync from cloud...');
+                                                        window.location.reload();
+                                                    }}
+                                                    className="flex-1 px-6 py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white text-sm font-black uppercase tracking-widest shadow-xl transition-all active:scale-95"
+                                                >
+                                                    🗑️ Clear localStorage
+                                                </button>
+                                            </div>
+
+                                            {/* Game List */}
+                                            {aaronGames.length > 0 && (
+                                                <div className="bg-slate-800/30 border border-slate-800 rounded-[2rem] overflow-hidden">
+                                                    <div className="overflow-x-auto max-h-[300px] overflow-y-auto">
+                                                        <table className="w-full text-left text-xs">
+                                                            <thead className="bg-slate-800/50 sticky top-0">
+                                                                <tr className="text-[9px] font-black text-slate-500 uppercase">
+                                                                    <th className="px-4 py-3">Table Name</th>
+                                                                    <th className="px-4 py-3">Code</th>
+                                                                    <th className="px-4 py-3">Phase</th>
+                                                                    <th className="px-4 py-3">Score</th>
+                                                                    <th className="px-4 py-3">Last Active</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody className="divide-y divide-slate-800">
+                                                                {aaronGames
+                                                                    .sort((a: any, b: any) => (b.lastActive || 0) - (a.lastActive || 0))
+                                                                    .map((g: any, i: number) => (
+                                                                        <tr key={i} className="hover:bg-slate-800/30 transition-colors">
+                                                                            <td className="px-4 py-3 text-white font-bold">{g.tableName || 'Unnamed'}</td>
+                                                                            <td className="px-4 py-3 font-mono text-cyan-400">{g.tableCode || 'N/A'}</td>
+                                                                            <td className="px-4 py-3">
+                                                                                <span className={`px-2 py-1 rounded text-[9px] font-black ${g.phase === 'game_over'
+                                                                                    ? 'bg-slate-700/50 text-slate-400'
+                                                                                    : 'bg-emerald-500/20 text-emerald-400'
+                                                                                    }`}>
+                                                                                    {g.phase}
+                                                                                </span>
+                                                                            </td>
+                                                                            <td className="px-4 py-3 text-purple-400 font-bold">
+                                                                                {g.scores?.team1 || 0}-{g.scores?.team2 || 0}
+                                                                            </td>
+                                                                            <td className="px-4 py-3 text-slate-500 text-[10px]">
+                                                                                {g.lastActive
+                                                                                    ? new Date(g.lastActive).toLocaleString('en-US', {
+                                                                                        month: '2-digit',
+                                                                                        day: '2-digit',
+                                                                                        hour: '2-digit',
+                                                                                        minute: '2-digit'
+                                                                                    })
+                                                                                    : 'Unknown'}
+                                                                            </td>
+                                                                        </tr>
+                                                                    ))}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })()}
+                            </div>
                         </div>
                     ) : tab === 'bot_audit' ? (
                         <BotAuditView decisions={botDecisions} />
@@ -1346,7 +1501,7 @@ const LandingPage = () => {
                     Logout from {state.currentUser}
                 </button>
                 <div className="text-[10px] font-black text-slate-800 uppercase tracking-[0.3em]">
-                    Euchre Engine V1.03
+                    Euchre Engine V1.04
                 </div>
             </div>
 
