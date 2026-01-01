@@ -311,9 +311,9 @@ const BotAuditView = ({ decisions }: { decisions: any[] }) => {
     );
 };
 
-const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; onClose: () => void; initialTab?: 'me' | 'league' | 'trumps' | 'bot_audit' | 'admin' | 'commentary' }) => {
+const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; onClose: () => void; initialTab?: 'me' | 'league' | 'trumps' | 'bot_audit' | 'freeze_incidents' | 'state_management' | 'commentary' }) => {
     const { state } = useGame();
-    const [tab, setTab] = useState<'me' | 'league' | 'trumps' | 'bot_audit' | 'admin' | 'commentary'>(initialTab as any);
+    const [tab, setTab] = useState<'me' | 'league' | 'trumps' | 'bot_audit' | 'freeze_incidents' | 'state_management' | 'commentary'>(initialTab as any);
     const [freezeStats, setFreezeStats] = useState<any>(null);
     const [freezeRate, setFreezeRate] = useState<any>(null);
 
@@ -359,9 +359,9 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
         }
     }, [isOpen]);
 
-    // Load freeze statistics when admin tab is selected
+    // Load freeze statistics when freeze_incidents or state_management tab is selected
     useEffect(() => {
-        if (tab === 'admin' && isOpen) {
+        if ((tab === 'freeze_incidents' || tab === 'state_management') && isOpen) {
             getFreezeStats().then(setFreezeStats);
             getFreezeRate(24).then(setFreezeRate);
         }
@@ -411,7 +411,7 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
             }
         };
 
-        if (isOpen && (tab === 'bot_audit' || tab === 'admin')) {
+        if (isOpen && (tab === 'bot_audit' || tab === 'freeze_incidents' || tab === 'state_management')) {
             loadBotDecisions();
         }
     }, [isOpen, tab]);
@@ -428,7 +428,7 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
             }
         };
 
-        if (isOpen && tab === 'admin') {
+        if (isOpen && tab === 'state_management') {
             loadCloudGames();
         }
     }, [isOpen, tab, state.currentUser]);
@@ -503,14 +503,18 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                                     >
                                         Bot Audit
                                     </button>
-                                    {state.currentViewPlayerName === 'Aaron' && (
-                                        <button
-                                            onClick={() => setTab('admin')}
-                                            className={`px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${tab === 'admin' ? 'bg-red-500 text-white shadow-[0_0_20px_rgba(239,68,68,0.4)]' : 'bg-slate-800 text-red-400 hover:text-red-300'}`}
-                                        >
-                                            🔧 Admin
-                                        </button>
-                                    )}
+                                    <button
+                                        onClick={() => setTab('freeze_incidents')}
+                                        className={`px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${tab === 'freeze_incidents' ? 'bg-emerald-500 text-white shadow-[0_0_20px_rgba(16,185,129,0.4)]' : 'bg-slate-800 text-slate-500 hover:text-slate-300'}`}
+                                    >
+                                        Freeze Incidents
+                                    </button>
+                                    <button
+                                        onClick={() => setTab('state_management')}
+                                        className={`px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${tab === 'state_management' ? 'bg-emerald-500 text-white shadow-[0_0_20px_rgba(16,185,129,0.4)]' : 'bg-slate-800 text-slate-500 hover:text-slate-300'}`}
+                                    >
+                                        State Management
+                                    </button>
                                     <button
                                         onClick={() => setTab('commentary')}
                                         className={`px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${tab === 'commentary' ? 'bg-emerald-500 text-white shadow-[0_0_20px_rgba(16,185,129,0.4)]' : 'bg-slate-800 text-slate-500 hover:text-slate-300'}`}
@@ -819,31 +823,8 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                                 </div>
                             )}
                         </div>
-                    ) : tab === 'admin' ? (
+                    ) : tab === 'freeze_incidents' ? (
                         <div className="space-y-6">
-                            <div className="flex justify-between items-center bg-red-950/20 border border-red-900/40 p-4 rounded-3xl mb-4">
-                                <div className="text-red-400 text-sm font-bold">
-                                    🔧 ADMIN DASHBOARD - Freeze Monitoring & Analytics
-                                </div>
-                                <button
-                                    onClick={async () => {
-                                        if (confirm('🚨 NUCLEAR OPTION: Are you sure you want to WIPE ALL PLAYER STATS? This is permanent.')) {
-                                            if (confirm('FINAL CONFIRMATION: Really delete all stats for all players?')) {
-                                                const { clearAllPlayerStats } = await import('./utils/supabaseStats');
-                                                const success = await clearAllPlayerStats();
-                                                if (success) {
-                                                    alert('Global stats have been wiped.');
-                                                    window.location.reload();
-                                                }
-                                            }
-                                        }
-                                    }}
-                                    className="px-6 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-[10px] font-black uppercase tracking-widest shadow-xl transition-all active:scale-95"
-                                >
-                                    🗑️ Wipe All Stats
-                                </button>
-                            </div>
-
                             {/* Freeze Rate Card */}
                             {freezeRate && (
                                 <div className="bg-gradient-to-br from-red-900/20 to-orange-900/20 border border-red-800/50 rounded-[2rem] p-6">
@@ -961,6 +942,34 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                                     </div>
                                 )}
                             </div>
+                        </div>
+                    ) : tab === 'state_management' ? (
+                        <div className="space-y-6">
+                            {/* Stats Wipe (Aaron only) */}
+                            {state.currentUser === 'Aaron' && (
+                                <div className="flex justify-between items-center bg-red-950/20 border border-red-900/40 p-4 rounded-3xl">
+                                    <div className="text-red-400 text-sm font-bold">
+                                        ⚠️ DANGER ZONE - Stats Management
+                                    </div>
+                                    <button
+                                        onClick={async () => {
+                                            if (confirm('🚨 NUCLEAR OPTION: Are you sure you want to WIPE ALL PLAYER STATS? This is permanent.')) {
+                                                if (confirm('FINAL CONFIRMATION: Really delete all stats for all players?')) {
+                                                    const { clearAllPlayerStats } = await import('./utils/supabaseStats');
+                                                    const success = await clearAllPlayerStats();
+                                                    if (success) {
+                                                        alert('Global stats have been wiped.');
+                                                        window.location.reload();
+                                                    }
+                                                }
+                                            }
+                                        }}
+                                        className="px-6 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-[10px] font-black uppercase tracking-widest shadow-xl transition-all active:scale-95"
+                                    >
+                                        🗑️ Wipe All Stats
+                                    </button>
+                                </div>
+                            )}
 
                             {/* localStorage Management */}
                             <div>
@@ -1254,7 +1263,7 @@ const LandingPage = () => {
     const [showJoin, setShowJoin] = useState(false);
     const [_refreshKey, setRefreshKey] = useState(0);
     const [isStatsOpen, setIsStatsOpen] = useState(false);
-    const [statsInitialTab, setStatsInitialTab] = useState<'me' | 'league' | 'trumps' | 'admin'>('me');
+    const [statsInitialTab, setStatsInitialTab] = useState<'me' | 'league' | 'trumps' | 'bot_audit' | 'freeze_incidents' | 'state_management' | 'commentary'>('me');
     const [cloudGames, setCloudGames] = useState<any[]>([]);
     const [gameFilter, setGameFilter] = useState<'in-progress' | 'completed'>('in-progress');
 
@@ -1351,14 +1360,6 @@ const LandingPage = () => {
                         >
                             Stats
                         </button>
-                        {state.currentUser === 'Aaron' && (
-                            <button
-                                onClick={() => { setStatsInitialTab('admin'); setIsStatsOpen(true); }}
-                                className="text-[10px] font-black text-red-400 hover:text-white hover:bg-red-500 px-4 md:px-6 py-2 md:py-3 rounded-xl md:rounded-2xl border-2 border-red-500/20 transition-all uppercase tracking-widest"
-                            >
-                                🔧 Admin
-                            </button>
-                        )}
                         <button
                             onClick={() => dispatch({ type: 'LOGOUT' })}
                             className="text-[10px] font-black text-red-500 hover:text-white hover:bg-red-500 px-4 md:px-6 py-2 md:py-3 rounded-xl md:rounded-2xl border-2 border-red-500/20 transition-all uppercase tracking-widest"
@@ -1641,7 +1642,7 @@ const GameView = () => {
     const { state, dispatch } = useGame();
     const [isStatsOpen, setIsStatsOpen] = useState(false);
     // @ts-ignore - Will be used when admin button is added to GameView
-    const [statsInitialTab, setStatsInitialTab] = useState<'me' | 'league' | 'trumps' | 'admin' | 'commentary'>('me');
+    const [statsInitialTab, setStatsInitialTab] = useState<'me' | 'league' | 'trumps' | 'bot_audit' | 'freeze_incidents' | 'state_management' | 'commentary'>('me');
     const [activeTab, setActiveTab] = useState<'table' | 'commentary' | 'stats'>('table');
 
     const handleNextStep = () => {
