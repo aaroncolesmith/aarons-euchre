@@ -477,8 +477,8 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                     <div className="flex justify-between items-start mb-10">
                         <div>
                             <h2 className="text-4xl font-black text-white italic tracking-tighter mb-2">Stats</h2>
-                            <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-slate-900">
-                                <div className="flex gap-3 mt-6 min-w-max">
+                            <div className="overflow-x-auto overflow-y-hidden -mx-2 px-2" style={{ scrollbarWidth: 'thin' }}>
+                                <div className="flex gap-3 mt-6 flex-nowrap">
                                     <button
                                         onClick={() => setTab('me')}
                                         className={`px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${tab === 'me' ? 'bg-emerald-500 text-white shadow-[0_0_20px_rgba(16,185,129,0.4)]' : 'bg-slate-800 text-slate-500 hover:text-slate-300'}`}
@@ -1504,7 +1504,7 @@ const LandingPage = () => {
                     Logout from {state.currentUser}
                 </button>
                 <div className="text-[10px] font-black text-slate-800 uppercase tracking-[0.3em]">
-                    Euchre Engine V1.04
+                    Euchre Engine V1.07
                 </div>
             </div>
 

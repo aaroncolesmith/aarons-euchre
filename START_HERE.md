@@ -606,12 +606,33 @@ ORDER BY games_won DESC LIMIT 10;
 3. Wait ~60 seconds for Vercel to deploy
 4. Then test on your mobile device
 
-**Version Numbering (Beta):** 
-- Current Phase: **Beta (V0.x)**
-- Increment the patch version for each deployment (e.g., V0.27 → V0.28)
-- Only increment major version (V1.0) when explicitly decided by product owner
-- This makes it easy to verify you're testing the latest version on mobile
+**Version Numbering (Production):** 
+- Current Phase: **Production (V1.x)**
+- **CRITICAL**: After EVERY change, you MUST:
+  1. **Increment the version number** in `src/App.tsx` (search for "Euchre Engine V")
+  2. **Verify the version displays correctly** in the app footer
+  3. **Commit and push to GitHub**
+  4. **Wait ~60 seconds for Vercel to auto-deploy**
+  5. **Verify the new version is live** at aarons-euchre.vercel.app
 - Version is displayed at the bottom of the landing page
+- **DO NOT skip version increments** - this is how we track what's deployed
+
+**Example Workflow:**
+```bash
+# 1. Make your changes
+vim src/App.tsx
+
+# 2. Update version number
+# Change "Euchre Engine V1.05" to "Euchre Engine V1.06"
+
+# 3. Commit and deploy
+git add -A
+git commit -m "V1.06: Description of changes"
+git push origin main
+
+# 4. Wait for Vercel deployment (~60 seconds)
+# 5. Verify version in app footer
+```
 
 ### Testing Multiplayer
 
