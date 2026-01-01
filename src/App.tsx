@@ -441,48 +441,44 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/10 backdrop-blur-sm animate-in fade-in duration-300 font-hand">
             <div className="bg-white border-4 border-slate-800 w-full max-w-4xl rounded-[2rem] shadow-[12px_12px_0px_0px_rgba(30,41,59,1)] overflow-hidden animate-in zoom-in duration-300 transform rotate-1 max-h-[90vh] flex flex-col">
-                <div className="p-6 md:p-8 flex flex-col h-full bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] [background-size:16px_16px]">
-                    <div className="flex justify-between items-start mb-6 shrink-0 border-b-2 border-dashed border-slate-300 pb-4">
-                        <div className="flex-1 min-w-0 mr-4">
-                            <h2 className="text-4xl font-black text-slate-800 uppercase tracking-widest transform -rotate-1">Stats</h2>
-                        </div>
-                        <button onClick={onClose} className="bg-white hover:bg-slate-100 text-slate-800 border-2 border-slate-800 p-2 rounded-full transition-all shadow-[2px_2px_0px_0px_rgba(30,41,59,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none">
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M6 18L18 6M6 6l12 12" /></svg>
-                        </button>
-                    </div>
-
-                    <div className="overflow-x-auto overflow-y-hidden -mx-2 px-2 shrink-0 mb-6 scrollbar-hide">
-                        <div className="flex gap-2 flex-nowrap pb-2">
-                            {[
-                                { id: 'me', label: 'My Stats' },
-                                { id: 'league', label: 'Leaderboard' },
-                                { id: 'bot_audit', label: 'Bot Audit' },
-                                { id: 'freeze_incidents', label: 'Freeze Logs' },
-                                { id: 'state_management', label: 'Admin' },
-                                { id: 'commentary', label: 'Chat' }
-                            ].map((t) => (
+                <div className="p-6 md:p-8 flex flex-col h-full bg-white">
+                    <div className="flex justify-between items-start mb-2 shrink-0">
+                        <div className="flex-1 overflow-x-auto min-w-0 mr-4 scrollbar-hide">
+                            <div className="flex gap-2 flex-nowrap py-1">
+                                {[
+                                    { id: 'me', label: 'My Stats' },
+                                    { id: 'league', label: 'Leaderboard' },
+                                    { id: 'bot_audit', label: 'Bot Audit' },
+                                    { id: 'freeze_incidents', label: 'Freeze Logs' },
+                                    { id: 'state_management', label: 'Admin' },
+                                    { id: 'commentary', label: 'Chat' }
+                                ].map((t) => (
+                                    <button
+                                        key={t.id}
+                                        onClick={() => setTab(t.id as any)}
+                                        className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap border-2 ${tab === t.id
+                                            ? 'bg-emerald-400 text-slate-900 border-slate-900 shadow-[2px_2px_0px_0px_rgba(30,41,59,1)] -translate-y-0.5'
+                                            : 'bg-transparent border-transparent text-slate-400 hover:text-slate-600 hover:bg-slate-50'
+                                            }`}
+                                    >
+                                        {t.label}
+                                    </button>
+                                ))}
                                 <button
-                                    key={t.id}
-                                    onClick={() => setTab(t.id as any)}
-                                    className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap border-2 ${tab === t.id
-                                        ? 'bg-emerald-400 border-slate-900 text-slate-900 shadow-[4px_4px_0px_0px_rgba(30,41,59,1)] -translate-y-1'
-                                        : 'bg-white border-slate-300 text-slate-400 hover:border-slate-500 hover:text-slate-600 shadow-[2px_2px_0px_0px_rgba(203,213,225,1)]'
+                                    onClick={downloadSessionLog}
+                                    disabled={state.eventLog.length === 0}
+                                    className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all border-2 whitespace-nowrap ${state.eventLog.length > 0
+                                        ? 'bg-white text-slate-800 border-slate-800 hover:bg-slate-50 cursor-pointer shadow-[2px_2px_0px_0px_rgba(30,41,59,1)]'
+                                        : 'bg-transparent text-slate-300 border-slate-200 cursor-not-allowed'
                                         }`}
                                 >
-                                    {t.label}
+                                    📥 Log
                                 </button>
-                            ))}
-                            <button
-                                onClick={downloadSessionLog}
-                                disabled={state.eventLog.length === 0}
-                                className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all border-2 whitespace-nowrap ${state.eventLog.length > 0
-                                    ? 'bg-white text-slate-800 border-slate-800 hover:bg-slate-50 cursor-pointer shadow-[2px_2px_0px_0px_rgba(30,41,59,1)]'
-                                    : 'bg-slate-50 text-slate-300 border-slate-200 cursor-not-allowed'
-                                    }`}
-                            >
-                                📥 Log {state.eventLog.length > 0 && `(${state.eventLog.length})`}
-                            </button>
+                            </div>
                         </div>
+                        <button onClick={onClose} className="bg-white hover:bg-slate-100 text-slate-800 border-2 border-slate-800 p-1.5 rounded-lg transition-all shadow-[2px_2px_0px_0px_rgba(30,41,59,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none flex-shrink-0">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
+                        </button>
                     </div>
 
                     {tab === 'me' ? (
@@ -496,9 +492,9 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                                         { label: 'Hands Played', value: human.stats.handsPlayed, color: 'text-slate-400' },
                                         { label: 'Hand Win %', value: `${human.stats.handsPlayed > 0 ? Math.round((human.stats.handsWon / human.stats.handsPlayed) * 100) : 0}%`, color: 'text-cyan-400' },
                                     ].map((stat, i) => (
-                                        <div key={i} className="bg-slate-800/40 border border-slate-700/30 p-5 rounded-[2rem]">
-                                            <div className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">{stat.label}</div>
-                                            <div className={`text-xl font-black ${stat.color}`}>{stat.value}</div>
+                                        <div key={i} className="bg-white border-2 border-emerald-500 p-4 rounded-2xl flex flex-col items-center justify-center shadow-[4px_4px_0px_0px_rgba(16,185,129,0.2)] transform hover:-rotate-1 transition-transform">
+                                            <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{stat.label}</div>
+                                            <div className={`text-3xl font-black font-hand ${String(stat.value).includes('%') ? 'text-emerald-600' : 'text-slate-800'}`}>{stat.value}</div>
                                         </div>
                                     ))}
                                 </div>
@@ -513,9 +509,9 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                                         { label: 'Tricks Won (Team)', value: human.stats.tricksWonTeam, color: 'text-indigo-400' },
                                         { label: 'Trick Win %', value: `${human.stats.tricksPlayed > 0 ? Math.round((human.stats.tricksWonTeam / human.stats.tricksPlayed) * 100) : 0}%`, color: 'text-indigo-400' },
                                     ].map((stat, i) => (
-                                        <div key={i} className="bg-slate-800/40 border border-slate-700/30 p-5 rounded-[2rem]">
-                                            <div className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">{stat.label}</div>
-                                            <div className={`text-xl font-black ${stat.color}`}>{stat.value}</div>
+                                        <div key={i} className="bg-white border-2 border-emerald-500 p-4 rounded-2xl flex flex-col items-center justify-center shadow-[4px_4px_0px_0px_rgba(16,185,129,0.2)] transform hover:-rotate-1 transition-transform">
+                                            <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{stat.label}</div>
+                                            <div className={`text-3xl font-black font-hand ${String(stat.value).includes('%') ? 'text-emerald-600' : 'text-slate-800'}`}>{stat.value}</div>
                                         </div>
                                     ))}
                                 </div>
@@ -530,9 +526,9 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                                         { label: 'Loner Attempts', value: human.stats.lonersAttempted, color: 'text-pink-400' },
                                         { label: 'Loners Won (5/5)', value: human.stats.lonersConverted, color: 'text-pink-500' },
                                     ].map((stat, i) => (
-                                        <div key={i} className="bg-slate-800/40 border border-slate-700/30 p-5 rounded-[2rem]">
-                                            <div className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">{stat.label}</div>
-                                            <div className={`text-xl font-black ${stat.color}`}>{stat.value}</div>
+                                        <div key={i} className="bg-white border-2 border-emerald-500 p-4 rounded-2xl flex flex-col items-center justify-center shadow-[4px_4px_0px_0px_rgba(16,185,129,0.2)] transform hover:-rotate-1 transition-transform">
+                                            <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{stat.label}</div>
+                                            <div className={`text-3xl font-black font-hand ${String(stat.value).includes('%') ? 'text-emerald-600' : 'text-slate-800'}`}>{stat.value}</div>
                                         </div>
                                     ))}
                                 </div>
@@ -547,9 +543,9 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                                         { label: 'Sweeps (5 Tricks)', value: human.stats.sweeps, color: 'text-yellow-400' },
                                         { label: 'Been Swept (0/5)', value: human.stats.swept, color: 'text-slate-700' },
                                     ].map((stat, i) => (
-                                        <div key={i} className="bg-slate-800/40 border border-slate-700/30 p-5 rounded-[2rem]">
-                                            <div className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">{stat.label}</div>
-                                            <div className={`text-xl font-black ${stat.color}`}>{stat.value}</div>
+                                        <div key={i} className="bg-white border-2 border-emerald-500 p-4 rounded-2xl flex flex-col items-center justify-center shadow-[4px_4px_0px_0px_rgba(16,185,129,0.2)] transform hover:-rotate-1 transition-transform">
+                                            <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{stat.label}</div>
+                                            <div className={`text-3xl font-black font-hand ${String(stat.value).includes('%') ? 'text-emerald-600' : 'text-slate-800'}`}>{stat.value}</div>
                                         </div>
                                     ))}
                                 </div>
@@ -1252,16 +1248,16 @@ const LandingPage = () => {
                             Hello, {state.currentUser}
                         </p>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 flex-wrap justify-end">
                         <button
                             onClick={() => { setStatsInitialTab('me'); setIsStatsOpen(true); }}
-                            className="bg-white hover:bg-slate-50 text-[10px] font-bold text-slate-800 px-4 py-2 rounded-xl border-2 border-slate-800 uppercase tracking-widest transition-all shadow-[2px_2px_0px_0px_rgba(30,41,59,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
+                            className="bg-white hover:bg-slate-50 text-[10px] font-bold text-slate-800 px-3 py-1.5 rounded-lg border-2 border-slate-800 uppercase tracking-widest transition-all shadow-[2px_2px_0px_0px_rgba(30,41,59,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
                         >
                             STATS
                         </button>
                         <button
                             onClick={() => dispatch({ type: 'LOGOUT' })}
-                            className="bg-white hover:bg-slate-50 text-[10px] font-bold text-red-500 px-4 py-2 rounded-xl border-2 border-red-500 uppercase tracking-widest transition-all shadow-[2px_2px_0px_0px_rgba(239,68,68,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
+                            className="bg-white hover:bg-slate-50 text-[10px] font-bold text-red-500 px-3 py-1.5 rounded-lg border-2 border-red-500 uppercase tracking-widest transition-all shadow-[2px_2px_0px_0px_rgba(239,68,68,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
                         >
                             LOGOUT
                         </button>
@@ -1270,7 +1266,7 @@ const LandingPage = () => {
 
                 {/* Main Action Buttons */}
                 {!showJoin ? (
-                    <div className="flex flex-col gap-6 mt-8">
+                    <div className="flex flex-col gap-6 mt-8 mb-16">
                         <button
                             onClick={() => dispatch({ type: 'CREATE_TABLE', payload: { userName: state.currentUser! } })}
                             className="bg-white text-slate-800 font-black py-8 rounded-3xl text-2xl border-4 border-slate-800 shadow-[8px_8px_0px_0px_rgba(30,41,59,1)] hover:translate-y-px hover:shadow-[6px_6px_0px_0px_rgba(30,41,59,1)] active:shadow-none active:translate-x-[4px] active:translate-y-[4px] transition-all uppercase tracking-[0.2em]"
@@ -1402,13 +1398,13 @@ const LandingPage = () => {
 
             {/* Footer Version */}
             <div className="mt-auto pt-8 text-center w-full">
-                <div className="text-[10px] font-black text-slate-300 uppercase tracking-[0.5em] transform rotate-180">
+                <div className="text-[10px] font-black text-slate-300 uppercase tracking-[0.5em]">
                     Euchre Engine V1.20
                 </div>
             </div>
 
             <StatsModal isOpen={isStatsOpen} onClose={() => setIsStatsOpen(false)} initialTab={statsInitialTab} />
-        </div>
+        </div >
     );
 };
 
