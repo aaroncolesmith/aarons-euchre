@@ -254,7 +254,7 @@ const BotAuditView = ({ decisions, filterType }: { decisions: any[]; filterType?
 
     return (
         <div className="bg-white border-2 border-emerald-500 rounded-2xl overflow-hidden shadow-[4px_4px_0px_0px_rgba(16,185,129,0.2)]">
-            <div className="overflow-x-auto max-h-[50vh] overflow-y-auto custom-scrollbar">
+            <div className="overflow-x-auto overflow-y-auto custom-scrollbar">
                 <table className="w-full text-left text-xs font-hand">
                     <thead className="bg-white sticky top-0 z-20">
                         <tr className="text-[9px] font-black text-emerald-700 uppercase tracking-widest border-b-2 border-emerald-500">
@@ -752,7 +752,7 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                                     </div>
                                 ) : (
                                     <div className="bg-white border-2 border-emerald-500 rounded-[2rem] overflow-hidden shadow-[4px_4px_0px_0px_rgba(16,185,129,0.2)]">
-                                        <div className="overflow-x-auto max-h-[400px] overflow-y-auto custom-scrollbar">
+                                        <div className="overflow-x-auto overflow-y-auto custom-scrollbar">
                                             <table className="w-full text-left text-xs font-hand">
                                                 <thead className="bg-white sticky top-0 z-20">
                                                     <tr className="text-[9px] font-black text-emerald-700 uppercase tracking-widest border-b-2 border-emerald-500">
@@ -1007,7 +1007,7 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                         </div>
                     ) : tab === 'commentary' ? (
                         <div className="flex-1 overflow-y-auto min-h-0 custom-scrollbar pr-2 pb-6">
-                            <div className="bg-white border-2 border-emerald-500 rounded-[2rem] p-6 h-[50vh] overflow-y-auto space-y-4 custom-scrollbar shadow-[4px_4px_0px_0px_rgba(16,185,129,0.2)]">
+                            <div className="bg-white border-2 border-emerald-500 rounded-[2rem] p-6 h-full overflow-y-auto space-y-4 custom-scrollbar shadow-[4px_4px_0px_0px_rgba(16,185,129,0.2)]">
                                 {state.logs.length === 0 ? (
                                     <div className="flex flex-col items-center justify-center h-full text-slate-400 space-y-4 font-hand">
                                         <div className="w-16 h-16 rounded-full bg-emerald-50 flex items-center justify-center border-2 border-emerald-100">
