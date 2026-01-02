@@ -7,6 +7,7 @@ import { supabase } from './lib/supabase';
 import { fetchUserCloudGames, mergeLocalAndCloudGames } from './utils/cloudGames';
 import { getFreezeStats, getFreezeRate } from './utils/cloudFreezeLogger';
 import { getAllPlayerStats } from './utils/supabaseStats';
+import { GameRecapModal } from './components/GameRecapModal';
 
 const getCardJitter = (id: string) => {
     let hash = 0;
@@ -1416,6 +1417,7 @@ const GameView = () => {
     const [isStatsOpen, setIsStatsOpen] = useState(false);
     // @ts-ignore - Will be used when admin button is added to GameView
     const [statsInitialTab, setStatsInitialTab] = useState<'me' | 'league' | 'bot_audit' | 'freeze_incidents' | 'state_management' | 'commentary'>('me');
+    const [showGameRecap, setShowGameRecap] = useState(false);
 
 
     const handleNextStep = () => {
@@ -1470,6 +1472,12 @@ const GameView = () => {
 
                         <div className="flex flex-col gap-4">
                             <button
+                                onClick={() => setShowGameRecap(true)}
+                                className="w-full bg-paper hover:bg-paper-dim text-ink font-black py-4 rounded-2xl text-lg border-4 border-ink shadow-sketch-ink transition-all active:scale-95"
+                            >
+                                GAME RECAP
+                            </button>
+                            <button
                                 onClick={() => dispatch({ type: 'EXIT_TO_LANDING' })}
                                 className="w-full bg-brand hover:bg-brand-dim text-white font-black py-6 rounded-2xl text-xl shadow-sketch-brand transition-all active:scale-95"
                             >
@@ -1478,6 +1486,7 @@ const GameView = () => {
                         </div>
                     </div>
                 </motion.div>
+                <GameRecapModal isOpen={showGameRecap} onClose={() => setShowGameRecap(false)} gameState={state} />
             </div>
         );
     }
