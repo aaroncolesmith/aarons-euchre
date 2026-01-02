@@ -152,7 +152,7 @@ export const GameRecapModal = ({ isOpen, onClose, gameState }: GameRecapModalPro
                             </div>
 
                             {/* Score Graph */}
-                            <div className="bg-paper rounded-2xl border-2 border-brand p-6 relative h-64">
+                            <div className="bg-paper rounded-2xl border-2 border-brand p-6 relative h-64 pl-8">
                                 <div className="absolute top-4 right-4 flex flex-col items-end text-xs font-bold gap-1">
                                     <div className="flex items-center gap-2 text-brand-dark">
                                         {gameState.teamNames.team1} <div className="w-8 h-1 bg-brand-dark rounded-full"></div>
@@ -162,13 +162,36 @@ export const GameRecapModal = ({ isOpen, onClose, gameState }: GameRecapModalPro
                                     </div>
                                 </div>
 
-                                <div className="absolute -left-8 top-1/2 -rotate-90 text-xs font-black text-brand tracking-widest">SCORE</div>
-                                <div className="absolute bottom-1 w-full text-center text-xs font-black text-brand tracking-widest">HAND</div>
+                                <div className="absolute bottom-1 w-full text-center text-xs font-black text-brand tracking-widest pl-8 pointer-events-none">HAND</div>
 
                                 <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full overflow-visible">
+                                    {/* Score Label on Y Axis */}
+                                    <text
+                                        transform="rotate(-90)"
+                                        x={-height / 2}
+                                        y={padding - 3}
+                                        textAnchor="middle"
+                                        className="text-[3px] font-black text-brand tracking-widest fill-current"
+                                        style={{ fontFamily: 'inherit' }}
+                                    >
+                                        SCORE
+                                    </text>
+
                                     {/* Axes */}
                                     <line x1={padding} y1={padding} x2={padding} y2={height - padding} stroke="currentColor" className="text-brand" strokeWidth="0.5" strokeLinecap="round" />
                                     <line x1={padding} y1={height - padding} x2={width - padding} y2={height - padding} stroke="currentColor" className="text-brand" strokeWidth="0.5" strokeLinecap="round" />
+
+                                    {/* Target Line (10 Points) */}
+                                    <line
+                                        x1={padding}
+                                        y1={getY(10)}
+                                        x2={width - padding}
+                                        y2={getY(10)}
+                                        stroke="currentColor"
+                                        className="text-brand-dim"
+                                        strokeWidth="0.3"
+                                        strokeDasharray="1.5 1.5"
+                                    />
 
                                     {/* Lines */}
                                     <path d={t1Path} fill="none" stroke="currentColor" className="text-brand-dark" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
