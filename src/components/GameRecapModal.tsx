@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Trophy } from 'lucide-react';
 import { GameState } from '../types/game';
@@ -10,6 +10,8 @@ interface GameRecapModalProps {
 }
 
 export const GameRecapModal = ({ isOpen, onClose, gameState }: GameRecapModalProps) => {
+    const [hoveredHand, setHoveredHand] = useState<number | null>(null);
+
     const stats = useMemo(() => {
         if (!gameState.history || gameState.history.length === 0) return [];
 
@@ -152,8 +154,11 @@ export const GameRecapModal = ({ isOpen, onClose, gameState }: GameRecapModalPro
                             </div>
 
                             {/* Score Graph */}
-                            <div className="bg-paper rounded-2xl border-2 border-brand p-6 relative h-64 pl-8">
-                                <div className="absolute top-4 right-4 flex flex-col items-end text-xs font-bold gap-1">
+                            <div
+                                className="bg-paper rounded-2xl border-2 border-brand p-6 relative h-64 pl-8"
+                                onMouseLeave={() => setHoveredHand(null)}
+                            >
+                                <div className="absolute top-4 right-4 flex flex-col items-end text-xs font-bold gap-1 z-10">
                                     <div className="flex items-center gap-2 text-brand-dark">
                                         {gameState.teamNames.team1} <div className="w-8 h-1 bg-brand-dark rounded-full"></div>
                                     </div>
@@ -163,6 +168,25 @@ export const GameRecapModal = ({ isOpen, onClose, gameState }: GameRecapModalPro
                                 </div>
 
                                 <div className="absolute bottom-1 w-full text-center text-xs font-black text-brand tracking-widest pl-8 pointer-events-none">HAND</div>
+
+                                {/* Tooltip */}
+                                {hoveredHand !== null && chartData[hoveredHand] && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 5 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        className="absolute top-2 z-20 bg-paper/90 backdrop-blur border-2 border-ink shadow-lg rounded-xl p-3 text-xs font-black pointer-events-none"
+                                        style={{
+                                            left: `${(getX(hoveredHand) / width) * 100}%`,
+                                            transform: 'translateX(-50%)'
+                                        }}
+                                    >
+                                        <div className="text-brand-dim uppercase tracking-widest mb-1 text-[10px]">Hand {chartData[hoveredHand].hand}</div>
+                                        <div className="flex flex-col gap-0.5 whitespace-nowrap">
+                                            <div className="text-brand-dark">{gameState.teamNames.team1}: {chartData[hoveredHand].t1}</div>
+                                            <div className="text-red-500">{gameState.teamNames.team2}: {chartData[hoveredHand].t2}</div>
+                                        </div>
+                                    </motion.div>
+                                )}
 
                                 <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full overflow-visible">
                                     {/* Score Label on Y Axis */}
@@ -197,11 +221,26 @@ export const GameRecapModal = ({ isOpen, onClose, gameState }: GameRecapModalPro
                                     <path d={t1Path} fill="none" stroke="currentColor" className="text-brand-dark" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
                                     <path d={t2Path} fill="none" stroke="currentColor" className="text-red-500" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
 
-                                    {/* Dots */}
+                                    {/* Dots with Hit Area */}
                                     {chartData.map((d, i) => (
-                                        <g key={i}>
-                                            <circle cx={getX(i)} cy={getY(d.t1)} r="1" className="fill-brand-dark" />
-                                            <circle cx={getX(i)} cy={getY(d.t2)} r="1" className="fill-red-500" />
+                                        <g key={i} onMouseEnter={() => setHoveredHand(i)} className="cursor-crosshair group">
+                                            {/* Invisible Heat Target */}
+                                            <rect
+                                                x={getX(i) - 2}
+                                                y={padding}
+                                                width="4"
+                                                height={height - 2 * padding}
+                                                fill="transparent"
+                                            />
+                                            {/* Guide Line on Hover */}
+                                            {hoveredHand === i && (
+                                                <line
+                                                    x1={getX(i)} y1={padding} x2={getX(i)} y2={height - padding}
+                                                    stroke="currentColor" strokeWidth="0.2" className="text-ink-dim" strokeDasharray="1 1"
+                                                />
+                                            )}
+                                            <circle cx={getX(i)} cy={getY(d.t1)} r="1" className="fill-brand-dark group-hover:r-[1.5] transition-all" />
+                                            <circle cx={getX(i)} cy={getY(d.t2)} r="1" className="fill-red-500 group-hover:r-[1.5] transition-all" />
                                         </g>
                                     ))}
                                 </svg>
