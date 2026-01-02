@@ -174,24 +174,25 @@ export const GameRecapModal = ({ isOpen, onClose, gameState }: GameRecapModalPro
                                     <motion.div
                                         initial={{ opacity: 0, scale: 0.9 }}
                                         animate={{ opacity: 1, scale: 1 }}
-                                        className="absolute z-20 bg-slate-900/95 text-white border border-slate-700 shadow-xl rounded-lg p-3 text-xs font-bold pointer-events-none whitespace-nowrap"
+                                        className="absolute z-20 bg-paper border-2 border-ink shadow-sketch-ink rounded-xl p-3 text-xs font-bold pointer-events-none whitespace-nowrap min-w-[140px]"
                                         style={{
                                             left: `${(getX(hoveredHand) / width) * 100}%`,
                                             top: `${(getY(Math.max(chartData[hoveredHand].t1, chartData[hoveredHand].t2)) / height) * 100}%`,
-                                            transform: `translate(${getX(hoveredHand) > 50 ? '-100%' : '0%'}, -100%)`,
-                                            marginLeft: getX(hoveredHand) > 50 ? '-12px' : '12px',
-                                            marginTop: '-12px'
+                                            transform: `translate(${getX(hoveredHand) > 50 ? '-100%' : '0%'}, -50%)`,
+                                            marginLeft: getX(hoveredHand) > 50 ? '-16px' : '16px',
                                         }}
                                     >
-                                        <div className="text-slate-400 uppercase tracking-widest mb-1 text-[10px] font-black">Hand {chartData[hoveredHand].hand}</div>
-                                        <div className="flex flex-col gap-1">
+                                        <div className="text-brand-dim uppercase tracking-widest mb-2 text-[10px] font-black border-b-2 border-brand/10 pb-1">
+                                            Hand {chartData[hoveredHand].hand}
+                                        </div>
+                                        <div className="flex flex-col gap-1.5">
                                             <div className="flex items-center justify-between gap-4">
-                                                <span className="text-brand">{gameState.teamNames.team1}</span>
-                                                <span className="font-mono">{chartData[hoveredHand].t1}</span>
+                                                <span className="text-brand-dark font-black">{gameState.teamNames.team1}</span>
+                                                <span className="font-hand text-xl leading-none text-ink">{chartData[hoveredHand].t1}</span>
                                             </div>
                                             <div className="flex items-center justify-between gap-4">
-                                                <span className="text-red-400">{gameState.teamNames.team2}</span>
-                                                <span className="font-mono">{chartData[hoveredHand].t2}</span>
+                                                <span className="text-red-500 font-black">{gameState.teamNames.team2}</span>
+                                                <span className="font-hand text-xl leading-none text-ink">{chartData[hoveredHand].t2}</span>
                                             </div>
                                         </div>
                                     </motion.div>
