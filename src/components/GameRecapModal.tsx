@@ -1,7 +1,7 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Trophy, ThumbsDown } from 'lucide-react';
-import { GameState, HandResult, Player } from '../types/game';
+import { X, Trophy } from 'lucide-react';
+import { GameState } from '../types/game';
 
 interface GameRecapModalProps {
     isOpen: boolean;
