@@ -14,6 +14,14 @@ const getCardJitter = (id: string) => {
     return (Math.abs(hash) % 14) - 7; // -7 to 7 degrees
 };
 
+const getPositionJitter = (id: string) => {
+    let hash = 0;
+    for (let i = 0; i < id.length; i++) hash = (hash << 5) - hash + id.charCodeAt(i);
+    const jX = (Math.abs(hash) % 20) - 10; // -10 to 10px
+    const jY = (Math.abs(hash >> 1) % 20) - 10; // -10 to 10px
+    return { x: jX, y: jY };
+};
+
 const PlayerSeat = ({
     index,
     position,
@@ -1390,7 +1398,7 @@ const LandingPage = () => {
             {/* Footer Version */}
             <div className="mt-auto pt-8 text-center w-full">
                 <div className="text-[10px] font-black text-slate-300 uppercase tracking-[0.5em]">
-                    Euchre Engine V0.90
+                    Euchre Engine V1.30
                 </div>
             </div>
 
@@ -1589,7 +1597,7 @@ const GameView = () => {
                             });
                         })()}
 
-                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20 pb-32">
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
                             <AnimatePresence>
                                 {state.currentTrick.map((t) => {
                                     const pIdx = state.players.findIndex(p => p.id === t.playerId);
@@ -1604,13 +1612,14 @@ const GameView = () => {
                                         { x: 50, r: -90 }, // Right
                                     ];
                                     const { x = 0, y = 0, r = 0 } = offsets[relativePos] || {};
+                                    const jitter = getPositionJitter(t.card.id);
 
                                     return (
                                         <motion.div
                                             key={t.card.id}
                                             layoutId={t.card.id}
                                             initial={{ scale: 0.5, opacity: 0 }}
-                                            animate={{ scale: 1, opacity: 1, x, y, rotate: r + getCardJitter(t.card.id) }}
+                                            animate={{ scale: 1, opacity: 1, x: x + jitter.x, y: y + jitter.y, rotate: r + getCardJitter(t.card.id) }}
                                             exit={{ scale: 0, opacity: 0 }}
                                             className="absolute"
                                         >
