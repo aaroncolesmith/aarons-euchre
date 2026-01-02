@@ -90,7 +90,6 @@ export const GameRecapModal = ({ isOpen, onClose, gameState }: GameRecapModalPro
     const width = 100;
     const height = 50;
     const padding = 5;
-    // UPDATED: Add + 1 to yMax for headroom
     const yMax = Math.max(10, ...chartData.map(d => Math.max(d.t1, d.t2))) + 1;
     const xMax = chartData.length > 1 ? chartData.length - 1 : 1;
 
@@ -170,27 +169,29 @@ export const GameRecapModal = ({ isOpen, onClose, gameState }: GameRecapModalPro
 
                                 <div className="absolute bottom-1 w-full text-center text-xs font-black text-brand tracking-widest pl-8 pointer-events-none">HAND</div>
 
-                                {/* Tooltip - UPDATED positioning */}
+                                {/* Tooltip */}
                                 {hoveredHand !== null && chartData[hoveredHand] && (
                                     <motion.div
                                         initial={{ opacity: 0, scale: 0.9 }}
                                         animate={{ opacity: 1, scale: 1 }}
-                                        className="absolute z-20 bg-paper/95 backdrop-blur border-2 border-ink shadow-lg rounded-xl p-3 text-xs font-black pointer-events-none min-w-[120px]"
+                                        className="absolute z-20 bg-slate-900/95 text-white border border-slate-700 shadow-xl rounded-lg p-3 text-xs font-bold pointer-events-none whitespace-nowrap"
                                         style={{
                                             left: `${(getX(hoveredHand) / width) * 100}%`,
                                             top: `${(getY(Math.max(chartData[hoveredHand].t1, chartData[hoveredHand].t2)) / height) * 100}%`,
-                                            transform: `translate(${hoveredHand > (chartData.length / 2) ? '-105%' : '5%'}, -50%)`
+                                            transform: `translate(${getX(hoveredHand) > 50 ? '-100%' : '0%'}, -100%)`,
+                                            marginLeft: getX(hoveredHand) > 50 ? '-12px' : '12px',
+                                            marginTop: '-12px'
                                         }}
                                     >
-                                        <div className="text-brand-dim uppercase tracking-widest mb-1 text-[10px]">Hand {chartData[hoveredHand].hand}</div>
-                                        <div className="flex flex-col gap-0.5 whitespace-nowrap">
-                                            <div className="text-brand-dark flex justify-between gap-3">
-                                                <span>{gameState.teamNames.team1}:</span>
-                                                <span>{chartData[hoveredHand].t1}</span>
+                                        <div className="text-slate-400 uppercase tracking-widest mb-1 text-[10px] font-black">Hand {chartData[hoveredHand].hand}</div>
+                                        <div className="flex flex-col gap-1">
+                                            <div className="flex items-center justify-between gap-4">
+                                                <span className="text-brand">{gameState.teamNames.team1}</span>
+                                                <span className="font-mono">{chartData[hoveredHand].t1}</span>
                                             </div>
-                                            <div className="text-red-500 flex justify-between gap-3">
-                                                <span>{gameState.teamNames.team2}:</span>
-                                                <span>{chartData[hoveredHand].t2}</span>
+                                            <div className="flex items-center justify-between gap-4">
+                                                <span className="text-red-400">{gameState.teamNames.team2}</span>
+                                                <span className="font-mono">{chartData[hoveredHand].t2}</span>
                                             </div>
                                         </div>
                                     </motion.div>
