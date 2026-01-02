@@ -27,6 +27,7 @@ export default {
             },
             boxShadow: {
                 'sketch-ink': '4px 4px 0px 0px rgb(var(--color-ink))',
+                'sketch-ink-lg': '6px 6px 0px 0px rgb(var(--color-ink))',
                 'sketch-brand': '4px 4px 0px 0px rgb(var(--color-brand) / 0.2)',
                 'sketch-brand-strong': '6px 6px 0px 0px rgb(var(--color-brand))',
             }

@@ -1268,13 +1268,13 @@ const LandingPage = () => {
                     <div className="flex flex-col gap-6 mt-8 mb-16">
                         <button
                             onClick={() => dispatch({ type: 'CREATE_TABLE', payload: { userName: state.currentUser! } })}
-                            className="bg-paper text-ink font-black py-5 rounded-2xl text-xl border-4 border-ink shadow-sketch-ink hover:translate-y-px hover:shadow-sketch-ink active:shadow-none active:translate-x-[4px] active:translate-y-[4px] transition-all uppercase tracking-[0.2em]"
+                            className="bg-paper text-ink font-black py-5 rounded-2xl text-xl border-4 border-ink shadow-sketch-ink-lg hover:translate-y-px hover:shadow-sketch-ink-lg active:shadow-none active:translate-x-[4px] active:translate-y-[4px] transition-all uppercase tracking-[0.2em]"
                         >
                             CREATE GAME
                         </button>
                         <button
                             onClick={() => setShowJoin(true)}
-                            className="bg-brand-dim text-ink font-black py-5 rounded-2xl text-xl border-4 border-slate-900 shadow-sketch-ink hover:translate-y-px hover:shadow-sketch-ink active:shadow-none active:translate-x-[4px] active:translate-y-[4px] transition-all uppercase tracking-[0.2em]"
+                            className="bg-brand-dim text-ink font-black py-5 rounded-2xl text-xl border-4 border-ink shadow-sketch-ink-lg hover:translate-y-px hover:shadow-sketch-ink-lg active:shadow-none active:translate-x-[4px] active:translate-y-[4px] transition-all uppercase tracking-[0.2em]"
                         >
                             JOIN TABLE
                         </button>
