@@ -1398,7 +1398,7 @@ const LandingPage = () => {
             {/* Footer Version */}
             <div className="mt-auto pt-8 text-center w-full">
                 <div className="text-[10px] font-black text-ink-dim/50 uppercase tracking-[0.5em]">
-                    Euchre Engine V1.30
+                    Euchre Engine V1.31
                 </div>
             </div>
 
@@ -1433,12 +1433,12 @@ const GameView = () => {
                 <motion.div
                     initial={{ scale: 0, rotate: -10 }}
                     animate={{ scale: 1, rotate: 0 }}
-                    className="w-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-10 md:p-16 rounded-[3rem] border-4 border-brand shadow-[0_0_80px_rgba(16,185,129,0.5)] relative overflow-hidden"
+                    className="w-full bg-paper p-10 md:p-16 rounded-[3rem] border-4 border-brand shadow-sketch-brand-strong relative overflow-hidden"
                 >
-                    <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent pointer-events-none" />
+                    <div className="absolute inset-0 bg-brand/5 pointer-events-none" />
 
                     <div className="relative z-10 space-y-8">
-                        <h1 className="text-6xl md:text-7xl font-black bg-gradient-to-r from-emerald-400 via-cyan-400 to-blue-500 bg-clip-text text-transparent text-center leading-none">
+                        <h1 className="text-6xl md:text-7xl font-black text-brand-dark text-center leading-none">
                             GAME OVER!
                         </h1>
 
@@ -1451,17 +1451,17 @@ const GameView = () => {
                             </div>
                         </div>
 
-                        <div className="bg-ink/50 rounded-2xl p-6 border border-slate-700">
+                        <div className="bg-paper-dim rounded-2xl p-6 border-2 border-brand/20">
                             <div className="grid grid-cols-2 gap-4 text-center">
                                 <div>
                                     <div className="text-sm text-ink-dim font-black uppercase tracking-wider mb-2">{state.teamNames.team1}</div>
-                                    <div className={`text-5xl font-black ${state.scores.team1 >= 10 ? 'text-brand-dim' : 'text-slate-600'}`}>
+                                    <div className={`text-5xl font-black ${state.scores.team1 >= 10 ? 'text-brand' : 'text-ink-dim'}`}>
                                         {state.scores.team1}
                                     </div>
                                 </div>
                                 <div>
                                     <div className="text-sm text-ink-dim font-black uppercase tracking-wider mb-2">{state.teamNames.team2}</div>
-                                    <div className={`text-5xl font-black ${state.scores.team2 >= 10 ? 'text-brand-dim' : 'text-slate-600'}`}>
+                                    <div className={`text-5xl font-black ${state.scores.team2 >= 10 ? 'text-brand' : 'text-ink-dim'}`}>
                                         {state.scores.team2}
                                     </div>
                                 </div>
