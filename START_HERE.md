@@ -36,7 +36,14 @@
 
 ### Target Users
 - **Humans:** Aaron, Polina, Gray-Gray, Mimi, Micah, Cherrie
+- **Testing:** TEST (use for automated testing only)
 - **Bots:** Fizz, J-Bock, Huber, Moses, Wooden, Buff
+
+### ⚠️ **CRITICAL TESTING RULE**
+**Always use the `TEST` user for automated testing, browser automation, and validation scripts.**
+- ✅ **DO:** Login as `TEST` for Playwright tests, browser subagent tests, and development testing
+- ❌ **DON'T:** Use `Aaron` or other real users for testing - this pollutes their game history and stats
+- **Purpose:** Keeps production user data clean and separates test data from real gameplay
 
 ---
 

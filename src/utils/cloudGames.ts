@@ -9,6 +9,7 @@ export async function fetchUserCloudGames(currentUser: string): Promise<GameStat
         const { data, error } = await supabase
             .from('games')
             .select('state, updated_at')
+            .is('deleted_at', null) // EXCLUDE soft-deleted games
             .order('updated_at', { ascending: false })
             .limit(100); // Only look at last 100 games to avoid massive payload
 

@@ -138,7 +138,12 @@ const PlayerSeat = ({
                 )}
 
                 {/* Player Name */}
-                <div className={`font-hand font-black text-xl uppercase tracking-tight whitespace-nowrap px-2 transition-all duration-300 ${isCurrentTurn || isAnimatingDealer ? 'text-brand scale-110' : 'text-ink-dim'}`}>
+                <div className={`
+                    font-hand font-black text-xl uppercase tracking-tight whitespace-nowrap px-4 py-2 rounded-xl transition-all duration-300
+                    ${isCurrentTurn || isAnimatingDealer
+                        ? 'text-brand bg-brand/10 border-4 border-brand shadow-[4px_4px_0px_0px_rgba(16,185,129,0.5)] scale-110'
+                        : 'text-ink-dim border-2 border-transparent'}
+                `}>
                     {player.name}
                 </div>
 
@@ -1101,7 +1106,7 @@ const LoginPage = () => {
     const [name, setName] = useState('');
     const [error, setError] = useState('');
 
-    const ALLOWED_USERS = ['Aaron', 'Polina', 'Gray-Gray', 'Mimi', 'Micah', 'Cherrie', 'Peter-Playwright'];
+    const ALLOWED_USERS = ['Aaron', 'Polina', 'Gray-Gray', 'Mimi', 'Micah', 'Cherrie', 'Peter-Playwright', 'TEST'];
 
     const handleLogin = (e: React.FormEvent) => {
         e.preventDefault();
@@ -1116,16 +1121,14 @@ const LoginPage = () => {
     };
 
     return (
-        <div className="flex flex-col items-center justify-center h-full w-full max-w-lg p-8 animate-in fade-in zoom-in duration-700">
-            <h1 className="text-6xl font-black text-ink italic leading-none mb-12 tracking-widest uppercase transform -rotate-2">
+        <div className="flex flex-col items-center justify-center h-full w-full max-w-lg mx-auto p-8 animate-in fade-in zoom-in duration-700">
+            <h1 className="text-7xl font-black text-ink italic leading-none mb-16 tracking-widest uppercase transform -rotate-2">
                 EUCHRE
-                <span className="block text-xl text-brand font-bold tracking-normal not-italic mt-2">Engine V1.20</span>
             </h1>
 
             <div className="w-full bg-paper p-10 rounded-[2rem] border-2 border-ink shadow-sketch-ink transform rotate-1">
                 <form onSubmit={handleLogin} className="space-y-6">
                     <div className="space-y-2">
-                        <label className="text-[12px] font-black text-ink-dim uppercase tracking-widest ml-4">Authorized Personnel Only</label>
                         <input
                             autoFocus
                             value={name}
@@ -1143,7 +1146,6 @@ const LoginPage = () => {
                     </button>
                 </form>
             </div>
-            <p className="mt-12 text-slate-600 text-[10px] font-black uppercase tracking-widest">Property of the euchre collective</p>
         </div>
     );
 };

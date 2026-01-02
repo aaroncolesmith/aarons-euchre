@@ -129,9 +129,9 @@ const saveActiveGame = (state: GameState) => {
 
 export const deleteActiveGame = async (tableCode: string) => {
     if (!tableCode) return;
-    console.log(`[DELETE] Attempting to delete game with code: ${tableCode}`);
+    console.log(`[DELETE] Attempting to soft-delete game with code: ${tableCode}`);
 
-    // Delete from localStorage
+    // Delete from localStorage (only, not cloud)
     const games = getSavedGames();
     if (games[tableCode]) {
         delete games[tableCode];
@@ -139,22 +139,25 @@ export const deleteActiveGame = async (tableCode: string) => {
         console.log(`[DELETE] Removed from localStorage: ${tableCode}`);
     }
 
-    // Delete from Supabase (uses code/tableCode as primary key)
+    // SOFT DELETE from Supabase: Set deleted_at timestamp instead of hard delete
+    // This preserves game history for debugging and analytics
     try {
-        console.log(`[DELETE] Attempting to delete from Supabase with code: ${tableCode}`);
+        console.log(`[SOFT-DELETE] Marking game ${tableCode} as deleted in Supabase`);
         const { error, data } = await supabase
             .from('games')
-            .delete()
+            .update({
+                deleted_at: new Date().toISOString()
+            })
             .eq('code', tableCode)
             .select();
 
         if (error) {
-            console.error('[DELETE] Supabase error:', error);
+            console.error('[SOFT-DELETE] Supabase error:', error);
         } else {
-            console.log(`[DELETE] Successfully deleted from Supabase:`, data);
+            console.log(`[SOFT-DELETE] Successfully soft-deleted from Supabase:`, data);
         }
     } catch (err) {
-        console.error('[DELETE] Exception deleting from Supabase:', err);
+        console.error('[SOFT-DELETE] Exception soft-deleting from Supabase:', err);
     }
 };
 
@@ -276,19 +279,20 @@ const gameReducer = (state: GameState, action: Action): GameState => {
             const normalizedName = enteredName.toLowerCase();
 
             // Check against known users (case-insensitive)
-            const knownUsers = ['aaron', 'polina', 'gray-gray', 'mimi', 'micah', 'cherrie', 'peter-playwright'];
+            const knownUsers = ['aaron', 'polina', 'gray-gray', 'mimi', 'micah', 'cherrie', 'peter-playwright', 'test'];
             const matchedUser = knownUsers.find(u => u === normalizedName);
 
             // Use the matched capitalization if found, otherwise use what was entered
             const displayName = matchedUser
-                ? ['Aaron', 'Polina', 'Gray-Gray', 'Mimi', 'Micah', 'Cherrie', 'Peter-Playwright'][knownUsers.indexOf(matchedUser)]
+                ? ['Aaron', 'Polina', 'Gray-Gray', 'Mimi', 'Micah', 'Cherrie', 'Peter-Playwright', 'TEST'][knownUsers.indexOf(matchedUser)]
                 : enteredName;
 
             return { ...state, currentUser: displayName, phase: 'landing' };
         }
 
         case 'LOGOUT':
-            return INITIAL_STATE_FUNC();
+            localStorage.removeItem('euchre_current_user'); // Clear saved user
+            return { ...INITIAL_STATE_FUNC(), currentUser: null }; // Force null user
 
         case 'LOAD_EXISTING_GAME': {
             const loaded = action.payload.gameState;
