@@ -34,22 +34,19 @@ const PlayerSeat = ({
     const isTrumpCaller = state.trumpCallerIndex === index && state.phase !== 'lobby';
 
     const posClasses = {
-        bottom: "bottom-4 md:bottom-10 left-1/2 -translate-x-1/2",
-        top: "top-1 md:top-4 left-1/2 -translate-x-1/2",
-        left: "-left-6 md:left-12 top-1/2 -translate-y-1/2 -rotate-90 origin-center",
-        right: "-right-6 md:right-12 top-1/2 -translate-y-1/2 rotate-90 origin-center"
+        bottom: "bottom-24 md:bottom-32 left-1/2 -translate-x-1/2",
+        top: "top-24 md:top-32 left-1/2 -translate-x-1/2",
+        left: "left-6 md:left-10 top-1/2 -translate-y-1/2 -rotate-90 origin-center",
+        right: "right-6 md:right-10 top-1/2 -translate-y-1/2 rotate-90 origin-center"
     };
 
     if (!player.name && inLobby) {
         return (
             <div className={`absolute ${posClasses[position]} flex flex-col items-center gap-3 z-20 group`}>
-                <div className="w-16 h-16 rounded-3xl bg-slate-800/50 border-2 border-dashed border-slate-700 flex items-center justify-center text-slate-600 transition-all group-hover:border-emerald-500/50 group-hover:bg-slate-800">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" /></svg>
-                </div>
                 <div className="flex flex-col gap-2">
                     <button
                         onClick={() => dispatch({ type: 'SIT_PLAYER', payload: { seatIndex: index, name: state.currentViewPlayerName! } })}
-                        className="bg-emerald-500/10 hover:bg-emerald-500 text-emerald-400 hover:text-white px-3 py-1 md:px-4 md:py-1.5 rounded-full text-[8px] md:text-[10px] font-black uppercase tracking-widest border border-emerald-500/20 transition-all"
+                        className="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border border-emerald-200 transition-all"
                     >
                         Sit Here
                     </button>
@@ -60,13 +57,13 @@ const PlayerSeat = ({
                             const botName = availableBots[Math.floor(Math.random() * availableBots.length)] || 'Bot ' + Math.random().toString().substr(2, 3);
                             dispatch({ type: 'ADD_BOT', payload: { seatIndex: index, botName } });
                         }}
-                        className="bg-slate-800 hover:bg-slate-700 text-slate-400 px-3 py-1 md:px-4 md:py-1.5 rounded-full text-[8px] md:text-[10px] font-black uppercase tracking-widest border border-slate-700 transition-all"
+                        className="bg-white hover:bg-slate-50 text-slate-500 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border border-slate-200 transition-all"
                     >
                         Add Bot
                     </button>
                 </div>
                 {/* Seat Label (N/S/E/W) */}
-                <div className="absolute -bottom-8 text-[8px] font-black text-slate-600 uppercase tracking-widest opacity-30">
+                <div className="absolute -bottom-6 text-[8px] font-black text-emerald-200 uppercase tracking-widest">
                     {position === 'bottom' ? 'South' : position === 'left' ? 'West' : position === 'top' ? 'North' : 'East'}
                 </div>
             </div>
@@ -80,82 +77,75 @@ const PlayerSeat = ({
             className={`absolute ${posClasses[position]} flex flex-col items-center gap-1 z-0`}
         >
             <motion.div
-                className={`
-                    relative w-36 md:w-48 h-20 md:h-24 rounded-3xl border-4 transition-all duration-300 flex flex-col items-center justify-center
-                    ${isAnimatingDealer
-                        ? 'bg-slate-900/95 border-amber-500 shadow-[0_0_40px_rgba(245,158,11,1)]'
-                        : isCurrentTurn
-                            ? 'bg-slate-900/95 border-emerald-500 shadow-[0_0_30px_rgba(16,185,129,0.8)]'
-                            : 'bg-slate-900/90 border-cyan-500/50 shadow-xl'}\
-                `}
+                className={`relative w-auto h-auto flex flex-col items-center justify-center`}
             >
-                {/* Caller Badge - Top Left */}
+                {/* Caller Badge */}
                 {isTrumpCaller && (
                     <motion.div
                         initial={{ opacity: 0, scale: 0 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="absolute -top-3 -left-3 bg-cyan-500/20 backdrop-blur-sm text-cyan-300 text-[9px] font-black px-4 py-1.5 rounded-full uppercase tracking-wider border-2 border-cyan-500"
+                        className="absolute -top-7 bg-white text-cyan-600 text-[9px] font-black px-3 py-1 rounded-lg uppercase tracking-wider border-2 border-cyan-500 shadow-sm z-30 whitespace-nowrap"
                     >
                         Caller
                     </motion.div>
                 )}
 
-                {/* Dealer Badge - Top Right */}
+                {/* Dealer Badge */}
                 {isDealer && !isAnimatingDealer && (
                     <motion.div
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
-                        className="absolute -top-3 -right-3 bg-amber-500 text-white text-sm font-black w-10 h-10 rounded-full flex items-center justify-center border-4 border-slate-900 shadow-lg z-30"
+                        className="absolute -top-6 -right-5 bg-white text-amber-500 text-xs font-black w-7 h-7 rounded-full flex items-center justify-center border-2 border-amber-500 shadow-sm z-30"
                     >
                         D
                     </motion.div>
                 )}
 
-                {/* UPCARD MOVED HERE - Centered on dealer during Round 1 */}
+                {/* UPCARD centered */}
                 {isDealer && !isAnimatingDealer && state.phase === 'bidding' && state.biddingRound === 1 && state.upcard && (
                     <motion.div
                         layoutId={state.upcard.id}
                         initial={{ scale: 0, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
-                        className={`absolute ${position === 'bottom' ? 'bottom-full -mb-2' : 'top-full -mt-2'} left-1/2 -translate-x-1/2 z-20 pointer-events-none`}
+                        className={`absolute ${position === 'bottom' ? 'bottom-full mb-4' : 'top-full mt-4'} left-1/2 -translate-x-1/2 z-20 pointer-events-none`}
                     >
                         <div className="relative">
                             <CardComponent card={state.upcard} size="sm" rotation={position === 'top' ? 195 : 15} disabled />
-                            <div className="absolute -top-2 left-1/2 -translate-x-1/2 bg-white text-slate-950 text-[7px] md:text-[8px] font-black px-2 py-0.5 rounded shadow-xl border border-slate-200 whitespace-nowrap z-30">
+                            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-white text-emerald-700 text-[8px] font-black px-2 py-0.5 rounded shadow-sm border border-emerald-200 whitespace-nowrap z-30">
                                 UPCARD
                             </div>
                         </div>
                     </motion.div>
                 )}
 
-                {/* Remove Button (Lobby Only) */}
+                {/* Remove Player (Lobby) */}
                 {player.isComputer && inLobby && (
                     <button
                         onClick={() => dispatch({ type: 'REMOVE_PLAYER', payload: { seatIndex: index } })}
-                        className="absolute -top-3 -left-3 bg-red-500 text-white w-7 h-7 rounded-full flex items-center justify-center text-xs font-black border-2 border-slate-900 z-10"
+                        className="absolute -top-2 -left-4 bg-white text-red-500 w-6 h-6 rounded-full flex items-center justify-center text-xs font-black border border-red-200 hover:border-red-500 transition-all z-10 shadow-sm"
                     >
                         ✕
                     </button>
                 )}
 
                 {/* Player Name */}
-                <div className={`font-black text-xs uppercase tracking-tight ${isCurrentTurn || isAnimatingDealer ? 'text-white' : 'text-slate-200'} truncate max-w-full px-2`}>
+                <div className={`font-hand font-black text-xl uppercase tracking-tight whitespace-nowrap px-2 transition-all duration-300 ${isCurrentTurn || isAnimatingDealer ? 'text-emerald-600 scale-110' : 'text-slate-400'}`}>
                     {player.name}
                 </div>
 
-                {/* CARDS LEFT - 5 rectangles showing hand size */}
+                {/* Cards Left */}
                 {!inLobby && player.name !== state.currentViewPlayerName && state.phase !== 'randomizing_dealer' && (
-                    <div className="flex gap-1 justify-center mb-1">
+                    <div className="flex gap-1 justify-center mt-1">
                         {[0, 1, 2, 3, 4].map((i) => {
                             const hasCard = i < player.hand.length;
                             return (
                                 <div
                                     key={i}
                                     className={`
-                                        w-3 h-5 rounded-sm border transition-all
+                                        w-3 h-5 rounded-[2px] transition-all
                                         ${hasCard
-                                            ? 'bg-slate-600 border-slate-500'
-                                            : 'bg-slate-800/50 border-slate-700/50'}
+                                            ? 'bg-white border-2 border-emerald-500'
+                                            : 'bg-transparent border-2 border-emerald-100'}
                                     `}
                                 />
                             );
@@ -163,12 +153,12 @@ const PlayerSeat = ({
                     </div>
                 )}
 
-                {/* TRICKS WON - Cyan badge bottom right with number */}
+                {/* Tricks Won */}
                 {!inLobby && state.phase !== 'randomizing_dealer' && (state.tricksWon[player.id] || 0) > 0 && (
                     <motion.div
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
-                        className="absolute -bottom-3 -right-3 bg-cyan-400 text-slate-900 text-base font-black w-9 h-9 rounded-full flex items-center justify-center border-3 border-slate-900 shadow-lg"
+                        className="absolute -bottom-2 -right-6 bg-white text-emerald-600 text-sm font-black w-7 h-7 rounded-full flex items-center justify-center border-2 border-emerald-500 shadow-sm font-hand"
                     >
                         {state.tricksWon[player.id] || 0}
                     </motion.div>
@@ -247,32 +237,32 @@ const BotAuditView = ({ decisions, filterType }: { decisions: any[]; filterType?
 
     if (filteredDecisions.length === 0) {
         return (
-            <div className="bg-slate-800/30 border border-slate-800 rounded-[2rem] p-12 text-center">
-                <div className="text-slate-500 text-lg mb-2">No bot decisions logged yet</div>
-                <div className="text-slate-600 text-sm">Play against bots to see their decision-making process here</div>
+            <div className="bg-white border-2 border-emerald-500 rounded-2xl p-12 text-center shadow-[4px_4px_0px_0px_rgba(16,185,129,0.2)]">
+                <div className="text-slate-400 text-lg mb-2 font-black uppercase tracking-widest">No bot decisions logged yet</div>
+                <div className="text-emerald-600 text-sm font-bold">Play against bots to see their decision-making process here</div>
             </div>
         );
     }
 
     return (
-        <div className="bg-slate-800/30 border border-slate-800 rounded-[2rem] overflow-hidden">
+        <div className="bg-white border-2 border-emerald-500 rounded-2xl overflow-hidden shadow-[4px_4px_0px_0px_rgba(16,185,129,0.2)]">
             <div className="overflow-x-auto max-h-[50vh] overflow-y-auto custom-scrollbar">
-                <table className="w-full text-left text-xs">
-                    <thead className="bg-slate-800/50 sticky top-0 z-20">
-                        <tr className="text-[9px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-700">
-                            <th className="px-4 py-4">Time</th>
-                            <th className="px-4 py-4 whitespace-nowrap">Game ID</th>
-                            <th className="px-4 py-4">Bot</th>
-                            <th className="px-4 py-4 whitespace-nowrap">Archetype</th>
-                            <th className="px-4 py-4">Phase</th>
-                            <th className="px-4 py-4">Decision</th>
-                            <th className="px-4 py-4 whitespace-nowrap">Hand at Decision</th>
-                            <th className="px-4 py-4">Reasoning</th>
-                            <th className="px-4 py-4 text-center">Strength</th>
-                            <th className="px-4 py-4 text-center">Score</th>
+                <table className="w-full text-left text-xs font-hand">
+                    <thead className="bg-white sticky top-0 z-20">
+                        <tr className="text-[9px] font-black text-emerald-700 uppercase tracking-widest border-b-2 border-emerald-500">
+                            <th className="px-4 py-4 bg-white">Time</th>
+                            <th className="px-4 py-4 whitespace-nowrap bg-white">Game ID</th>
+                            <th className="px-4 py-4 bg-white">Bot</th>
+                            <th className="px-4 py-4 whitespace-nowrap bg-white">Archetype</th>
+                            <th className="px-4 py-4 bg-white">Phase</th>
+                            <th className="px-4 py-4 bg-white">Decision</th>
+                            <th className="px-4 py-4 whitespace-nowrap bg-white">Hand at Decision</th>
+                            <th className="px-4 py-4 bg-white">Reasoning</th>
+                            <th className="px-4 py-4 text-center bg-white">Strength</th>
+                            <th className="px-4 py-4 text-center bg-white">Score</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-800/50">
+                    <tbody className="divide-y divide-emerald-100">
                         {filteredDecisions.map((d, i) => {
                             const formatHand = (handData: any) => {
                                 if (!handData) return '-';
@@ -287,23 +277,23 @@ const BotAuditView = ({ decisions, filterType }: { decisions: any[]; filterType?
                             };
 
                             return (
-                                <tr key={`${d.id || i}`} className="hover:bg-slate-800/40 transition-colors group">
-                                    <td className="px-4 py-3 text-slate-500 text-[10px] font-medium whitespace-nowrap">
+                                <tr key={`${d.id || i}`} className="hover:bg-emerald-50 transition-colors group border-b border-emerald-50">
+                                    <td className="px-4 py-3 text-slate-400 text-[10px] font-medium whitespace-nowrap tabular-nums">
                                         {new Date(d.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
                                     </td>
-                                    <td className="px-4 py-3 text-slate-500 text-[10px] font-black tabular-nums whitespace-nowrap">{d.game_code || 'N/A'}</td>
-                                    <td className="px-4 py-3 font-black text-white whitespace-nowrap">{d.player_name}</td>
+                                    <td className="px-4 py-3 text-slate-400 text-[10px] font-black tabular-nums whitespace-nowrap">{d.game_code || 'N/A'}</td>
+                                    <td className="px-4 py-3 font-black text-emerald-900 whitespace-nowrap">{d.player_name}</td>
                                     <td className="px-4 py-3 whitespace-nowrap">
-                                        <span className="text-[9px] text-cyan-400 font-black px-2 py-0.5 bg-cyan-400/10 rounded-full border border-cyan-400/20 uppercase tracking-tight">
+                                        <span className="text-[9px] text-emerald-800 font-black px-2 py-0.5 bg-emerald-100 rounded-full border border-emerald-200 uppercase tracking-tight">
                                             {d.archetype}
                                         </span>
                                     </td>
                                     <td className="px-4 py-3 text-slate-500 uppercase text-[9px] font-black whitespace-nowrap">{d.game_phase}</td>
-                                    <td className="px-4 py-3 font-black text-emerald-400 group-hover:text-emerald-300 transition-colors whitespace-nowrap">{d.decision}</td>
-                                    <td className="px-4 py-3 text-slate-400 font-bold text-[10px] whitespace-nowrap font-mono">{formatHand(d.hand_state)}</td>
-                                    <td className="px-4 py-3 text-slate-300 min-w-[300px] max-w-md leading-relaxed text-[11px]">{d.reasoning}</td>
-                                    <td className="px-4 py-3 text-center font-black text-purple-400 tabular-nums">{d.hand_strength?.toFixed(1) || '-'}</td>
-                                    <td className="px-4 py-3 text-center text-slate-600 text-[9px] font-black tabular-nums whitespace-nowrap">
+                                    <td className="px-4 py-3 font-black text-emerald-600 group-hover:text-emerald-700 transition-colors whitespace-nowrap">{d.decision}</td>
+                                    <td className="px-4 py-3 text-slate-600 font-bold text-[10px] whitespace-nowrap font-mono">{formatHand(d.hand_state)}</td>
+                                    <td className="px-4 py-3 text-slate-700 min-w-[300px] max-w-md leading-relaxed text-[11px] font-hand">{d.reasoning}</td>
+                                    <td className="px-4 py-3 text-center font-black text-purple-600 tabular-nums">{d.hand_strength?.toFixed(1) || '-'}</td>
+                                    <td className="px-4 py-3 text-center text-slate-400 text-[9px] font-black tabular-nums whitespace-nowrap">
                                         {d.current_score_us}-{d.current_score_them}
                                     </td>
                                 </tr>
@@ -439,9 +429,9 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
 
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/10 backdrop-blur-sm animate-in fade-in duration-300 font-hand">
-            <div className="bg-white border-4 border-slate-800 w-full max-w-4xl rounded-[2rem] shadow-[12px_12px_0px_0px_rgba(30,41,59,1)] overflow-hidden animate-in zoom-in duration-300 transform rotate-1 max-h-[90vh] flex flex-col">
-                <div className="p-6 md:p-8 flex flex-col h-full bg-white">
+        <div className="fixed inset-0 z-[100] flex items-start justify-center pt-16 md:pt-24 p-4 bg-slate-900/10 backdrop-blur-sm animate-in fade-in duration-300 font-hand">
+            <div className="bg-white border-4 border-slate-800 w-full max-w-4xl rounded-[2rem] shadow-[12px_12px_0px_0px_rgba(30,41,59,1)] overflow-hidden animate-in zoom-in duration-300 transform rotate-1 max-h-[85vh] flex flex-col">
+                <div className="p-6 md:p-8 flex flex-col flex-1 min-h-0 bg-white">
                     <div className="flex justify-between items-start mb-2 shrink-0">
                         <div className="flex-1 overflow-x-auto min-w-0 mr-4 scrollbar-hide">
                             <div className="flex gap-2 flex-nowrap py-1">
@@ -640,11 +630,11 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                                 );
 
                                 return (
-                                    <div className="bg-slate-800/30 border border-slate-800 rounded-[2rem] overflow-hidden">
+                                    <div className="bg-white border-2 border-emerald-500 rounded-2xl overflow-hidden shadow-[4px_4px_0px_0px_rgba(16,185,129,0.2)]">
                                         <div className="overflow-x-auto">
-                                            <table className="w-full text-left text-sm">
+                                            <table className="w-full text-left text-sm font-hand">
                                                 <thead>
-                                                    <tr className="bg-slate-800/50 text-[9px] font-black text-slate-500 uppercase tracking-[0.15em]">
+                                                    <tr className="bg-white border-b-2 border-emerald-500 text-[10px] font-black text-emerald-700 uppercase tracking-widest">
                                                         <SortableHeader column="name">Player</SortableHeader>
                                                         <SortableHeader column="gp">GP</SortableHeader>
                                                         <SortableHeader column="wins">Wins</SortableHeader>
@@ -658,7 +648,7 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                                                         <SortableHeader column="lonersCalled">Loners Called</SortableHeader>
                                                     </tr>
                                                 </thead>
-                                                <tbody className="divide-y divide-slate-800">
+                                                <tbody className="divide-y divide-emerald-100">
                                                     {sortedPlayers.map((p: any, i: number) => {
                                                         const totalPossibleTricks = p.handsPlayed * 5;
                                                         const tricksPercent = totalPossibleTricks > 0
@@ -666,25 +656,25 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                                                             : 0;
 
                                                         return (
-                                                            <tr key={i} className={`group hover:bg-slate-800/50 transition-colors ${p.name === human.name ? 'bg-emerald-500/5' : ''}`}>
-                                                                <td className="px-4 py-3 font-bold text-white whitespace-nowrap">
+                                                            <tr key={i} className={`group hover:bg-emerald-50 transition-colors ${p.name === human.name ? 'bg-emerald-50' : ''}`}>
+                                                                <td className="px-4 py-3 font-bold text-emerald-900 whitespace-nowrap">
                                                                     {p.name}
-                                                                    {p.name === human.name && <span className="ml-2 bg-emerald-500 text-[8px] px-2 py-0.5 rounded-full">YOU</span>}
+                                                                    {p.name === human.name && <span className="ml-2 bg-emerald-500 text-white text-[8px] px-2 py-0.5 rounded-full">YOU</span>}
                                                                 </td>
-                                                                <td className="px-4 py-3 text-slate-400 font-bold tabular-nums">{p.gamesPlayed}</td>
-                                                                <td className="px-4 py-3 text-emerald-400 font-bold tabular-nums">{p.gamesWon}</td>
-                                                                <td className="px-4 py-3 text-red-400 font-bold tabular-nums">{p.gamesPlayed - p.gamesWon}</td>
-                                                                <td className="px-4 py-3 text-emerald-400 font-black tabular-nums">
+                                                                <td className="px-4 py-3 text-slate-700 font-bold tabular-nums font-hand text-lg">{p.gamesPlayed}</td>
+                                                                <td className="px-4 py-3 text-emerald-600 font-bold tabular-nums font-hand text-lg">{p.gamesWon}</td>
+                                                                <td className="px-4 py-3 text-red-500 font-bold tabular-nums font-hand text-lg">{p.gamesPlayed - p.gamesWon}</td>
+                                                                <td className="px-4 py-3 text-emerald-600 font-black tabular-nums font-hand text-lg">
                                                                     {p.gamesPlayed > 0 ? Math.round((p.gamesWon / p.gamesPlayed) * 100) : 0}%
                                                                 </td>
-                                                                <td className="px-4 py-3 text-cyan-400 font-black tabular-nums">
+                                                                <td className="px-4 py-3 text-cyan-600 font-black tabular-nums font-hand text-lg">
                                                                     {p.handsPlayed > 0 ? Math.round((p.handsWon / p.handsPlayed) * 100) : 0}%
                                                                 </td>
-                                                                <td className="px-4 py-3 text-purple-400 font-bold tabular-nums">{p.tricksTaken}</td>
-                                                                <td className="px-4 py-3 text-purple-300 font-bold tabular-nums">{tricksPercent}%</td>
-                                                                <td className="px-4 py-3 text-red-400 font-bold tabular-nums">{p.euchresMade}</td>
-                                                                <td className="px-4 py-3 text-yellow-400 font-bold tabular-nums">{p.lonersConverted}</td>
-                                                                <td className="px-4 py-3 text-orange-400 font-bold tabular-nums">{p.lonersAttempted}</td>
+                                                                <td className="px-4 py-3 text-purple-600 font-bold tabular-nums font-hand text-lg">{p.tricksTaken}</td>
+                                                                <td className="px-4 py-3 text-purple-600 font-bold tabular-nums font-hand text-lg">{tricksPercent}%</td>
+                                                                <td className="px-4 py-3 text-red-500 font-bold tabular-nums font-hand text-lg">{p.euchresMade}</td>
+                                                                <td className="px-4 py-3 text-yellow-600 font-bold tabular-nums font-hand text-lg">{p.lonersConverted}</td>
+                                                                <td className="px-4 py-3 text-orange-500 font-bold tabular-nums font-hand text-lg">{p.lonersAttempted}</td>
                                                             </tr>
                                                         );
                                                     })}
@@ -696,7 +686,7 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                             })()}
                         </div>
                     ) : tab === 'freeze_incidents' ? (
-                        <div className="space-y-6">
+                        <div className="space-y-6 flex-1 overflow-y-auto min-h-0 custom-scrollbar pr-2 pb-6">
                             {/* Freeze Rate Card */}
                             {freezeRate && (
                                 <div className="bg-gradient-to-br from-red-900/20 to-orange-900/20 border border-red-800/50 rounded-[2rem] p-6">
@@ -744,61 +734,61 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                                 </div>
 
                                 {!freezeStats ? (
-                                    <div className="bg-slate-800/30 border border-slate-800 rounded-[2rem] p-12 text-center">
-                                        <div className="text-slate-500">Loading freeze data...</div>
+                                    <div className="bg-white border-2 border-emerald-500 rounded-[2rem] p-12 text-center shadow-[4px_4px_0px_0px_rgba(16,185,129,0.2)]">
+                                        <div className="text-slate-400 font-medium">Loading freeze data...</div>
                                     </div>
                                 ) : freezeStats.length === 0 ? (
-                                    <div className="bg-slate-800/30 border border-slate-800 rounded-[2rem] p-12 text-center">
-                                        <div className="text-emerald-500 text-lg mb-2">🎉 No Freeze Incidents!</div>
-                                        <div className="text-slate-600 text-sm">All games running smoothly</div>
+                                    <div className="bg-white border-2 border-emerald-500 rounded-[2rem] p-12 text-center shadow-[4px_4px_0px_0px_rgba(16,185,129,0.2)]">
+                                        <div className="text-emerald-500 text-lg mb-2 font-black">🎉 No Freeze Incidents!</div>
+                                        <div className="text-slate-500 text-sm font-medium">All games running smoothly</div>
                                     </div>
                                 ) : (
-                                    <div className="bg-slate-800/30 border border-slate-800 rounded-[2rem] overflow-hidden">
-                                        <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
-                                            <table className="w-full text-left text-xs">
-                                                <thead className="bg-slate-800/50 sticky top-0">
-                                                    <tr className="text-[9px] font-black text-slate-500 uppercase">
-                                                        <th className="px-4 py-3">Time</th>
-                                                        <th className="px-4 py-3">Game</th>
-                                                        <th className="px-4 py-3">Type</th>
-                                                        <th className="px-4 py-3">Phase</th>
-                                                        <th className="px-4 py-3">Player</th>
-                                                        <th className="px-4 py-3">Duration</th>
-                                                        <th className="px-4 py-3">Recovery</th>
-                                                        <th className="px-4 py-3">Version</th>
+                                    <div className="bg-white border-2 border-emerald-500 rounded-[2rem] overflow-hidden shadow-[4px_4px_0px_0px_rgba(16,185,129,0.2)]">
+                                        <div className="overflow-x-auto max-h-[400px] overflow-y-auto custom-scrollbar">
+                                            <table className="w-full text-left text-xs font-hand">
+                                                <thead className="bg-white sticky top-0 z-20">
+                                                    <tr className="text-[9px] font-black text-emerald-700 uppercase tracking-widest border-b-2 border-emerald-500">
+                                                        <th className="px-4 py-4 bg-white">Time</th>
+                                                        <th className="px-4 py-4 bg-white">Game</th>
+                                                        <th className="px-4 py-4 bg-white">Type</th>
+                                                        <th className="px-4 py-4 bg-white">Phase</th>
+                                                        <th className="px-4 py-4 bg-white">Player</th>
+                                                        <th className="px-4 py-4 bg-white">Duration</th>
+                                                        <th className="px-4 py-4 bg-white">Recovery</th>
+                                                        <th className="px-4 py-4 bg-white">Version</th>
                                                     </tr>
                                                 </thead>
-                                                <tbody className="divide-y divide-slate-800">
+                                                <tbody className="divide-y divide-emerald-100">
                                                     {freezeStats.map((incident: any) => (
-                                                        <tr key={incident.id} className="hover:bg-slate-800/30 transition-colors">
-                                                            <td className="px-4 py-3 text-slate-400 text-[10px]">
+                                                        <tr key={incident.id} className="hover:bg-emerald-50 transition-colors group">
+                                                            <td className="px-4 py-3 text-slate-400 font-medium text-[10px] whitespace-nowrap tabular-nums">
                                                                 {new Date(incident.created_at).toLocaleString()}
                                                             </td>
-                                                            <td className="px-4 py-3 font-mono text-cyan-400 font-bold">
+                                                            <td className="px-4 py-3 font-black text-emerald-600 font-mono">
                                                                 {incident.game_code}
                                                             </td>
                                                             <td className="px-4 py-3">
-                                                                <span className="px-2 py-1 rounded text-[9px] font-black bg-red-500/20 text-red-400">
+                                                                <span className="px-2 py-0.5 rounded-full text-[9px] font-black bg-red-50 text-red-500 border border-red-200 uppercase tracking-tight">
                                                                     {incident.freeze_type}
                                                                 </span>
                                                             </td>
-                                                            <td className="px-4 py-3 text-purple-400">{incident.phase}</td>
+                                                            <td className="px-4 py-3 text-emerald-500 font-bold uppercase text-[9px] tracking-wider">{incident.phase}</td>
                                                             <td className="px-4 py-3">
-                                                                <div className="text-white font-bold">{incident.current_player_name || 'Unknown'}</div>
-                                                                <div className="text-[9px] text-slate-500">
+                                                                <div className="text-emerald-900 font-black">{incident.current_player_name || 'Unknown'}</div>
+                                                                <div className="text-[9px] text-emerald-400 font-bold">
                                                                     {incident.is_bot ? '🤖 Bot' : '👤 Human'}
                                                                 </div>
                                                             </td>
-                                                            <td className="px-4 py-3 text-yellow-400 font-bold">
+                                                            <td className="px-4 py-3 text-purple-600 font-black tabular-nums">
                                                                 {(incident.time_since_active_ms / 1000).toFixed(0)}s
                                                             </td>
                                                             <td className="px-4 py-3">
                                                                 {incident.recovered ? (
-                                                                    <span className="px-2 py-1 rounded text-[9px] font-black bg-emerald-500/20 text-emerald-400">
+                                                                    <span className="text-[9px] font-black text-emerald-600 flex items-center gap-1">
                                                                         ✓ Recovered
                                                                     </span>
                                                                 ) : (
-                                                                    <span className="px-2 py-1 rounded text-[9px] font-black bg-red-500/20 text-red-400">
+                                                                    <span className="text-[9px] font-black text-red-500 flex items-center gap-1">
                                                                         ✗ Failed
                                                                     </span>
                                                                 )}
@@ -816,11 +806,11 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                             </div>
                         </div>
                     ) : tab === 'state_management' ? (
-                        <div className="space-y-6">
+                        <div className="space-y-6 flex-1 overflow-y-auto min-h-0 custom-scrollbar pr-2 pb-6">
                             {/* Stats Wipe (Aaron only) */}
                             {state.currentUser === 'Aaron' && (
-                                <div className="flex justify-between items-center bg-red-950/20 border border-red-900/40 p-4 rounded-3xl">
-                                    <div className="text-red-400 text-sm font-bold">
+                                <div className="flex justify-between items-center bg-white border-2 border-red-500 p-4 rounded-2xl shadow-[4px_4px_0px_0px_rgba(239,68,68,0.2)]">
+                                    <div className="text-red-500 text-sm font-black uppercase tracking-widest">
                                         ⚠️ DANGER ZONE - Stats Management
                                     </div>
                                     <button
@@ -836,7 +826,7 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                                                 }
                                             }
                                         }}
-                                        className="px-6 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-[10px] font-black uppercase tracking-widest shadow-xl transition-all active:scale-95"
+                                        className="px-6 py-2 rounded-xl bg-red-500 hover:bg-red-600 text-white text-[10px] font-black uppercase tracking-widest shadow-[2px_2px_0px_0px_rgba(153,27,27,1)] transition-all active:translate-y-[2px] active:shadow-none border-2 border-red-700"
                                     >
                                         🗑️ Wipe All Stats
                                     </button>
@@ -846,7 +836,7 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                             {/* localStorage Management */}
                             <div>
                                 <div className="flex justify-between items-center mb-4">
-                                    <div className="text-xs font-black text-slate-400 uppercase tracking-widest">
+                                    <div className="text-xs font-black text-emerald-700 uppercase tracking-widest border-b-2 border-emerald-500 pb-1">
                                         localStorage Management
                                     </div>
                                 </div>
@@ -865,30 +855,30 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                                     return (
                                         <div className="space-y-4">
                                             {/* Summary Card */}
-                                            <div className="bg-blue-950/20 border border-blue-900/40 rounded-[2rem] p-6">
+                                            <div className="bg-white border-2 border-emerald-500 rounded-2xl p-6 shadow-[4px_4px_0px_0px_rgba(16,185,129,0.2)]">
                                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                                     <div>
-                                                        <div className="text-2xl font-black text-white">{gamesArray.length}</div>
-                                                        <div className="text-xs text-slate-400">Total in localStorage</div>
+                                                        <div className="text-3xl font-black text-slate-700 font-hand">{gamesArray.length}</div>
+                                                        <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">Total stored</div>
                                                     </div>
                                                     <div>
-                                                        <div className="text-2xl font-black text-emerald-400">{aaronGames.length}</div>
-                                                        <div className="text-xs text-slate-400">Your Games</div>
+                                                        <div className="text-3xl font-black text-emerald-600 font-hand">{aaronGames.length}</div>
+                                                        <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">Your Games</div>
                                                     </div>
                                                     <div>
-                                                        <div className="text-2xl font-black text-cyan-400">{inProgress.length}</div>
-                                                        <div className="text-xs text-slate-400">In Progress (Local)</div>
+                                                        <div className="text-3xl font-black text-cyan-500 font-hand">{inProgress.length}</div>
+                                                        <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">In Progress</div>
                                                     </div>
                                                     <div>
-                                                        <div className="text-2xl font-black text-purple-400">{completed.length}</div>
-                                                        <div className="text-xs text-slate-400">Completed (Local)</div>
+                                                        <div className="text-3xl font-black text-purple-500 font-hand">{completed.length}</div>
+                                                        <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">Completed</div>
                                                     </div>
                                                 </div>
-                                                <div className="mt-4 pt-4 border-t border-blue-800/30">
-                                                    <div className="text-sm text-slate-300">
-                                                        <span className="font-bold text-yellow-400">Cloud Games:</span> {cloudGames.length} (source of truth)
+                                                <div className="mt-4 pt-4 border-t border-emerald-100">
+                                                    <div className="text-sm text-slate-600 font-hand">
+                                                        <span className="font-bold text-emerald-600">Cloud Games:</span> {cloudGames.length} (source of truth)
                                                     </div>
-                                                    <div className="text-xs text-slate-500 mt-2">
+                                                    <div className="text-xs text-slate-400 mt-2 font-bold">
                                                         💡 If counts don't match cloud, clear localStorage to sync fresh data
                                                     </div>
                                                 </div>
@@ -907,7 +897,7 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                                                         a.click();
                                                         URL.revokeObjectURL(url);
                                                     }}
-                                                    className="flex-1 px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-black uppercase tracking-widest shadow-xl transition-all active:scale-95"
+                                                    className="flex-1 px-6 py-3 rounded-xl bg-white border-2 border-slate-800 text-slate-800 hover:bg-slate-50 text-sm font-black uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(30,41,59,1)] transition-all active:translate-y-[2px] active:shadow-none"
                                                 >
                                                     💾 Export Backup
                                                 </button>
@@ -920,45 +910,45 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                                                         alert('✅ localStorage cleared! Refreshing to sync from cloud...');
                                                         window.location.reload();
                                                     }}
-                                                    className="flex-1 px-6 py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white text-sm font-black uppercase tracking-widest shadow-xl transition-all active:scale-95"
+                                                    className="flex-1 px-6 py-3 rounded-xl bg-red-500 hover:bg-red-600 text-white text-sm font-black uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(153,27,27,1)] transition-all active:translate-y-[2px] active:shadow-none border-2 border-red-700"
                                                 >
-                                                    🗑️ Clear localStorage
+                                                    🗑️ Clear Storage
                                                 </button>
                                             </div>
 
                                             {/* Game List */}
                                             {aaronGames.length > 0 && (
-                                                <div className="bg-slate-800/30 border border-slate-800 rounded-[2rem] overflow-hidden">
-                                                    <div className="overflow-x-auto max-h-[300px] overflow-y-auto">
-                                                        <table className="w-full text-left text-xs">
-                                                            <thead className="bg-slate-800/50 sticky top-0">
-                                                                <tr className="text-[9px] font-black text-slate-500 uppercase">
-                                                                    <th className="px-4 py-3">Table Name</th>
-                                                                    <th className="px-4 py-3">Code</th>
-                                                                    <th className="px-4 py-3">Phase</th>
-                                                                    <th className="px-4 py-3">Score</th>
-                                                                    <th className="px-4 py-3">Last Active</th>
+                                                <div className="bg-white border-2 border-emerald-500 rounded-2xl overflow-hidden shadow-[4px_4px_0px_0px_rgba(16,185,129,0.2)]">
+                                                    <div className="overflow-x-auto max-h-[300px] overflow-y-auto custom-scrollbar">
+                                                        <table className="w-full text-left text-xs font-hand">
+                                                            <thead className="bg-white sticky top-0 border-b-2 border-emerald-500">
+                                                                <tr className="text-[9px] font-black text-emerald-700 uppercase tracking-widest">
+                                                                    <th className="px-4 py-3 bg-white">Table Name</th>
+                                                                    <th className="px-4 py-3 bg-white">Code</th>
+                                                                    <th className="px-4 py-3 bg-white">Phase</th>
+                                                                    <th className="px-4 py-3 bg-white">Score</th>
+                                                                    <th className="px-4 py-3 bg-white">Last Active</th>
                                                                 </tr>
                                                             </thead>
-                                                            <tbody className="divide-y divide-slate-800">
+                                                            <tbody className="divide-y divide-emerald-100">
                                                                 {aaronGames
                                                                     .sort((a: any, b: any) => (b.lastActive || 0) - (a.lastActive || 0))
                                                                     .map((g: any, i: number) => (
-                                                                        <tr key={i} className="hover:bg-slate-800/30 transition-colors">
-                                                                            <td className="px-4 py-3 text-white font-bold">{g.tableName || 'Unnamed'}</td>
-                                                                            <td className="px-4 py-3 font-mono text-cyan-400">{g.tableCode || 'N/A'}</td>
+                                                                        <tr key={i} className="hover:bg-emerald-50 transition-colors border-b border-emerald-50">
+                                                                            <td className="px-4 py-3 text-emerald-900 font-bold">{g.tableName || 'Unnamed'}</td>
+                                                                            <td className="px-4 py-3 font-mono text-emerald-600 font-bold">{g.tableCode || 'N/A'}</td>
                                                                             <td className="px-4 py-3">
-                                                                                <span className={`px-2 py-1 rounded text-[9px] font-black ${g.phase === 'game_over'
-                                                                                    ? 'bg-slate-700/50 text-slate-400'
-                                                                                    : 'bg-emerald-500/20 text-emerald-400'
+                                                                                <span className={`px-2 py-1 rounded-full text-[9px] font-black border uppercase tracking-tight ${g.phase === 'game_over'
+                                                                                    ? 'bg-slate-100 text-slate-400 border-slate-200'
+                                                                                    : 'bg-emerald-100 text-emerald-600 border-emerald-200'
                                                                                     }`}>
                                                                                     {g.phase}
                                                                                 </span>
                                                                             </td>
-                                                                            <td className="px-4 py-3 text-purple-400 font-bold">
+                                                                            <td className="px-4 py-3 text-purple-600 font-bold">
                                                                                 {g.scores?.team1 || 0}-{g.scores?.team2 || 0}
                                                                             </td>
-                                                                            <td className="px-4 py-3 text-slate-500 text-[10px]">
+                                                                            <td className="px-4 py-3 text-slate-400 text-[10px] tabular-nums">
                                                                                 {g.lastActive
                                                                                     ? new Date(g.lastActive).toLocaleString('en-US', {
                                                                                         month: '2-digit',
@@ -981,35 +971,39 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                             </div>
                         </div>
                     ) : tab === 'bot_audit' ? (
-                        <div className="space-y-6">
+                        <div className="space-y-6 flex-1 overflow-y-auto min-h-0 custom-scrollbar pr-2 pb-6">
                             {/* Filter Controls */}
-                            <div className="flex gap-3">
+                            {/* Filter Controls */}
+                            <div className="flex gap-8 border-b-2 border-emerald-100/50 px-2">
                                 <button
                                     onClick={() => setBotAuditFilter('all')}
-                                    className={`px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${botAuditFilter === 'all' ? 'bg-cyan-500 text-white shadow-[0_0_20px_rgba(6,182,212,0.4)]' : 'bg-slate-800 text-slate-500 hover:text-slate-300'}`}
+                                    className={`pb-3 text-[10px] md:text-xs font-black uppercase tracking-widest transition-all relative ${botAuditFilter === 'all' ? 'text-emerald-600' : 'text-slate-400 hover:text-emerald-400'}`}
                                 >
-                                    All Decisions
+                                    All
+                                    {botAuditFilter === 'all' && (
+                                        <motion.div layoutId="auditFilterTab" className="absolute bottom-[-2px] left-0 right-0 h-[3px] bg-emerald-500 rounded-t-full" />
+                                    )}
                                 </button>
                                 <button
                                     onClick={() => setBotAuditFilter('trump_calls')}
-                                    className={`px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${botAuditFilter === 'trump_calls' ? 'bg-cyan-500 text-white shadow-[0_0_20px_rgba(6,182,212,0.4)]' : 'bg-slate-800 text-slate-500 hover:text-slate-300'}`}
+                                    className={`pb-3 text-[10px] md:text-xs font-black uppercase tracking-widest transition-all relative ${botAuditFilter === 'trump_calls' ? 'text-emerald-600' : 'text-slate-400 hover:text-emerald-400'}`}
                                 >
-                                    Trump Calls Only
+                                    Trump Calls
+                                    {botAuditFilter === 'trump_calls' && (
+                                        <motion.div layoutId="auditFilterTab" className="absolute bottom-[-2px] left-0 right-0 h-[3px] bg-emerald-500 rounded-t-full" />
+                                    )}
                                 </button>
                             </div>
 
                             <BotAuditView decisions={botDecisions} filterType={botAuditFilter} />
                         </div>
                     ) : tab === 'commentary' ? (
-                        <div className="space-y-6">
-                            <div className="flex justify-between items-center mb-4">
-                                <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em] border-b border-slate-800 pb-2 flex-1">Table Commentary</h3>
-                            </div>
-                            <div className="bg-slate-950/50 rounded-[2rem] border border-slate-800 p-8 h-[50vh] overflow-y-auto space-y-4 custom-scrollbar">
+                        <div className="flex-1 overflow-y-auto min-h-0 custom-scrollbar pr-2 pb-6">
+                            <div className="bg-white border-2 border-emerald-500 rounded-[2rem] p-6 h-[50vh] overflow-y-auto space-y-4 custom-scrollbar shadow-[4px_4px_0px_0px_rgba(16,185,129,0.2)]">
                                 {state.logs.length === 0 ? (
-                                    <div className="flex flex-col items-center justify-center h-full text-slate-600 space-y-4">
-                                        <div className="w-16 h-16 rounded-full bg-slate-900 flex items-center justify-center border-2 border-slate-800">
-                                            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
+                                    <div className="flex flex-col items-center justify-center h-full text-slate-400 space-y-4 font-hand">
+                                        <div className="w-16 h-16 rounded-full bg-emerald-50 flex items-center justify-center border-2 border-emerald-100">
+                                            <svg className="w-8 h-8 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
                                         </div>
                                         <p className="font-bold">No commentary yet</p>
                                     </div>
@@ -1019,7 +1013,7 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                                             key={i}
                                             initial={{ opacity: 0, x: -10 }}
                                             animate={{ opacity: 1, x: 0 }}
-                                            className={`text-sm md:text-base font-bold leading-relaxed p-4 rounded-2xl ${i === 0 ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-slate-900 text-slate-400 border border-slate-800/50'}`}
+                                            className={`text-sm md:text-base font-bold leading-relaxed p-4 rounded-2xl font-hand shadow-sm ${i === 0 ? 'bg-emerald-100 text-emerald-800 border-2 border-emerald-200' : 'bg-white text-slate-500 border-2 border-slate-100'}`}
                                         >
                                             {log}
                                         </motion.div>
@@ -1029,9 +1023,6 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                         </div>
                     ) : null}
 
-                    <div className="mt-10 pt-10 border-t border-slate-800 flex justify-center">
-                        <button onClick={onClose} className="bg-white text-slate-900 font-black py-4 px-12 rounded-2xl shadow-xl text-lg hover:scale-105 transition-transform active:scale-95">BACK TO TABLE</button>
-                    </div>
                 </div>
             </div>
         </div >
@@ -1085,12 +1076,12 @@ const TableOverlay = () => {
     return (
         <div
             onClick={handleClick}
-            className="absolute inset-0 z-[60] flex items-center justify-center p-4 md:p-8 bg-slate-950/40 backdrop-blur-sm animate-in fade-in duration-300 cursor-pointer"
+            className="absolute inset-0 z-[60] flex items-center justify-center p-4 md:p-8 bg-white/60 backdrop-blur-sm animate-in fade-in duration-300 cursor-pointer text-center"
         >
-            <div className="bg-emerald-500 text-white px-6 md:px-12 py-6 md:py-8 rounded-2xl md:rounded-[3rem] shadow-[0_0_100px_rgba(16,185,129,0.4)] border-4 border-white animate-in zoom-in slide-in-from-bottom-12 duration-500 max-w-lg w-full max-h-[80vh] flex flex-col">
-                <div className="text-[10px] font-black uppercase tracking-[0.4em] mb-3 md:mb-2 opacity-80 text-center shrink-0">Event Notification</div>
-                <div className="text-lg md:text-2xl font-black italic tracking-tight text-center overflow-y-auto flex-1 px-2">{state.overlayMessage}</div>
-                <div className="mt-4 md:mt-6 text-[8px] font-black uppercase tracking-widest opacity-60 text-center animate-pulse shrink-0">Click to continue</div>
+            <div className="bg-white text-emerald-900 px-6 md:px-12 py-8 rounded-[2rem] shadow-[12px_12px_0px_0px_rgba(16,185,129,0.2)] border-4 border-emerald-500 animate-in zoom-in slide-in-from-bottom-12 duration-500 max-w-lg w-full">
+                <div className="text-xs font-black text-emerald-400 uppercase tracking-[0.3em] mb-4">Event Notification</div>
+                <div className="text-2xl md:text-3xl font-black font-hand text-emerald-800 leading-relaxed">{state.overlayMessage}</div>
+                <div className="mt-8 text-[10px] font-black text-emerald-300 uppercase tracking-widest animate-pulse">Click to continue</div>
             </div>
         </div>
     );
@@ -1234,7 +1225,7 @@ const LandingPage = () => {
     };
 
     return (
-        <div className="flex flex-col items-center justify-start min-h-full w-full max-w-2xl p-4 md:p-8 pt-2 md:pt-8 animate-in fade-in zoom-in duration-700 overflow-y-auto pb-20 no-scrollbar">
+        <div className="flex flex-col items-center justify-start h-full w-full max-w-2xl mx-auto p-4 md:p-8 pt-6 md:pt-12 animate-in fade-in zoom-in duration-700 overflow-y-auto no-scrollbar">
             {/* Header with Branding */}
 
             {/* Revised Header Structure */}
@@ -1269,13 +1260,13 @@ const LandingPage = () => {
                     <div className="flex flex-col gap-6 mt-8 mb-16">
                         <button
                             onClick={() => dispatch({ type: 'CREATE_TABLE', payload: { userName: state.currentUser! } })}
-                            className="bg-white text-slate-800 font-black py-8 rounded-3xl text-2xl border-4 border-slate-800 shadow-[8px_8px_0px_0px_rgba(30,41,59,1)] hover:translate-y-px hover:shadow-[6px_6px_0px_0px_rgba(30,41,59,1)] active:shadow-none active:translate-x-[4px] active:translate-y-[4px] transition-all uppercase tracking-[0.2em]"
+                            className="bg-white text-slate-800 font-black py-5 rounded-2xl text-xl border-4 border-slate-800 shadow-[6px_6px_0px_0px_rgba(30,41,59,1)] hover:translate-y-px hover:shadow-[4px_4px_0px_0px_rgba(30,41,59,1)] active:shadow-none active:translate-x-[4px] active:translate-y-[4px] transition-all uppercase tracking-[0.2em]"
                         >
                             CREATE GAME
                         </button>
                         <button
                             onClick={() => setShowJoin(true)}
-                            className="bg-emerald-400 text-slate-900 font-black py-8 rounded-3xl text-2xl border-4 border-slate-900 shadow-[8px_8px_0px_0px_rgba(30,41,59,1)] hover:translate-y-px hover:shadow-[6px_6px_0px_0px_rgba(30,41,59,1)] active:shadow-none active:translate-x-[4px] active:translate-y-[4px] transition-all uppercase tracking-[0.2em]"
+                            className="bg-emerald-400 text-slate-900 font-black py-5 rounded-2xl text-xl border-4 border-slate-900 shadow-[6px_6px_0px_0px_rgba(30,41,59,1)] hover:translate-y-px hover:shadow-[4px_4px_0px_0px_rgba(30,41,59,1)] active:shadow-none active:translate-x-[4px] active:translate-y-[4px] transition-all uppercase tracking-[0.2em]"
                         >
                             JOIN TABLE
                         </button>
@@ -1348,7 +1339,7 @@ const LandingPage = () => {
                             </button>
                         </div>
 
-                        <div className="space-y-3 pb-4">
+                        <div className="space-y-3 pb-4 max-h-[400px] overflow-y-auto custom-scrollbar pr-2">
                             {savedGames
                                 .filter(g => gameFilter === 'in-progress' ? g.phase !== 'game_over' : g.phase === 'game_over')
                                 .map(game => (
@@ -1399,7 +1390,7 @@ const LandingPage = () => {
             {/* Footer Version */}
             <div className="mt-auto pt-8 text-center w-full">
                 <div className="text-[10px] font-black text-slate-300 uppercase tracking-[0.5em]">
-                    Euchre Engine V1.20
+                    Euchre Engine V0.90
                 </div>
             </div>
 
@@ -1408,137 +1399,16 @@ const LandingPage = () => {
     );
 };
 
-const StatsView = () => {
-    const { state } = useGame();
-    const [tab, setTab] = useState<'me' | 'league'>('me');
-    const mySeatIndex = state.players.findIndex(p => p.name === state.currentViewPlayerName);
-    const human = mySeatIndex !== -1 ? state.players[mySeatIndex] : {
-        name: state.currentViewPlayerName,
-        stats: getEmptyStats()
-    };
 
-    const globalStats = JSON.parse(localStorage.getItem('euchre_global_profiles') || '{ }');
-    const leaguePlayers = Object.keys(globalStats).map(name => ({
-        name,
-        ...globalStats[name]
-    })).sort((a: any, b: any) => (b.gamesWon / Math.max(1, b.gamesPlayed)) - (a.gamesWon / Math.max(1, a.gamesPlayed)));
 
-    return (
-        <div className="md:hidden flex-1 bg-slate-900/95 rounded-[2rem] p-4 overflow-y-auto w-full h-full flex flex-col pt-20">
-            <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-black text-white italic tracking-tighter">Stats</h2>
-                <div className="flex gap-2 bg-slate-800/50 p-1 rounded-full">
-                    <button
-                        onClick={() => setTab('me')}
-                        className={`px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${tab === 'me' ? 'bg-emerald-500 text-white shadow-lg' : 'text-slate-500'}`}
-                    >
-                        Career
-                    </button>
-                    <button
-                        onClick={() => setTab('league')}
-                        className={`px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${tab === 'league' ? 'bg-emerald-500 text-white shadow-lg' : 'text-slate-500'}`}
-                    >
-                        League
-                    </button>
-                </div>
-            </div>
 
-            {tab === 'me' ? (
-                <div className="space-y-6 pb-20">
-                    <div className="grid grid-cols-2 gap-3">
-                        {[
-                            { label: 'Games Played', value: human.stats.gamesPlayed, color: 'text-slate-400' },
-                            { label: 'Win Rate', value: `${human.stats.gamesPlayed > 0 ? Math.round((human.stats.gamesWon / human.stats.gamesPlayed) * 100) : 0}%`, color: 'text-emerald-400' },
-                            { label: 'Hand Win %', value: `${human.stats.handsPlayed > 0 ? Math.round((human.stats.handsWon / human.stats.handsPlayed) * 100) : 0}%`, color: 'text-cyan-400' },
-                            { label: 'Sweeps', value: human.stats.sweeps, color: 'text-yellow-400' },
-                        ].map((stat, i) => (
-                            <div key={i} className="bg-slate-800/40 border border-slate-700/30 p-4 rounded-2xl">
-                                <div className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">{stat.label}</div>
-                                <div className={`text-xl font-black ${stat.color}`}>{stat.value}</div>
-                            </div>
-                        ))}
-                    </div>
-
-                    <div>
-                        <h3 className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-3">Trick Taking</h3>
-                        <div className="grid grid-cols-2 gap-3">
-                            {[
-                                { label: 'Tricks Taken', value: human.stats.tricksTaken, color: 'text-purple-400' },
-                                {
-                                    label: 'Tricks %',
-                                    value: `${human.stats.handsPlayed > 0 ? Math.round((human.stats.tricksTaken / (human.stats.handsPlayed * 5)) * 100) : 0}%`,
-                                    color: 'text-purple-300'
-                                },
-                                { label: 'Euchres', value: human.stats.euchresMade, color: 'text-pink-400' },
-                            ].map((stat, i) => (
-                                <div key={i} className="bg-slate-800/40 border border-slate-700/30 p-4 rounded-2xl">
-                                    <div className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">{stat.label}</div>
-                                    <div className={`text-xl font-black ${stat.color}`}>{stat.value}</div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            ) : (
-                <div className="bg-slate-800/30 border border-slate-800 rounded-2xl overflow-hidden pb-20">
-                    <table className="w-full text-left">
-                        <thead className="bg-slate-800/50 text-[8px] font-black text-slate-500 uppercase tracking-widest">
-                            <tr>
-                                <th className="px-4 py-3">Player</th>
-                                <th className="px-4 py-3 text-right">Win %</th>
-                                <th className="px-4 py-3 text-right">Tricks %</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-800">
-                            {leaguePlayers.map((p: any, i: number) => {
-                                // Calculate tricks taken percentage
-                                // Each hand has 5 tricks, so total possible = handsPlayed * 5
-                                const totalPossibleTricks = p.handsPlayed * 5;
-                                const tricksPercent = totalPossibleTricks > 0
-                                    ? Math.round((p.tricksTaken / totalPossibleTricks) * 100)
-                                    : 0;
-
-                                return (
-                                    <tr key={i} className={`group ${p.name === human.name ? 'bg-emerald-500/5' : ''}`}>
-                                        <td className="px-4 py-3 font-black text-white flex items-center gap-3">
-                                            <span className="text-slate-600 text-[9px] tabular-nums">{i + 1}</span>
-                                            <span className="text-sm">{p.name}</span>
-                                        </td>
-                                        <td className="px-4 py-3 text-emerald-400 font-black text-sm tabular-nums text-right">
-                                            {p.gamesPlayed > 0 ? Math.round((p.gamesWon / p.gamesPlayed) * 100) : 0}%
-                                        </td>
-                                        <td className="px-4 py-3 text-purple-400 font-black text-sm tabular-nums text-right">
-                                            {tricksPercent}%
-                                        </td>
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
-                </div>
-            )}
-        </div>
-    );
-};
-
-const TabButton = ({ active, onClick, children }: any) => (
-    <button
-        onClick={onClick}
-        className={`flex-1 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${active
-            ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20'
-            : 'text-slate-500 hover:text-slate-300'
-            }`}
-    >
-        {children}
-    </button>
-);
 
 const GameView = () => {
     const { state, dispatch } = useGame();
     const [isStatsOpen, setIsStatsOpen] = useState(false);
     // @ts-ignore - Will be used when admin button is added to GameView
     const [statsInitialTab, setStatsInitialTab] = useState<'me' | 'league' | 'bot_audit' | 'freeze_incidents' | 'state_management' | 'commentary'>('me');
-    const [activeTab, setActiveTab] = useState<'table' | 'commentary' | 'stats'>('table');
+
 
     const handleNextStep = () => {
         // AI execution is handled in GameStore useEffect hooks
@@ -1606,143 +1476,95 @@ const GameView = () => {
 
     return (
         <LayoutGroup>
-            <div className="w-full h-full max-w-7xl max-h-screen flex flex-col md:flex-row px-1 py-2 md:p-6 gap-2 md:gap-6 overflow-hidden">
+            <div className="w-full h-full max-w-7xl mx-auto max-h-screen flex flex-col md:flex-row px-2 py-2 gap-4 overflow-hidden bg-white/0 font-hand">
 
-                {/* Mobile Tabs */}
-                <div className="flex md:hidden w-full shrink-0 bg-slate-900/90 rounded-2xl p-1 mb-2 border border-slate-800">
-                    <TabButton active={activeTab === 'table'} onClick={() => setActiveTab('table')}>TABLE</TabButton>
-                    <TabButton active={activeTab === 'commentary'} onClick={() => setActiveTab('commentary')}>COMMENTARY</TabButton>
-                    <TabButton active={activeTab === 'stats'} onClick={() => setActiveTab('stats')}>STATS</TabButton>
-                </div>
 
-                {/* Table Commentary Sidebar (Hidden on Desktop per feedback) */}
-                <div className={`md:hidden bg-slate-900/90 rounded-[2rem] border border-slate-800/50 p-6 backdrop-blur-3xl flex flex-col shadow-2xl shrink-0 ${activeTab === 'commentary' ? 'flex flex-1 w-full order-last' : 'hidden'}`}>
-                    <div className="flex flex-col gap-4 mb-4">
-                        <div className="flex justify-between items-center">
-                            <h2 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
-                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                                Table Commentary
-                            </h2>
-                        </div>
-                    </div>
-                    <div className="flex-1 overflow-y-auto space-y-3 pr-2 scrollbar-thin scrollbar-thumb-slate-800">
-                        {state.logs.map((log: string, i: number) => (
-                            <motion.div
-                                key={i}
-                                initial={{ opacity: 0, x: -10 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                className={`text-xs font-bold leading-relaxed ${i === 0 ? 'text-emerald-400' : 'text-slate-400'}`}
-                            >
-                                {log}
-                            </motion.div>
-                        ))}
-                    </div>
-                </div>
 
                 <StatsModal isOpen={isStatsOpen} onClose={() => setIsStatsOpen(false)} initialTab={statsInitialTab} />
 
-                <div className={`flex-1 bg-white/90 rounded-[2rem] md:rounded-[3rem] shadow-[12px_12px_0px_0px_rgba(30,41,59,1)] border-4 border-slate-800 px-1 py-3 md:p-8 backdrop-blur-sm flex flex-col relative overflow-hidden ${activeTab === 'table' ? 'flex' : 'hidden md:flex'}`}>
+                {/* Main Game Area */}
+                <div className="flex-1 bg-white rounded-[2rem] md:rounded-[3rem] border-4 border-emerald-500 shadow-[6px_6px_0px_0px_rgba(16,185,129,0.2)] relative flex flex-col w-full h-full overflow-hidden">
 
-                    <div className="flex justify-between items-start md:items-center mb-2 md:mb-4">
-                        <div className="flex items-center gap-4">
-                            <div className="flex flex-col transform -rotate-1">
-                                <h1 className="text-lg md:text-3xl font-black text-slate-800 italic leading-none uppercase tracking-wider">
-                                    {state.tableName || 'Euchre'}
-                                </h1>
-                                {state.tableCode && (
-                                    <>
-                                        <div className="hidden md:block text-[10px] font-black text-emerald-600 tracking-[0.2em] mt-1 bg-emerald-100 px-2 rounded-lg inline-block w-fit">CODE: {state.tableCode}</div>
-                                        <div className="md:hidden text-[8px] font-bold text-emerald-600 tracking-wider mt-0.5 bg-emerald-100 px-1.5 rounded inline-block w-fit">{state.tableCode}</div>
-                                    </>
-                                )}
-                            </div>
-                            <button
-                                onClick={() => { setStatsInitialTab('commentary'); setIsStatsOpen(true); }}
-                                className="hidden md:block bg-white hover:bg-slate-50 text-slate-800 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border-2 border-slate-800 transition-all shadow-[2px_2px_0px_0px_rgba(30,41,59,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
-                            >
-                                Chat
-                            </button>
-                            <button
-                                onClick={() => { setStatsInitialTab('me'); setIsStatsOpen(true); }}
-                                className="hidden md:block bg-white hover:bg-slate-50 text-slate-800 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border-2 border-slate-800 transition-all shadow-[2px_2px_0px_0px_rgba(30,41,59,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
-                            >
-                                Stats
-                            </button>
+                    {/* Header (Separated) */}
+                    <div className="shrink-0 flex justify-between items-start p-5 md:p-8 bg-white border-b-2 border-emerald-100 z-30">
+                        <div className="flex flex-col">
+                            <h1 className="text-2xl md:text-3xl font-black text-emerald-700 tracking-wide leading-none">
+                                {state.tableName || 'The Green Table'}
+                            </h1>
+                            {state.tableCode && (
+                                <div className="text-[10px] md:text-xs font-bold text-emerald-400 mt-1 pl-1 tracking-widest font-mono">
+                                    {state.tableCode}
+                                </div>
+                            )}
                         </div>
 
-                        <div className="flex gap-2">
-                            <button
-                                onClick={async () => {
-                                    if (!state.tableCode) return;
-                                    const { data } = await supabase.from('games').select('state').eq('code', state.tableCode).single();
-                                    if (data && data.state) {
-                                        dispatch({ type: 'LOAD_EXISTING_GAME', payload: { gameState: data.state } });
-                                        // Preserve user view
-                                        dispatch({ type: 'JOIN_TABLE', payload: { code: state.tableCode, userName: state.currentUser! } });
-                                    }
-                                }}
-                                className="bg-slate-800 hover:bg-slate-700 text-cyan-300 px-3 py-1 md:px-4 md:py-2 rounded-lg md:rounded-xl text-[8px] md:text-[10px] font-black uppercase tracking-widest border border-slate-700 transition-all shadow-sm"
-                            >
-                                Sync
-                            </button>
-
-                            {state.phase === 'lobby' ? (
+                        <div className="flex flex-col items-end gap-2">
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={() => { setStatsInitialTab('me'); setIsStatsOpen(true); }}
+                                    className="bg-white hover:bg-emerald-50 text-emerald-800 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border-2 border-emerald-500 transition-all shadow-[3px_3px_0px_0px_rgba(16,185,129,0.3)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
+                                >
+                                    STATS
+                                </button>
+                                <button
+                                    onClick={() => dispatch({ type: 'EXIT_TO_LANDING' })}
+                                    className="w-[34px] h-[34px] bg-white hover:bg-red-50 text-emerald-800 hover:text-red-500 rounded-xl border-2 border-emerald-500 hover:border-red-400 transition-all shadow-[3px_3px_0px_0px_rgba(16,185,129,0.3)] hover:shadow-[3px_3px_0px_0px_rgba(239,68,68,0.3)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none flex items-center justify-center"
+                                >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M6 18L18 6M6 6l12 12" /></svg>
+                                </button>
+                            </div>
+                            {state.phase === 'lobby' && (
                                 <button
                                     onClick={() => {
-                                        // Check if there are empty seats
                                         const emptySeats = state.players.filter(p => !p.name).length;
-
                                         if (emptySeats > 0) {
-                                            // Prompt user to auto-fill
-                                            if (confirm(`There ${emptySeats === 1 ? 'is 1 empty seat' : `are ${emptySeats} empty seats`}. Would you like to auto-fill with bots?`)) {
-                                                // Auto-fill empty seats with bots
+                                            if (confirm(`Auto-fill ${emptySeats} seats with bots?`)) {
                                                 dispatch({ type: 'AUTOFILL_BOTS' });
-                                                // Then start the match
                                                 setTimeout(() => dispatch({ type: 'START_MATCH' }), 100);
                                             }
                                         } else {
-                                            // All seats filled, start immediately
                                             dispatch({ type: 'START_MATCH' });
                                         }
                                     }}
-                                    className="bg-emerald-600 hover:bg-emerald-500 text-white font-black py-1 px-4 md:py-2 md:px-10 rounded-lg md:rounded-xl transition transform active:scale-95 text-[10px] md:text-sm shadow-lg shadow-emerald-500/20 animate-pulse"
+                                    className="bg-emerald-500 hover:bg-emerald-400 text-white font-black text-[10px] px-3 py-1.5 rounded-lg border-2 border-emerald-600 shadow-sm animate-pulse"
                                 >
-                                    START
+                                    START GAME
                                 </button>
-                            ) : null}
-                            <button
-                                onClick={() => dispatch({ type: 'EXIT_TO_LANDING' })}
-                                className="bg-slate-800 hover:bg-red-500 text-slate-400 hover:text-white px-3 py-1 md:px-4 md:py-2 rounded-lg md:rounded-xl text-[8px] md:text-[10px] font-black uppercase border border-slate-700 transition-all"
-                            >
-                                Leave
-                            </button>
+                            )}
                         </div>
                     </div>
 
-                    {state.phase !== 'lobby' && (
-                        <div className="flex justify-center items-center gap-4 md:gap-12 mb-1 md:mb-4">
-                            <div className="text-center">
-                                <div className="text-[8px] md:text-[10px] font-black text-cyan-500 uppercase tracking-widest mb-0.5 md:mb-1">{state.teamNames.team1}</div>
-                                <div className="text-xl md:text-3xl font-black text-white table-nums leading-none">{state.scores.team1}</div>
-                            </div>
+                    {/* Game Board Surface */}
+                    <div className="flex-1 relative bg-white flex flex-col items-center overflow-hidden w-full h-full scale-95 md:scale-100 origin-center">
 
-                            {state.trump && (
-                                <div className="flex flex-col items-center bg-slate-800/80 px-2 py-1 md:px-4 md:py-2 rounded-xl md:rounded-2xl border border-slate-700/50">
-                                    <div className="hidden md:block text-[8px] font-black text-slate-500 uppercase tracking-widest mb-0.5">TRUMP</div>
-                                    <div className={`text-lg md:text-2xl font-black leading-none ${state.trump === 'hearts' || state.trump === 'diamonds' ? 'text-red-500' : 'text-white'}`}>
-                                        {state.trump === 'hearts' ? '♥' : state.trump === 'diamonds' ? '♦' : state.trump === 'clubs' ? '♣' : '♠'}
-                                    </div>
+                        {/* Scoreboard (Green Ink) - Flowing inside Board */}
+                        {state.phase !== 'lobby' && (
+                            <div className="flex justify-between items-center w-full px-6 md:px-12 mt-2 md:mt-6 mb-2 pointer-events-none relative z-20 shrink-0">
+                                {/* Team 1 Score */}
+                                <div className="text-center">
+                                    <div className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-1">{state.teamNames.team1}</div>
+                                    <div className="text-3xl md:text-5xl font-black text-emerald-800 font-hand">{state.scores.team1}</div>
                                 </div>
-                            )}
 
-                            <div className="text-center">
-                                <div className="text-[8px] md:text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-0.5 md:mb-1">{state.teamNames.team2}</div>
-                                <div className="text-xl md:text-3xl font-black text-white table-nums leading-none">{state.scores.team2}</div>
+                                {/* Trump Display */}
+                                {state.trump && (
+                                    <div className="flex flex-col items-center bg-white px-4 py-2 rounded-2xl border-2 border-emerald-500 shadow-[4px_4px_0px_0px_rgba(16,185,129,0.2)]">
+                                        <div className="hidden md:block text-[8px] font-black text-emerald-400 uppercase tracking-widest mb-0.5">TRUMP</div>
+                                        <div className={`text-2xl md:text-4xl font-black leading-none ${state.trump === 'hearts' || state.trump === 'diamonds' ? 'text-red-500' : 'text-slate-800'}`}>
+                                            {state.trump === 'hearts' ? '♥' : state.trump === 'diamonds' ? '♦' : state.trump === 'clubs' ? '♣' : '♠'}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Team 2 Score */}
+                                <div className="text-center">
+                                    <div className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-1">{state.teamNames.team2}</div>
+                                    <div className="text-3xl md:text-5xl font-black text-emerald-800 font-hand">{state.scores.team2}</div>
+                                </div>
                             </div>
-                        </div>
-                    )}
+                        )}
 
-                    <div className="flex-1 relative bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.05)_0%,transparent_70%)] rounded-[2rem] md:rounded-[3rem] border border-slate-800/30 flex items-center justify-center overflow-hidden scale-95 md:scale-100 origin-center">
+
 
                         <TableOverlay />
 
@@ -1767,7 +1589,7 @@ const GameView = () => {
                             });
                         })()}
 
-                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20 pb-32">
                             <AnimatePresence>
                                 {state.currentTrick.map((t) => {
                                     const pIdx = state.players.findIndex(p => p.id === t.playerId);
@@ -1819,28 +1641,28 @@ const GameView = () => {
                                             initial={{ opacity: 0, y: 20 }}
                                             animate={{ opacity: 1, y: 0 }}
                                             exit={{ opacity: 0, scale: 0.95 }}
-                                            className="pointer-events-auto p-2 bg-slate-900/90 rounded-full border-2 border-emerald-500 shadow-[0_0_50px_rgba(16,185,129,0.4)] flex flex-col items-center backdrop-blur-xl mx-auto w-full max-w-[380px] md:max-w-2xl"
+                                            className="pointer-events-auto flex flex-col items-center mx-auto w-full max-w-[380px] md:max-w-2xl"
                                         >
                                             {state.biddingRound === 1 ? (
-                                                <div className="grid grid-cols-3 gap-2 p-1 w-full">
-                                                    <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit: state.upcard!.suit, callerIndex: myIdx, isLoner: false } })} className="bg-emerald-600 hover:bg-emerald-500 text-white w-full py-3 md:py-4 rounded-full font-black text-[9px] md:text-sm uppercase shadow-lg shadow-emerald-500/20 leading-tight transition-transform active:scale-95 whitespace-nowrap px-1">Order Up</button>
-                                                    <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit: state.upcard!.suit, callerIndex: myIdx, isLoner: true } })} className="bg-amber-500 hover:bg-amber-400 text-white w-full py-3 md:py-4 rounded-full font-black text-[9px] md:text-sm uppercase shadow-lg shadow-amber-500/20 leading-tight transition-transform active:scale-95 whitespace-nowrap px-1">Go Alone</button>
-                                                    <button onClick={() => dispatch({ type: 'PASS_BID', payload: { playerIndex: myIdx } })} className="bg-pink-600 hover:bg-pink-500 text-white w-full py-3 md:py-4 rounded-full font-black text-[9px] md:text-sm uppercase shadow-lg shadow-pink-500/20 leading-tight transition-transform active:scale-95 flex items-center justify-center whitespace-nowrap px-1">Pass</button>
+                                                <div className="grid grid-cols-3 gap-3 w-full">
+                                                    <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit: state.upcard!.suit, callerIndex: myIdx, isLoner: false } })} className="bg-white hover:bg-emerald-50 text-emerald-800 w-full py-3 rounded-xl font-black text-xs md:text-sm uppercase tracking-wider border-2 border-emerald-500 transition-all shadow-[4px_4px_0px_0px_rgba(16,185,129,0.4)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none whitespace-nowrap">Order Up</button>
+                                                    <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit: state.upcard!.suit, callerIndex: myIdx, isLoner: true } })} className="bg-white hover:bg-emerald-50 text-emerald-800 w-full py-3 rounded-xl font-black text-xs md:text-sm uppercase tracking-wider border-2 border-emerald-500 transition-all shadow-[4px_4px_0px_0px_rgba(16,185,129,0.4)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none whitespace-nowrap">Go Alone</button>
+                                                    <button onClick={() => dispatch({ type: 'PASS_BID', payload: { playerIndex: myIdx } })} className="bg-white hover:bg-emerald-50 text-emerald-800 w-full py-3 rounded-xl font-black text-xs md:text-sm uppercase tracking-wider border-2 border-emerald-500 transition-all shadow-[4px_4px_0px_0px_rgba(16,185,129,0.4)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none whitespace-nowrap">Pass</button>
                                                 </div>
                                             ) : (
-                                                <div className="flex flex-col gap-3 p-4 md:p-6 min-w-[300px]">
-                                                    <div className="flex flex-wrap justify-center gap-2">
+                                                <div className="flex flex-col gap-4 w-full">
+                                                    <div className="flex gap-3">
                                                         {(['hearts', 'diamonds', 'clubs', 'spades'] as const).filter(s => s !== state.upcard!.suit).map(suit => (
-                                                            <div key={suit} className="flex-1 flex flex-col gap-1">
-                                                                <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit, callerIndex: myIdx, isLoner: false } })} className="bg-slate-800 hover:bg-slate-700 text-white w-full py-3 rounded-xl font-black text-[10px] uppercase border border-slate-700 transition-all hover:scale-105 active:scale-95">{suit}</button>
-                                                                <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit, callerIndex: myIdx, isLoner: true } })} className="bg-slate-800/50 hover:bg-amber-500/20 text-amber-500/50 hover:text-amber-500 w-full py-1.5 rounded text-[8px] font-black uppercase transition-all">Alone</button>
+                                                            <div key={suit} className="flex-1 flex flex-col gap-2">
+                                                                <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit, callerIndex: myIdx, isLoner: false } })} className="bg-white hover:bg-emerald-50 text-emerald-800 w-full py-3 rounded-xl font-black text-[10px] md:text-xs uppercase tracking-wider border-2 border-emerald-500 transition-all shadow-[3px_3px_0px_0px_rgba(16,185,129,0.4)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none">{suit}</button>
+                                                                <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit, callerIndex: myIdx, isLoner: true } })} className="bg-white hover:bg-emerald-50 text-emerald-600 w-full py-1.5 rounded-lg font-black text-[8px] uppercase tracking-wider border border-emerald-400 transition-all shadow-[2px_2px_0px_0px_rgba(16,185,129,0.3)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none">Alone</button>
                                                             </div>
                                                         ))}
                                                     </div>
                                                     {myIdx !== state.dealerIndex ? (
-                                                        <button onClick={() => dispatch({ type: 'PASS_BID', payload: { playerIndex: myIdx } })} className="w-full bg-pink-600 hover:bg-pink-500 text-white py-4 rounded-full font-black text-[10px] uppercase shadow-lg transition-transform active:scale-95">Pass</button>
+                                                        <button onClick={() => dispatch({ type: 'PASS_BID', payload: { playerIndex: myIdx } })} className="bg-white hover:bg-pink-50 text-emerald-800 hover:text-pink-600 w-full py-3 rounded-xl font-black text-xs uppercase tracking-wider border-2 border-emerald-500 hover:border-pink-500 transition-all shadow-[4px_4px_0px_0px_rgba(16,185,129,0.4)] hover:shadow-[4px_4px_0px_0px_rgba(236,72,153,0.4)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none">Pass</button>
                                                     ) : (
-                                                        <div className="w-full bg-pink-600/10 border-2 border-pink-500/30 text-pink-500 py-4 rounded-full font-black text-[9px] uppercase tracking-widest text-center animate-pulse">
+                                                        <div className="w-full bg-white border-2 border-red-500 text-red-500 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest text-center animate-pulse shadow-[4px_4px_0px_0px_rgba(239,68,68,0.2)]">
                                                             STICK THE DEALER: YOU MUST CALL
                                                         </div>
                                                     )}
@@ -1877,7 +1699,7 @@ const GameView = () => {
                     </div>
 
 
-                    <div className="h-32 md:h-36 flex items-end justify-center relative mt-auto px-1 md:px-10 pt-2 pb-2 bg-slate-800/10 rounded-t-[3rem]">
+                    <div className="h-40 md:h-48 flex items-end justify-center relative mt-auto px-1 md:px-10 pt-2 pb-6 z-[60] w-full pointer-events-none">
                         {(() => {
                             const myIdx = state.players.findIndex(p => p.name === state.currentViewPlayerName);
                             if (myIdx === -1 || ['scoring', 'randomizing_dealer', 'game_over', 'lobby'].includes(state.phase)) return null;
@@ -1886,7 +1708,7 @@ const GameView = () => {
                             const handSize = myPlayer.hand.length;
 
                             return (
-                                <div className="flex justify-center items-end relative" style={{ width: '100%', maxWidth: '400px' }}>
+                                <div className="flex justify-center items-end relative mx-auto pointer-events-auto" style={{ width: '100%', maxWidth: '380px' }}>
                                     {myPlayer.hand.map((card: Card, index: number) => {
                                         let isValid = false;
                                         const isPickedUpCard = state.phase === 'discard' && card.id === state.upcard?.id;
@@ -1905,11 +1727,8 @@ const GameView = () => {
                                         const isFirstCard = index === 0;
 
                                         return (
-                                            <motion.div
+                                            <div
                                                 key={card.id}
-                                                layoutId={card.id}
-                                                initial={{ y: 150, opacity: 0 }}
-                                                animate={{ y: 0, opacity: 1 }}
                                                 className="relative"
                                                 style={{
                                                     marginLeft: isFirstCard ? 0 : `${overlapAmount}px`,
@@ -1936,7 +1755,7 @@ const GameView = () => {
                                                         else if (state.phase === 'playing' && isValid) dispatch({ type: 'PLAY_CARD', payload: { playerIndex: myIdx, cardId: card.id } });
                                                     }}
                                                 />
-                                            </motion.div>
+                                            </div>
                                         );
                                     })}
                                 </div>
@@ -1954,10 +1773,9 @@ const GameView = () => {
                     )}
                 </div>
 
-                {/* Mobile Stats View */}
-                {activeTab === 'stats' && <StatsView />}
-            </div>
-        </LayoutGroup>
+
+            </div >
+        </LayoutGroup >
     );
 };
 
@@ -1999,7 +1817,7 @@ function App() {
 
     return (
         <div
-            className="w-screen h-screen bg-transparent text-slate-800 flex items-center justify-center selection:bg-emerald-200 overflow-hidden font-hand"
+            className="w-screen h-screen bg-transparent text-slate-800 selection:bg-emerald-200 overflow-hidden font-hand relative"
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
