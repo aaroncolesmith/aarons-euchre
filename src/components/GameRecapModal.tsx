@@ -90,7 +90,8 @@ export const GameRecapModal = ({ isOpen, onClose, gameState }: GameRecapModalPro
     const width = 100;
     const height = 50;
     const padding = 5;
-    const yMax = Math.max(10, ...chartData.map(d => Math.max(d.t1, d.t2)));
+    // UPDATED: Add + 1 to yMax for headroom
+    const yMax = Math.max(10, ...chartData.map(d => Math.max(d.t1, d.t2))) + 1;
     const xMax = chartData.length > 1 ? chartData.length - 1 : 1;
 
     const getX = (i: number) => padding + (i / xMax) * (width - 2 * padding);
@@ -169,21 +170,28 @@ export const GameRecapModal = ({ isOpen, onClose, gameState }: GameRecapModalPro
 
                                 <div className="absolute bottom-1 w-full text-center text-xs font-black text-brand tracking-widest pl-8 pointer-events-none">HAND</div>
 
-                                {/* Tooltip */}
+                                {/* Tooltip - UPDATED positioning */}
                                 {hoveredHand !== null && chartData[hoveredHand] && (
                                     <motion.div
-                                        initial={{ opacity: 0, y: 5 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        className="absolute top-2 z-20 bg-paper/90 backdrop-blur border-2 border-ink shadow-lg rounded-xl p-3 text-xs font-black pointer-events-none"
+                                        initial={{ opacity: 0, scale: 0.9 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        className="absolute z-20 bg-paper/95 backdrop-blur border-2 border-ink shadow-lg rounded-xl p-3 text-xs font-black pointer-events-none min-w-[120px]"
                                         style={{
                                             left: `${(getX(hoveredHand) / width) * 100}%`,
-                                            transform: 'translateX(-50%)'
+                                            top: `${(getY(Math.max(chartData[hoveredHand].t1, chartData[hoveredHand].t2)) / height) * 100}%`,
+                                            transform: `translate(${hoveredHand > (chartData.length / 2) ? '-105%' : '5%'}, -50%)`
                                         }}
                                     >
                                         <div className="text-brand-dim uppercase tracking-widest mb-1 text-[10px]">Hand {chartData[hoveredHand].hand}</div>
                                         <div className="flex flex-col gap-0.5 whitespace-nowrap">
-                                            <div className="text-brand-dark">{gameState.teamNames.team1}: {chartData[hoveredHand].t1}</div>
-                                            <div className="text-red-500">{gameState.teamNames.team2}: {chartData[hoveredHand].t2}</div>
+                                            <div className="text-brand-dark flex justify-between gap-3">
+                                                <span>{gameState.teamNames.team1}:</span>
+                                                <span>{chartData[hoveredHand].t1}</span>
+                                            </div>
+                                            <div className="text-red-500 flex justify-between gap-3">
+                                                <span>{gameState.teamNames.team2}:</span>
+                                                <span>{chartData[hoveredHand].t2}</span>
+                                            </div>
                                         </div>
                                     </motion.div>
                                 )}
