@@ -438,7 +438,7 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
 
     return (
         <div className="fixed inset-0 z-[100] flex items-start justify-center pt-16 md:pt-24 p-4 bg-ink/10 backdrop-blur-sm animate-in fade-in duration-300 font-hand">
-            <div className="bg-paper border-4 border-ink w-full max-w-4xl rounded-[2rem] shadow-sketch-ink overflow-hidden animate-in zoom-in duration-300 transform rotate-1 max-h-[85vh] flex flex-col">
+            <div className="bg-paper border-4 border-ink w-full max-w-4xl rounded-[2rem] shadow-sketch-ink overflow-hidden animate-in zoom-in duration-300 max-h-[85vh] flex flex-col">
                 <div className="p-6 md:p-8 flex flex-col flex-1 min-h-0 bg-paper">
                     <div className="flex justify-between items-start mb-2 shrink-0">
                         <div className="flex-1 overflow-x-auto min-w-0 mr-4 scrollbar-hide">
