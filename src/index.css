@@ -3,10 +3,30 @@
 @tailwind utilities;
 
 :root {
+  /* Theme Tokens */
+  --color-paper: 255 255 255;
+  /* White */
+  --color-paper-dim: 248 250 252;
+  /* Slate-50 */
+
+  --color-ink: 30 41 59;
+  /* Slate-800 */
+  --color-ink-dim: 148 163 184;
+  /* Slate-400 */
+
+  --color-brand: 16 185 129;
+  /* Emerald-500 */
+  --color-brand-dim: 52 211 153;
+  /* Emerald-400 */
+  --color-brand-dark: 6 95 70;
+  /* Emerald-800 */
+
+  --color-accent: 6 182 212;
+  /* Cyan-500 */
+
   font-family: 'Architects Daughter', cursive;
-  background-color: #ffffff;
-  color: #1e293b;
-  /* slate-800 */
+  background-color: rgb(var(--color-paper-dim));
+  color: rgb(var(--color-ink));
 }
 
 body {

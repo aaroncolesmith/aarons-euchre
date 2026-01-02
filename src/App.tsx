@@ -54,7 +54,7 @@ const PlayerSeat = ({
                 <div className="flex flex-col gap-2">
                     <button
                         onClick={() => dispatch({ type: 'SIT_PLAYER', payload: { seatIndex: index, name: state.currentViewPlayerName! } })}
-                        className="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border border-emerald-200 transition-all"
+                        className="bg-brand/10 hover:bg-brand/20 text-brand-dark px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border border-brand-dim transition-all"
                     >
                         Sit Here
                     </button>
@@ -65,7 +65,7 @@ const PlayerSeat = ({
                             const botName = availableBots[Math.floor(Math.random() * availableBots.length)] || 'Bot ' + Math.random().toString().substr(2, 3);
                             dispatch({ type: 'ADD_BOT', payload: { seatIndex: index, botName } });
                         }}
-                        className="bg-white hover:bg-slate-50 text-slate-500 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border border-slate-200 transition-all"
+                        className="bg-paper hover:bg-paper-dim text-ink-dim px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border border-ink-dim/50 transition-all"
                     >
                         Add Bot
                     </button>
@@ -92,7 +92,7 @@ const PlayerSeat = ({
                     <motion.div
                         initial={{ opacity: 0, scale: 0 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="absolute -top-7 bg-white text-cyan-600 text-[9px] font-black px-3 py-1 rounded-lg uppercase tracking-wider border-2 border-cyan-500 shadow-sm z-30 whitespace-nowrap"
+                        className="absolute -top-7 bg-paper text-cyan-600 text-[9px] font-black px-3 py-1 rounded-lg uppercase tracking-wider border-2 border-cyan-500 shadow-sm z-30 whitespace-nowrap"
                     >
                         Caller
                     </motion.div>
@@ -103,7 +103,7 @@ const PlayerSeat = ({
                     <motion.div
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
-                        className="absolute -top-6 -right-5 bg-white text-amber-500 text-xs font-black w-7 h-7 rounded-full flex items-center justify-center border-2 border-amber-500 shadow-sm z-30"
+                        className="absolute -top-6 -right-5 bg-paper text-amber-500 text-xs font-black w-7 h-7 rounded-full flex items-center justify-center border-2 border-amber-500 shadow-sm z-30"
                     >
                         D
                     </motion.div>
@@ -119,7 +119,7 @@ const PlayerSeat = ({
                     >
                         <div className="relative">
                             <CardComponent card={state.upcard} size="sm" rotation={position === 'top' ? 195 : 15} disabled />
-                            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-white text-emerald-700 text-[8px] font-black px-2 py-0.5 rounded shadow-sm border border-emerald-200 whitespace-nowrap z-30">
+                            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-paper text-brand-dark text-[8px] font-black px-2 py-0.5 rounded shadow-sm border border-brand-dim whitespace-nowrap z-30">
                                 UPCARD
                             </div>
                         </div>
@@ -130,14 +130,14 @@ const PlayerSeat = ({
                 {player.isComputer && inLobby && (
                     <button
                         onClick={() => dispatch({ type: 'REMOVE_PLAYER', payload: { seatIndex: index } })}
-                        className="absolute -top-2 -left-4 bg-white text-red-500 w-6 h-6 rounded-full flex items-center justify-center text-xs font-black border border-red-200 hover:border-red-500 transition-all z-10 shadow-sm"
+                        className="absolute -top-2 -left-4 bg-paper text-red-500 w-6 h-6 rounded-full flex items-center justify-center text-xs font-black border border-red-200 hover:border-red-500 transition-all z-10 shadow-sm"
                     >
                         ✕
                     </button>
                 )}
 
                 {/* Player Name */}
-                <div className={`font-hand font-black text-xl uppercase tracking-tight whitespace-nowrap px-2 transition-all duration-300 ${isCurrentTurn || isAnimatingDealer ? 'text-emerald-600 scale-110' : 'text-slate-400'}`}>
+                <div className={`font-hand font-black text-xl uppercase tracking-tight whitespace-nowrap px-2 transition-all duration-300 ${isCurrentTurn || isAnimatingDealer ? 'text-brand scale-110' : 'text-ink-dim'}`}>
                     {player.name}
                 </div>
 
@@ -152,8 +152,8 @@ const PlayerSeat = ({
                                     className={`
                                         w-3 h-5 rounded-[2px] transition-all
                                         ${hasCard
-                                            ? 'bg-white border-2 border-emerald-500'
-                                            : 'bg-transparent border-2 border-emerald-100'}
+                                            ? 'bg-paper border-2 border-brand'
+                                            : 'bg-transparent border-2 border-brand-dim/50'}
                                     `}
                                 />
                             );
@@ -166,7 +166,7 @@ const PlayerSeat = ({
                     <motion.div
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
-                        className="absolute -bottom-2 -right-6 bg-white text-emerald-600 text-sm font-black w-7 h-7 rounded-full flex items-center justify-center border-2 border-emerald-500 shadow-sm font-hand"
+                        className="absolute -bottom-2 -right-6 bg-paper text-brand text-sm font-black w-7 h-7 rounded-full flex items-center justify-center border-2 border-brand shadow-sm font-hand"
                     >
                         {state.tricksWon[player.id] || 0}
                     </motion.div>
@@ -205,8 +205,8 @@ const CardComponent = ({
         mobile: 'w-[77px] h-[115px] text-xl'
     };
 
-    const valClass = isRed ? 'text-red-600' : 'text-slate-900';
-    const invalidClass = isRed ? 'text-red-600/50' : 'text-slate-900/50';
+    const valClass = isRed ? 'text-red-600' : 'text-ink';
+    const invalidClass = isRed ? 'text-red-600/50' : 'text-ink/50';
 
     return (
         <motion.button
@@ -218,7 +218,7 @@ const CardComponent = ({
             className={`
                 ${sizes[size]} rounded-[1.25rem] border-2 shadow-[0_8px_30px_rgba(0,0,0,0.5)] 
                 flex flex-col items-center justify-center relative overflow-hidden transition-all duration-500
-                ${isValid ? 'bg-white border-white' : 'bg-white/90 border-slate-200/50 opacity-80'}
+                ${isValid ? 'bg-paper border-white' : 'bg-paper/90 border-ink-dim/50/50 opacity-80'}
             `}
             style={{ rotate: rotation }}
         >
@@ -245,29 +245,29 @@ const BotAuditView = ({ decisions, filterType }: { decisions: any[]; filterType?
 
     if (filteredDecisions.length === 0) {
         return (
-            <div className="bg-white border-2 border-emerald-500 rounded-2xl p-12 text-center shadow-[4px_4px_0px_0px_rgba(16,185,129,0.2)]">
-                <div className="text-slate-400 text-lg mb-2 font-black uppercase tracking-widest">No bot decisions logged yet</div>
-                <div className="text-emerald-600 text-sm font-bold">Play against bots to see their decision-making process here</div>
+            <div className="bg-paper border-2 border-brand rounded-2xl p-12 text-center shadow-sketch-brand">
+                <div className="text-ink-dim text-lg mb-2 font-black uppercase tracking-widest">No bot decisions logged yet</div>
+                <div className="text-brand text-sm font-bold">Play against bots to see their decision-making process here</div>
             </div>
         );
     }
 
     return (
-        <div className="bg-white border-2 border-emerald-500 rounded-2xl overflow-hidden shadow-[4px_4px_0px_0px_rgba(16,185,129,0.2)]">
+        <div className="bg-paper border-2 border-brand rounded-2xl overflow-hidden shadow-sketch-brand">
             <div className="overflow-x-auto overflow-y-auto custom-scrollbar">
                 <table className="w-full text-left text-xs font-hand">
-                    <thead className="bg-white sticky top-0 z-20">
-                        <tr className="text-[9px] font-black text-emerald-700 uppercase tracking-widest border-b-2 border-emerald-500">
-                            <th className="px-4 py-4 bg-white">Time</th>
-                            <th className="px-4 py-4 whitespace-nowrap bg-white">Game ID</th>
-                            <th className="px-4 py-4 bg-white">Bot</th>
-                            <th className="px-4 py-4 whitespace-nowrap bg-white">Archetype</th>
-                            <th className="px-4 py-4 bg-white">Phase</th>
-                            <th className="px-4 py-4 bg-white">Decision</th>
-                            <th className="px-4 py-4 whitespace-nowrap bg-white">Hand at Decision</th>
-                            <th className="px-4 py-4 bg-white">Reasoning</th>
-                            <th className="px-4 py-4 text-center bg-white">Strength</th>
-                            <th className="px-4 py-4 text-center bg-white">Score</th>
+                    <thead className="bg-paper sticky top-0 z-20">
+                        <tr className="text-[9px] font-black text-brand-dark uppercase tracking-widest border-b-2 border-brand">
+                            <th className="px-4 py-4 bg-paper">Time</th>
+                            <th className="px-4 py-4 whitespace-nowrap bg-paper">Game ID</th>
+                            <th className="px-4 py-4 bg-paper">Bot</th>
+                            <th className="px-4 py-4 whitespace-nowrap bg-paper">Archetype</th>
+                            <th className="px-4 py-4 bg-paper">Phase</th>
+                            <th className="px-4 py-4 bg-paper">Decision</th>
+                            <th className="px-4 py-4 whitespace-nowrap bg-paper">Hand at Decision</th>
+                            <th className="px-4 py-4 bg-paper">Reasoning</th>
+                            <th className="px-4 py-4 text-center bg-paper">Strength</th>
+                            <th className="px-4 py-4 text-center bg-paper">Score</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-emerald-100">
@@ -285,23 +285,23 @@ const BotAuditView = ({ decisions, filterType }: { decisions: any[]; filterType?
                             };
 
                             return (
-                                <tr key={`${d.id || i}`} className="hover:bg-emerald-50 transition-colors group border-b border-emerald-50">
-                                    <td className="px-4 py-3 text-slate-400 text-[10px] font-medium whitespace-nowrap tabular-nums">
+                                <tr key={`${d.id || i}`} className="hover:bg-brand/10 transition-colors group border-b border-emerald-50">
+                                    <td className="px-4 py-3 text-ink-dim text-[10px] font-medium whitespace-nowrap tabular-nums">
                                         {new Date(d.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
                                     </td>
-                                    <td className="px-4 py-3 text-slate-400 text-[10px] font-black tabular-nums whitespace-nowrap">{d.game_code || 'N/A'}</td>
-                                    <td className="px-4 py-3 font-black text-emerald-900 whitespace-nowrap">{d.player_name}</td>
+                                    <td className="px-4 py-3 text-ink-dim text-[10px] font-black tabular-nums whitespace-nowrap">{d.game_code || 'N/A'}</td>
+                                    <td className="px-4 py-3 font-black text-brand-dark whitespace-nowrap">{d.player_name}</td>
                                     <td className="px-4 py-3 whitespace-nowrap">
-                                        <span className="text-[9px] text-emerald-800 font-black px-2 py-0.5 bg-emerald-100 rounded-full border border-emerald-200 uppercase tracking-tight">
+                                        <span className="text-[9px] text-brand-dark font-black px-2 py-0.5 bg-brand/20 rounded-full border border-brand-dim uppercase tracking-tight">
                                             {d.archetype}
                                         </span>
                                     </td>
-                                    <td className="px-4 py-3 text-slate-500 uppercase text-[9px] font-black whitespace-nowrap">{d.game_phase}</td>
-                                    <td className="px-4 py-3 font-black text-emerald-600 group-hover:text-emerald-700 transition-colors whitespace-nowrap">{d.decision}</td>
+                                    <td className="px-4 py-3 text-ink-dim uppercase text-[9px] font-black whitespace-nowrap">{d.game_phase}</td>
+                                    <td className="px-4 py-3 font-black text-brand group-hover:text-brand-dark transition-colors whitespace-nowrap">{d.decision}</td>
                                     <td className="px-4 py-3 text-slate-600 font-bold text-[10px] whitespace-nowrap font-mono">{formatHand(d.hand_state)}</td>
                                     <td className="px-4 py-3 text-slate-700 min-w-[300px] max-w-md leading-relaxed text-[11px] font-hand">{d.reasoning}</td>
                                     <td className="px-4 py-3 text-center font-black text-purple-600 tabular-nums">{d.hand_strength?.toFixed(1) || '-'}</td>
-                                    <td className="px-4 py-3 text-center text-slate-400 text-[9px] font-black tabular-nums whitespace-nowrap">
+                                    <td className="px-4 py-3 text-center text-ink-dim text-[9px] font-black tabular-nums whitespace-nowrap">
                                         {d.current_score_us}-{d.current_score_them}
                                     </td>
                                 </tr>
@@ -437,9 +437,9 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
 
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-start justify-center pt-16 md:pt-24 p-4 bg-slate-900/10 backdrop-blur-sm animate-in fade-in duration-300 font-hand">
-            <div className="bg-white border-4 border-slate-800 w-full max-w-4xl rounded-[2rem] shadow-[12px_12px_0px_0px_rgba(30,41,59,1)] overflow-hidden animate-in zoom-in duration-300 transform rotate-1 max-h-[85vh] flex flex-col">
-                <div className="p-6 md:p-8 flex flex-col flex-1 min-h-0 bg-white">
+        <div className="fixed inset-0 z-[100] flex items-start justify-center pt-16 md:pt-24 p-4 bg-ink/10 backdrop-blur-sm animate-in fade-in duration-300 font-hand">
+            <div className="bg-paper border-4 border-ink w-full max-w-4xl rounded-[2rem] shadow-sketch-ink overflow-hidden animate-in zoom-in duration-300 transform rotate-1 max-h-[85vh] flex flex-col">
+                <div className="p-6 md:p-8 flex flex-col flex-1 min-h-0 bg-paper">
                     <div className="flex justify-between items-start mb-2 shrink-0">
                         <div className="flex-1 overflow-x-auto min-w-0 mr-4 scrollbar-hide">
                             <div className="flex gap-2 flex-nowrap py-1">
@@ -455,8 +455,8 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                                         key={t.id}
                                         onClick={() => setTab(t.id as any)}
                                         className={`px-2 py-2 mx-1 text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap border-b-4 ${tab === t.id
-                                            ? 'text-emerald-600 border-emerald-500'
-                                            : 'text-slate-400 hover:text-emerald-600 border-transparent'
+                                            ? 'text-brand border-brand'
+                                            : 'text-ink-dim hover:text-brand border-transparent'
                                             }`}
                                     >
                                         {t.label}
@@ -466,15 +466,15 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                                     onClick={downloadSessionLog}
                                     disabled={state.eventLog.length === 0}
                                     className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all border-2 whitespace-nowrap ${state.eventLog.length > 0
-                                        ? 'bg-white text-slate-800 border-slate-800 hover:bg-slate-50 cursor-pointer shadow-[2px_2px_0px_0px_rgba(30,41,59,1)]'
-                                        : 'bg-transparent text-slate-300 border-slate-200 cursor-not-allowed'
+                                        ? 'bg-paper text-ink border-ink hover:bg-paper-dim cursor-pointer shadow-sketch-ink'
+                                        : 'bg-transparent text-ink-dim/50 border-ink-dim/50 cursor-not-allowed'
                                         }`}
                                 >
                                     📥 Log
                                 </button>
                             </div>
                         </div>
-                        <button onClick={onClose} className="bg-white hover:bg-slate-100 text-slate-800 border-2 border-slate-800 p-1.5 rounded-lg transition-all shadow-[2px_2px_0px_0px_rgba(30,41,59,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none flex-shrink-0">
+                        <button onClick={onClose} className="bg-paper hover:bg-paper-dim text-ink border-2 border-ink p-1.5 rounded-lg transition-all shadow-sketch-ink active:translate-x-[1px] active:translate-y-[1px] active:shadow-none flex-shrink-0">
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
                         </button>
                     </div>
@@ -482,41 +482,41 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                     {tab === 'me' ? (
                         <div className="space-y-10 overflow-y-auto pr-4 custom-scrollbar flex-1 min-h-0 pb-6">
                             <div>
-                                <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em] mb-4 border-b border-slate-800 pb-2">Efficiency & Global</h3>
+                                <h3 className="text-[10px] font-black text-ink-dim uppercase tracking-[0.4em] mb-4 border-b border-ink pb-2">Efficiency & Global</h3>
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                     {[
-                                        { label: 'Games Played', value: human.stats.gamesPlayed, color: 'text-slate-400' },
-                                        { label: 'Game Win %', value: `${human.stats.gamesPlayed > 0 ? Math.round((human.stats.gamesWon / human.stats.gamesPlayed) * 100) : 0}%`, color: 'text-emerald-400' },
-                                        { label: 'Hands Played', value: human.stats.handsPlayed, color: 'text-slate-400' },
+                                        { label: 'Games Played', value: human.stats.gamesPlayed, color: 'text-ink-dim' },
+                                        { label: 'Game Win %', value: `${human.stats.gamesPlayed > 0 ? Math.round((human.stats.gamesWon / human.stats.gamesPlayed) * 100) : 0}%`, color: 'text-brand-dim' },
+                                        { label: 'Hands Played', value: human.stats.handsPlayed, color: 'text-ink-dim' },
                                         { label: 'Hand Win %', value: `${human.stats.handsPlayed > 0 ? Math.round((human.stats.handsWon / human.stats.handsPlayed) * 100) : 0}%`, color: 'text-cyan-400' },
                                     ].map((stat, i) => (
-                                        <div key={i} className="bg-white border-2 border-emerald-500 p-4 rounded-2xl flex flex-col items-center justify-center shadow-[4px_4px_0px_0px_rgba(16,185,129,0.2)] transform hover:-rotate-1 transition-transform">
-                                            <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{stat.label}</div>
-                                            <div className={`text-3xl font-black font-hand ${String(stat.value).includes('%') ? 'text-emerald-600' : 'text-slate-800'}`}>{stat.value}</div>
+                                        <div key={i} className="bg-paper border-2 border-brand p-4 rounded-2xl flex flex-col items-center justify-center shadow-sketch-brand transform hover:-rotate-1 transition-transform">
+                                            <div className="text-[10px] font-black text-ink-dim uppercase tracking-widest mb-1">{stat.label}</div>
+                                            <div className={`text-3xl font-black font-hand ${String(stat.value).includes('%') ? 'text-brand' : 'text-ink'}`}>{stat.value}</div>
                                         </div>
                                     ))}
                                 </div>
                             </div>
 
                             <div>
-                                <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em] mb-4 border-b border-slate-800 pb-2">Trick Play</h3>
+                                <h3 className="text-[10px] font-black text-ink-dim uppercase tracking-[0.4em] mb-4 border-b border-ink pb-2">Trick Play</h3>
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                     {[
-                                        { label: 'Tricks Played', value: human.stats.tricksPlayed, color: 'text-slate-400' },
+                                        { label: 'Tricks Played', value: human.stats.tricksPlayed, color: 'text-ink-dim' },
                                         { label: 'Tricks Taken', value: human.stats.tricksTaken, color: 'text-purple-400' },
                                         { label: 'Tricks Won (Team)', value: human.stats.tricksWonTeam, color: 'text-indigo-400' },
                                         { label: 'Trick Win %', value: `${human.stats.tricksPlayed > 0 ? Math.round((human.stats.tricksWonTeam / human.stats.tricksPlayed) * 100) : 0}%`, color: 'text-indigo-400' },
                                     ].map((stat, i) => (
-                                        <div key={i} className="bg-white border-2 border-emerald-500 p-4 rounded-2xl flex flex-col items-center justify-center shadow-[4px_4px_0px_0px_rgba(16,185,129,0.2)] transform hover:-rotate-1 transition-transform">
-                                            <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{stat.label}</div>
-                                            <div className={`text-3xl font-black font-hand ${String(stat.value).includes('%') ? 'text-emerald-600' : 'text-slate-800'}`}>{stat.value}</div>
+                                        <div key={i} className="bg-paper border-2 border-brand p-4 rounded-2xl flex flex-col items-center justify-center shadow-sketch-brand transform hover:-rotate-1 transition-transform">
+                                            <div className="text-[10px] font-black text-ink-dim uppercase tracking-widest mb-1">{stat.label}</div>
+                                            <div className={`text-3xl font-black font-hand ${String(stat.value).includes('%') ? 'text-brand' : 'text-ink'}`}>{stat.value}</div>
                                         </div>
                                     ))}
                                 </div>
                             </div>
 
                             <div>
-                                <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em] mb-4 border-b border-slate-800 pb-2">Bidding & Loners</h3>
+                                <h3 className="text-[10px] font-black text-ink-dim uppercase tracking-[0.4em] mb-4 border-b border-ink pb-2">Bidding & Loners</h3>
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                     {[
                                         { label: 'Hands Called', value: human.stats.callsMade, color: 'text-amber-400' },
@@ -524,16 +524,16 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                                         { label: 'Loner Attempts', value: human.stats.lonersAttempted, color: 'text-pink-400' },
                                         { label: 'Loners Won (5/5)', value: human.stats.lonersConverted, color: 'text-pink-500' },
                                     ].map((stat, i) => (
-                                        <div key={i} className="bg-white border-2 border-emerald-500 p-4 rounded-2xl flex flex-col items-center justify-center shadow-[4px_4px_0px_0px_rgba(16,185,129,0.2)] transform hover:-rotate-1 transition-transform">
-                                            <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{stat.label}</div>
-                                            <div className={`text-3xl font-black font-hand ${String(stat.value).includes('%') ? 'text-emerald-600' : 'text-slate-800'}`}>{stat.value}</div>
+                                        <div key={i} className="bg-paper border-2 border-brand p-4 rounded-2xl flex flex-col items-center justify-center shadow-sketch-brand transform hover:-rotate-1 transition-transform">
+                                            <div className="text-[10px] font-black text-ink-dim uppercase tracking-widest mb-1">{stat.label}</div>
+                                            <div className={`text-3xl font-black font-hand ${String(stat.value).includes('%') ? 'text-brand' : 'text-ink'}`}>{stat.value}</div>
                                         </div>
                                     ))}
                                 </div>
                             </div>
 
                             <div>
-                                <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em] mb-4 border-b border-slate-800 pb-2">Impact Moments</h3>
+                                <h3 className="text-[10px] font-black text-ink-dim uppercase tracking-[0.4em] mb-4 border-b border-ink pb-2">Impact Moments</h3>
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                     {[
                                         { label: 'Euchred Opponent', value: human.stats.euchresMade, color: 'text-red-400' },
@@ -541,9 +541,9 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                                         { label: 'Sweeps (5 Tricks)', value: human.stats.sweeps, color: 'text-yellow-400' },
                                         { label: 'Been Swept (0/5)', value: human.stats.swept, color: 'text-slate-700' },
                                     ].map((stat, i) => (
-                                        <div key={i} className="bg-white border-2 border-emerald-500 p-4 rounded-2xl flex flex-col items-center justify-center shadow-[4px_4px_0px_0px_rgba(16,185,129,0.2)] transform hover:-rotate-1 transition-transform">
-                                            <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{stat.label}</div>
-                                            <div className={`text-3xl font-black font-hand ${String(stat.value).includes('%') ? 'text-emerald-600' : 'text-slate-800'}`}>{stat.value}</div>
+                                        <div key={i} className="bg-paper border-2 border-brand p-4 rounded-2xl flex flex-col items-center justify-center shadow-sketch-brand transform hover:-rotate-1 transition-transform">
+                                            <div className="text-[10px] font-black text-ink-dim uppercase tracking-widest mb-1">{stat.label}</div>
+                                            <div className={`text-3xl font-black font-hand ${String(stat.value).includes('%') ? 'text-brand' : 'text-ink'}`}>{stat.value}</div>
                                         </div>
                                     ))}
                                 </div>
@@ -629,7 +629,7 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                                         <div className="flex items-center gap-2">
                                             {children}
                                             {sortColumn === column && (
-                                                <span className="text-emerald-400">
+                                                <span className="text-brand-dim">
                                                     {sortDirection === 'asc' ? '↑' : '↓'}
                                                 </span>
                                             )}
@@ -638,11 +638,11 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                                 );
 
                                 return (
-                                    <div className="bg-white border-2 border-emerald-500 rounded-2xl overflow-hidden shadow-[4px_4px_0px_0px_rgba(16,185,129,0.2)]">
+                                    <div className="bg-paper border-2 border-brand rounded-2xl overflow-hidden shadow-sketch-brand">
                                         <div className="overflow-x-auto">
                                             <table className="w-full text-left text-sm font-hand">
                                                 <thead>
-                                                    <tr className="bg-white border-b-2 border-emerald-500 text-[10px] font-black text-emerald-700 uppercase tracking-widest">
+                                                    <tr className="bg-paper border-b-2 border-brand text-[10px] font-black text-brand-dark uppercase tracking-widest">
                                                         <SortableHeader column="name">Player</SortableHeader>
                                                         <SortableHeader column="gp">GP</SortableHeader>
                                                         <SortableHeader column="wins">Wins</SortableHeader>
@@ -664,15 +664,15 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                                                             : 0;
 
                                                         return (
-                                                            <tr key={i} className={`group hover:bg-emerald-50 transition-colors ${p.name === human.name ? 'bg-emerald-50' : ''}`}>
-                                                                <td className="px-4 py-3 font-bold text-emerald-900 whitespace-nowrap">
+                                                            <tr key={i} className={`group hover:bg-brand/10 transition-colors ${p.name === human.name ? 'bg-brand/10' : ''}`}>
+                                                                <td className="px-4 py-3 font-bold text-brand-dark whitespace-nowrap">
                                                                     {p.name}
-                                                                    {p.name === human.name && <span className="ml-2 bg-emerald-500 text-white text-[8px] px-2 py-0.5 rounded-full">YOU</span>}
+                                                                    {p.name === human.name && <span className="ml-2 bg-brand text-white text-[8px] px-2 py-0.5 rounded-full">YOU</span>}
                                                                 </td>
                                                                 <td className="px-4 py-3 text-slate-700 font-bold tabular-nums font-hand text-lg">{p.gamesPlayed}</td>
-                                                                <td className="px-4 py-3 text-emerald-600 font-bold tabular-nums font-hand text-lg">{p.gamesWon}</td>
+                                                                <td className="px-4 py-3 text-brand font-bold tabular-nums font-hand text-lg">{p.gamesWon}</td>
                                                                 <td className="px-4 py-3 text-red-500 font-bold tabular-nums font-hand text-lg">{p.gamesPlayed - p.gamesWon}</td>
-                                                                <td className="px-4 py-3 text-emerald-600 font-black tabular-nums font-hand text-lg">
+                                                                <td className="px-4 py-3 text-brand font-black tabular-nums font-hand text-lg">
                                                                     {p.gamesPlayed > 0 ? Math.round((p.gamesWon / p.gamesPlayed) * 100) : 0}%
                                                                 </td>
                                                                 <td className="px-4 py-3 text-cyan-600 font-black tabular-nums font-hand text-lg">
@@ -704,23 +704,23 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                         <div>
                                             <div className="text-3xl font-black text-white">{freezeRate.total}</div>
-                                            <div className="text-xs text-slate-400">Total Freezes</div>
+                                            <div className="text-xs text-ink-dim">Total Freezes</div>
                                         </div>
                                         <div>
-                                            <div className="text-3xl font-black text-emerald-400">{freezeRate.recovered}</div>
-                                            <div className="text-xs text-slate-400">Recovered</div>
+                                            <div className="text-3xl font-black text-brand-dim">{freezeRate.recovered}</div>
+                                            <div className="text-xs text-ink-dim">Recovered</div>
                                         </div>
                                         <div>
                                             <div className="text-3xl font-black text-red-400">{freezeRate.unrecovered}</div>
-                                            <div className="text-xs text-slate-400">Unrecovered</div>
+                                            <div className="text-xs text-ink-dim">Unrecovered</div>
                                         </div>
                                         <div>
                                             <div className="text-3xl font-black text-cyan-400">{freezeRate.recoveryRate}</div>
-                                            <div className="text-xs text-slate-400">Recovery Rate</div>
+                                            <div className="text-xs text-ink-dim">Recovery Rate</div>
                                         </div>
                                     </div>
                                     <div className="mt-4 pt-4 border-t border-red-800/30">
-                                        <div className="text-sm text-slate-300">
+                                        <div className="text-sm text-ink-dim/50">
                                             <span className="font-bold text-yellow-400">{freezeRate.freezesPerHour}</span> freezes/hour average
                                         </div>
                                     </div>
@@ -730,49 +730,49 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                             {/* Recent Freeze Incidents */}
                             <div>
                                 <div className="flex justify-between items-center mb-4">
-                                    <div className="text-xs font-black text-slate-400 uppercase tracking-widest">
+                                    <div className="text-xs font-black text-ink-dim uppercase tracking-widest">
                                         Recent Freeze Incidents
                                     </div>
                                     <button
                                         onClick={() => { getFreezeStats().then(setFreezeStats); getFreezeRate(24).then(setFreezeRate); }}
-                                        className="px-4 py-2 rounded-full text-[10px] font-black bg-slate-800 text-slate-400 hover:bg-slate-700 transition-all"
+                                        className="px-4 py-2 rounded-full text-[10px] font-black bg-ink text-ink-dim hover:bg-slate-700 transition-all"
                                     >
                                         🔄 Refresh
                                     </button>
                                 </div>
 
                                 {!freezeStats ? (
-                                    <div className="bg-white border-2 border-emerald-500 rounded-[2rem] p-12 text-center shadow-[4px_4px_0px_0px_rgba(16,185,129,0.2)]">
-                                        <div className="text-slate-400 font-medium">Loading freeze data...</div>
+                                    <div className="bg-paper border-2 border-brand rounded-[2rem] p-12 text-center shadow-sketch-brand">
+                                        <div className="text-ink-dim font-medium">Loading freeze data...</div>
                                     </div>
                                 ) : freezeStats.length === 0 ? (
-                                    <div className="bg-white border-2 border-emerald-500 rounded-[2rem] p-12 text-center shadow-[4px_4px_0px_0px_rgba(16,185,129,0.2)]">
-                                        <div className="text-emerald-500 text-lg mb-2 font-black">🎉 No Freeze Incidents!</div>
-                                        <div className="text-slate-500 text-sm font-medium">All games running smoothly</div>
+                                    <div className="bg-paper border-2 border-brand rounded-[2rem] p-12 text-center shadow-sketch-brand">
+                                        <div className="text-brand text-lg mb-2 font-black">🎉 No Freeze Incidents!</div>
+                                        <div className="text-ink-dim text-sm font-medium">All games running smoothly</div>
                                     </div>
                                 ) : (
-                                    <div className="bg-white border-2 border-emerald-500 rounded-[2rem] overflow-hidden shadow-[4px_4px_0px_0px_rgba(16,185,129,0.2)]">
+                                    <div className="bg-paper border-2 border-brand rounded-[2rem] overflow-hidden shadow-sketch-brand">
                                         <div className="overflow-x-auto overflow-y-auto custom-scrollbar">
                                             <table className="w-full text-left text-xs font-hand">
-                                                <thead className="bg-white sticky top-0 z-20">
-                                                    <tr className="text-[9px] font-black text-emerald-700 uppercase tracking-widest border-b-2 border-emerald-500">
-                                                        <th className="px-4 py-4 bg-white">Time</th>
-                                                        <th className="px-4 py-4 bg-white">Game</th>
-                                                        <th className="px-4 py-4 bg-white">Type</th>
-                                                        <th className="px-4 py-4 bg-white">Phase</th>
-                                                        <th className="px-4 py-4 bg-white">Player</th>
-                                                        <th className="px-4 py-4 bg-white">Duration</th>
-                                                        <th className="px-4 py-4 bg-white">Recovery</th>
-                                                        <th className="px-4 py-4 bg-white">Version</th>
+                                                <thead className="bg-paper sticky top-0 z-20">
+                                                    <tr className="text-[9px] font-black text-brand-dark uppercase tracking-widest border-b-2 border-brand">
+                                                        <th className="px-4 py-4 bg-paper">Time</th>
+                                                        <th className="px-4 py-4 bg-paper">Game</th>
+                                                        <th className="px-4 py-4 bg-paper">Type</th>
+                                                        <th className="px-4 py-4 bg-paper">Phase</th>
+                                                        <th className="px-4 py-4 bg-paper">Player</th>
+                                                        <th className="px-4 py-4 bg-paper">Duration</th>
+                                                        <th className="px-4 py-4 bg-paper">Recovery</th>
+                                                        <th className="px-4 py-4 bg-paper">Version</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody className="divide-y divide-emerald-100">
                                                     {freezeStats.map((incident: any) => (
-                                                        <tr key={incident.id} className="hover:bg-emerald-50 transition-colors group">
-                                                            <td className="px-4 py-3 text-slate-400 font-medium text-[10px] whitespace-nowrap tabular-nums">
+                                                        <tr key={incident.id} className="hover:bg-brand/10 transition-colors group">
+                                                            <td className="px-4 py-3 text-ink-dim font-medium text-[10px] whitespace-nowrap tabular-nums">
                                                                 {new Date(incident.created_at).toLocaleString()}
                                                             </td>
-                                                            <td className="px-4 py-3 font-black text-emerald-600 font-mono">
+                                                            <td className="px-4 py-3 font-black text-brand font-mono">
                                                                 {incident.game_code}
                                                             </td>
                                                             <td className="px-4 py-3">
@@ -780,10 +780,10 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                                                                     {incident.freeze_type}
                                                                 </span>
                                                             </td>
-                                                            <td className="px-4 py-3 text-emerald-500 font-bold uppercase text-[9px] tracking-wider">{incident.phase}</td>
+                                                            <td className="px-4 py-3 text-brand font-bold uppercase text-[9px] tracking-wider">{incident.phase}</td>
                                                             <td className="px-4 py-3">
-                                                                <div className="text-emerald-900 font-black">{incident.current_player_name || 'Unknown'}</div>
-                                                                <div className="text-[9px] text-emerald-400 font-bold">
+                                                                <div className="text-brand-dark font-black">{incident.current_player_name || 'Unknown'}</div>
+                                                                <div className="text-[9px] text-brand-dim font-bold">
                                                                     {incident.is_bot ? '🤖 Bot' : '👤 Human'}
                                                                 </div>
                                                             </td>
@@ -792,7 +792,7 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                                                             </td>
                                                             <td className="px-4 py-3">
                                                                 {incident.recovered ? (
-                                                                    <span className="text-[9px] font-black text-emerald-600 flex items-center gap-1">
+                                                                    <span className="text-[9px] font-black text-brand flex items-center gap-1">
                                                                         ✓ Recovered
                                                                     </span>
                                                                 ) : (
@@ -801,7 +801,7 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                                                                     </span>
                                                                 )}
                                                             </td>
-                                                            <td className="px-4 py-3 text-slate-400 font-mono text-[10px]">
+                                                            <td className="px-4 py-3 text-ink-dim font-mono text-[10px]">
                                                                 {incident.app_version}
                                                             </td>
                                                         </tr>
@@ -817,7 +817,7 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                         <div className="space-y-6 flex-1 overflow-y-auto min-h-0 custom-scrollbar pr-2 pb-6">
                             {/* Stats Wipe (Aaron only) */}
                             {state.currentUser === 'Aaron' && (
-                                <div className="flex justify-between items-center bg-white border-2 border-red-500 p-4 rounded-2xl shadow-[4px_4px_0px_0px_rgba(239,68,68,0.2)]">
+                                <div className="flex justify-between items-center bg-paper border-2 border-red-500 p-4 rounded-2xl shadow-[4px_4px_0px_0px_rgba(239,68,68,0.2)]">
                                     <div className="text-red-500 text-sm font-black uppercase tracking-widest">
                                         ⚠️ DANGER ZONE - Stats Management
                                     </div>
@@ -844,7 +844,7 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                             {/* localStorage Management */}
                             <div>
                                 <div className="flex justify-between items-center mb-4">
-                                    <div className="text-xs font-black text-emerald-700 uppercase tracking-widest border-b-2 border-emerald-500 pb-1">
+                                    <div className="text-xs font-black text-brand-dark uppercase tracking-widest border-b-2 border-brand pb-1">
                                         localStorage Management
                                     </div>
                                 </div>
@@ -863,30 +863,30 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                                     return (
                                         <div className="space-y-4">
                                             {/* Summary Card */}
-                                            <div className="bg-white border-2 border-emerald-500 rounded-2xl p-6 shadow-[4px_4px_0px_0px_rgba(16,185,129,0.2)]">
+                                            <div className="bg-paper border-2 border-brand rounded-2xl p-6 shadow-sketch-brand">
                                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                                     <div>
                                                         <div className="text-3xl font-black text-slate-700 font-hand">{gamesArray.length}</div>
-                                                        <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">Total stored</div>
+                                                        <div className="text-[10px] font-black uppercase tracking-widest text-ink-dim">Total stored</div>
                                                     </div>
                                                     <div>
-                                                        <div className="text-3xl font-black text-emerald-600 font-hand">{aaronGames.length}</div>
-                                                        <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">Your Games</div>
+                                                        <div className="text-3xl font-black text-brand font-hand">{aaronGames.length}</div>
+                                                        <div className="text-[10px] font-black uppercase tracking-widest text-ink-dim">Your Games</div>
                                                     </div>
                                                     <div>
                                                         <div className="text-3xl font-black text-cyan-500 font-hand">{inProgress.length}</div>
-                                                        <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">In Progress</div>
+                                                        <div className="text-[10px] font-black uppercase tracking-widest text-ink-dim">In Progress</div>
                                                     </div>
                                                     <div>
                                                         <div className="text-3xl font-black text-purple-500 font-hand">{completed.length}</div>
-                                                        <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">Completed</div>
+                                                        <div className="text-[10px] font-black uppercase tracking-widest text-ink-dim">Completed</div>
                                                     </div>
                                                 </div>
-                                                <div className="mt-4 pt-4 border-t border-emerald-100">
+                                                <div className="mt-4 pt-4 border-t border-brand-dim/50">
                                                     <div className="text-sm text-slate-600 font-hand">
-                                                        <span className="font-bold text-emerald-600">Cloud Games:</span> {cloudGames.length} (source of truth)
+                                                        <span className="font-bold text-brand">Cloud Games:</span> {cloudGames.length} (source of truth)
                                                     </div>
-                                                    <div className="text-xs text-slate-400 mt-2 font-bold">
+                                                    <div className="text-xs text-ink-dim mt-2 font-bold">
                                                         💡 If counts don't match cloud, clear localStorage to sync fresh data
                                                     </div>
                                                 </div>
@@ -905,7 +905,7 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                                                         a.click();
                                                         URL.revokeObjectURL(url);
                                                     }}
-                                                    className="flex-1 px-6 py-3 rounded-xl bg-white border-2 border-slate-800 text-slate-800 hover:bg-slate-50 text-sm font-black uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(30,41,59,1)] transition-all active:translate-y-[2px] active:shadow-none"
+                                                    className="flex-1 px-6 py-3 rounded-xl bg-paper border-2 border-ink text-ink hover:bg-paper-dim text-sm font-black uppercase tracking-widest shadow-sketch-ink transition-all active:translate-y-[2px] active:shadow-none"
                                                 >
                                                     💾 Export Backup
                                                 </button>
@@ -926,29 +926,29 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
 
                                             {/* Game List */}
                                             {aaronGames.length > 0 && (
-                                                <div className="bg-white border-2 border-emerald-500 rounded-2xl overflow-hidden shadow-[4px_4px_0px_0px_rgba(16,185,129,0.2)]">
+                                                <div className="bg-paper border-2 border-brand rounded-2xl overflow-hidden shadow-sketch-brand">
                                                     <div className="overflow-x-auto max-h-[300px] overflow-y-auto custom-scrollbar">
                                                         <table className="w-full text-left text-xs font-hand">
-                                                            <thead className="bg-white sticky top-0 border-b-2 border-emerald-500">
-                                                                <tr className="text-[9px] font-black text-emerald-700 uppercase tracking-widest">
-                                                                    <th className="px-4 py-3 bg-white">Table Name</th>
-                                                                    <th className="px-4 py-3 bg-white">Code</th>
-                                                                    <th className="px-4 py-3 bg-white">Phase</th>
-                                                                    <th className="px-4 py-3 bg-white">Score</th>
-                                                                    <th className="px-4 py-3 bg-white">Last Active</th>
+                                                            <thead className="bg-paper sticky top-0 border-b-2 border-brand">
+                                                                <tr className="text-[9px] font-black text-brand-dark uppercase tracking-widest">
+                                                                    <th className="px-4 py-3 bg-paper">Table Name</th>
+                                                                    <th className="px-4 py-3 bg-paper">Code</th>
+                                                                    <th className="px-4 py-3 bg-paper">Phase</th>
+                                                                    <th className="px-4 py-3 bg-paper">Score</th>
+                                                                    <th className="px-4 py-3 bg-paper">Last Active</th>
                                                                 </tr>
                                                             </thead>
                                                             <tbody className="divide-y divide-emerald-100">
                                                                 {aaronGames
                                                                     .sort((a: any, b: any) => (b.lastActive || 0) - (a.lastActive || 0))
                                                                     .map((g: any, i: number) => (
-                                                                        <tr key={i} className="hover:bg-emerald-50 transition-colors border-b border-emerald-50">
-                                                                            <td className="px-4 py-3 text-emerald-900 font-bold">{g.tableName || 'Unnamed'}</td>
-                                                                            <td className="px-4 py-3 font-mono text-emerald-600 font-bold">{g.tableCode || 'N/A'}</td>
+                                                                        <tr key={i} className="hover:bg-brand/10 transition-colors border-b border-emerald-50">
+                                                                            <td className="px-4 py-3 text-brand-dark font-bold">{g.tableName || 'Unnamed'}</td>
+                                                                            <td className="px-4 py-3 font-mono text-brand font-bold">{g.tableCode || 'N/A'}</td>
                                                                             <td className="px-4 py-3">
                                                                                 <span className={`px-2 py-1 rounded-full text-[9px] font-black border uppercase tracking-tight ${g.phase === 'game_over'
-                                                                                    ? 'bg-slate-100 text-slate-400 border-slate-200'
-                                                                                    : 'bg-emerald-100 text-emerald-600 border-emerald-200'
+                                                                                    ? 'bg-paper-dim text-ink-dim border-ink-dim/50'
+                                                                                    : 'bg-brand/20 text-brand border-brand-dim'
                                                                                     }`}>
                                                                                     {g.phase}
                                                                                 </span>
@@ -956,7 +956,7 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                                                                             <td className="px-4 py-3 text-purple-600 font-bold">
                                                                                 {g.scores?.team1 || 0}-{g.scores?.team2 || 0}
                                                                             </td>
-                                                                            <td className="px-4 py-3 text-slate-400 text-[10px] tabular-nums">
+                                                                            <td className="px-4 py-3 text-ink-dim text-[10px] tabular-nums">
                                                                                 {g.lastActive
                                                                                     ? new Date(g.lastActive).toLocaleString('en-US', {
                                                                                         month: '2-digit',
@@ -982,23 +982,23 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                         <div className="space-y-6 flex-1 overflow-y-auto min-h-0 custom-scrollbar pr-2 pb-6">
                             {/* Filter Controls */}
                             {/* Filter Controls */}
-                            <div className="flex gap-8 border-b-2 border-emerald-100/50 px-2">
+                            <div className="flex gap-8 border-b-2 border-brand-dim/50/50 px-2">
                                 <button
                                     onClick={() => setBotAuditFilter('all')}
-                                    className={`pb-3 text-[10px] md:text-xs font-black uppercase tracking-widest transition-all relative ${botAuditFilter === 'all' ? 'text-emerald-600' : 'text-slate-400 hover:text-emerald-400'}`}
+                                    className={`pb-3 text-[10px] md:text-xs font-black uppercase tracking-widest transition-all relative ${botAuditFilter === 'all' ? 'text-brand' : 'text-ink-dim hover:text-brand-dim'}`}
                                 >
                                     All
                                     {botAuditFilter === 'all' && (
-                                        <motion.div layoutId="auditFilterTab" className="absolute bottom-[-2px] left-0 right-0 h-[3px] bg-emerald-500 rounded-t-full" />
+                                        <motion.div layoutId="auditFilterTab" className="absolute bottom-[-2px] left-0 right-0 h-[3px] bg-brand rounded-t-full" />
                                     )}
                                 </button>
                                 <button
                                     onClick={() => setBotAuditFilter('trump_calls')}
-                                    className={`pb-3 text-[10px] md:text-xs font-black uppercase tracking-widest transition-all relative ${botAuditFilter === 'trump_calls' ? 'text-emerald-600' : 'text-slate-400 hover:text-emerald-400'}`}
+                                    className={`pb-3 text-[10px] md:text-xs font-black uppercase tracking-widest transition-all relative ${botAuditFilter === 'trump_calls' ? 'text-brand' : 'text-ink-dim hover:text-brand-dim'}`}
                                 >
                                     Trump Calls
                                     {botAuditFilter === 'trump_calls' && (
-                                        <motion.div layoutId="auditFilterTab" className="absolute bottom-[-2px] left-0 right-0 h-[3px] bg-emerald-500 rounded-t-full" />
+                                        <motion.div layoutId="auditFilterTab" className="absolute bottom-[-2px] left-0 right-0 h-[3px] bg-brand rounded-t-full" />
                                     )}
                                 </button>
                             </div>
@@ -1007,11 +1007,11 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                         </div>
                     ) : tab === 'commentary' ? (
                         <div className="flex-1 overflow-y-auto min-h-0 custom-scrollbar pr-2 pb-6">
-                            <div className="bg-white border-2 border-emerald-500 rounded-[2rem] p-6 h-full overflow-y-auto space-y-4 custom-scrollbar shadow-[4px_4px_0px_0px_rgba(16,185,129,0.2)]">
+                            <div className="bg-paper border-2 border-brand rounded-[2rem] p-6 h-full overflow-y-auto space-y-4 custom-scrollbar shadow-sketch-brand">
                                 {state.logs.length === 0 ? (
-                                    <div className="flex flex-col items-center justify-center h-full text-slate-400 space-y-4 font-hand">
-                                        <div className="w-16 h-16 rounded-full bg-emerald-50 flex items-center justify-center border-2 border-emerald-100">
-                                            <svg className="w-8 h-8 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
+                                    <div className="flex flex-col items-center justify-center h-full text-ink-dim space-y-4 font-hand">
+                                        <div className="w-16 h-16 rounded-full bg-brand/10 flex items-center justify-center border-2 border-brand-dim/50">
+                                            <svg className="w-8 h-8 text-brand-dim" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
                                         </div>
                                         <p className="font-bold">No commentary yet</p>
                                     </div>
@@ -1021,7 +1021,7 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                                             key={i}
                                             initial={{ opacity: 0, x: -10 }}
                                             animate={{ opacity: 1, x: 0 }}
-                                            className={`text-sm md:text-base font-bold leading-relaxed p-4 rounded-2xl font-hand shadow-sm ${i === 0 ? 'bg-emerald-100 text-emerald-800 border-2 border-emerald-200' : 'bg-white text-slate-500 border-2 border-slate-100'}`}
+                                            className={`text-sm md:text-base font-bold leading-relaxed p-4 rounded-2xl font-hand shadow-sm ${i === 0 ? 'bg-brand/20 text-brand-dark border-2 border-brand-dim' : 'bg-paper text-ink-dim border-2 border-paper-dim'}`}
                                         >
                                             {log}
                                         </motion.div>
@@ -1084,12 +1084,12 @@ const TableOverlay = () => {
     return (
         <div
             onClick={handleClick}
-            className="absolute inset-0 z-[60] flex items-center justify-center p-4 md:p-8 bg-white/60 backdrop-blur-sm animate-in fade-in duration-300 cursor-pointer text-center"
+            className="absolute inset-0 z-[60] flex items-center justify-center p-4 md:p-8 bg-paper/60 backdrop-blur-sm animate-in fade-in duration-300 cursor-pointer text-center"
         >
-            <div className="bg-white text-emerald-900 px-6 md:px-12 py-8 rounded-[2rem] shadow-[12px_12px_0px_0px_rgba(16,185,129,0.2)] border-4 border-emerald-500 animate-in zoom-in slide-in-from-bottom-12 duration-500 max-w-lg w-full">
-                <div className="text-xs font-black text-emerald-400 uppercase tracking-[0.3em] mb-4">Event Notification</div>
-                <div className="text-2xl md:text-3xl font-black font-hand text-emerald-800 leading-relaxed">{state.overlayMessage}</div>
-                <div className="mt-8 text-[10px] font-black text-emerald-300 uppercase tracking-widest animate-pulse">Click to continue</div>
+            <div className="bg-paper text-brand-dark px-6 md:px-12 py-8 rounded-[2rem] shadow-[12px_12px_0px_0px_rgba(16,185,129,0.2)] border-4 border-brand animate-in zoom-in slide-in-from-bottom-12 duration-500 max-w-lg w-full">
+                <div className="text-xs font-black text-brand-dim uppercase tracking-[0.3em] mb-4">Event Notification</div>
+                <div className="text-2xl md:text-3xl font-black font-hand text-brand-dark leading-relaxed">{state.overlayMessage}</div>
+                <div className="mt-8 text-[10px] font-black text-brand-dim uppercase tracking-widest animate-pulse">Click to continue</div>
             </div>
         </div>
     );
@@ -1116,27 +1116,27 @@ const LoginPage = () => {
 
     return (
         <div className="flex flex-col items-center justify-center h-full w-full max-w-lg p-8 animate-in fade-in zoom-in duration-700">
-            <h1 className="text-6xl font-black text-slate-800 italic leading-none mb-12 tracking-widest uppercase transform -rotate-2">
+            <h1 className="text-6xl font-black text-ink italic leading-none mb-12 tracking-widest uppercase transform -rotate-2">
                 EUCHRE
-                <span className="block text-xl text-emerald-600 font-bold tracking-normal not-italic mt-2">Engine V1.20</span>
+                <span className="block text-xl text-brand font-bold tracking-normal not-italic mt-2">Engine V1.20</span>
             </h1>
 
-            <div className="w-full bg-white p-10 rounded-[2rem] border-2 border-slate-800 shadow-[8px_8px_0px_0px_rgba(30,41,59,1)] transform rotate-1">
+            <div className="w-full bg-paper p-10 rounded-[2rem] border-2 border-ink shadow-sketch-ink transform rotate-1">
                 <form onSubmit={handleLogin} className="space-y-6">
                     <div className="space-y-2">
-                        <label className="text-[12px] font-black text-slate-500 uppercase tracking-widest ml-4">Authorized Personnel Only</label>
+                        <label className="text-[12px] font-black text-ink-dim uppercase tracking-widest ml-4">Authorized Personnel Only</label>
                         <input
                             autoFocus
                             value={name}
                             onChange={(e) => { setName(e.target.value); setError(''); }}
-                            className="w-full bg-white border-2 border-slate-800 rounded-2xl px-8 py-5 text-xl font-black text-slate-800 focus:outline-none focus:ring-4 focus:ring-emerald-500/20 transition-all placeholder:text-slate-400 uppercase shadow-[4px_4px_0px_0px_#cbd5e1]"
+                            className="w-full bg-paper border-2 border-ink rounded-2xl px-8 py-5 text-xl font-black text-ink focus:outline-none focus:ring-4 focus:ring-emerald-500/20 transition-all placeholder:text-ink-dim uppercase shadow-[4px_4px_0px_0px_#cbd5e1]"
                             placeholder="Enter Username"
                         />
                         {error && <p className="text-red-500 text-[10px] font-black uppercase tracking-widest ml-4 mt-2">Error: {error}</p>}
                     </div>
                     <button
                         type="submit"
-                        className="w-full bg-emerald-400 text-slate-900 font-black py-6 rounded-2xl text-xl border-2 border-slate-900 shadow-[6px_6px_0px_0px_rgba(30,41,59,1)] active:shadow-none active:translate-x-[6px] active:translate-y-[6px] transition-all hover:-translate-y-1 hover:shadow-[8px_8px_0px_0px_rgba(30,41,59,1)] uppercase tracking-widest"
+                        className="w-full bg-brand-dim text-ink font-black py-6 rounded-2xl text-xl border-2 border-slate-900 shadow-sketch-ink active:shadow-none active:translate-x-[6px] active:translate-y-[6px] transition-all hover:-translate-y-1 hover:shadow-sketch-ink uppercase tracking-widest"
                     >
                         LOGIN
                     </button>
@@ -1240,23 +1240,23 @@ const LandingPage = () => {
             <div className="w-full mb-8">
                 <div className="flex justify-between items-center mb-2">
                     <div>
-                        <h1 className="text-6xl font-black text-slate-800 tracking-wide uppercase italic">
+                        <h1 className="text-6xl font-black text-ink tracking-wide uppercase italic">
                             EUCHRE
                         </h1>
-                        <p className="text-xs font-bold text-emerald-600 tracking-[0.2em] mt-1 ml-1 uppercase">
+                        <p className="text-xs font-bold text-brand tracking-[0.2em] mt-1 ml-1 uppercase">
                             Hello, {state.currentUser}
                         </p>
                     </div>
                     <div className="flex gap-2 flex-wrap justify-end">
                         <button
                             onClick={() => { setStatsInitialTab('me'); setIsStatsOpen(true); }}
-                            className="bg-white hover:bg-slate-50 text-[10px] font-bold text-slate-800 px-3 py-1.5 rounded-lg border-2 border-slate-800 uppercase tracking-widest transition-all shadow-[2px_2px_0px_0px_rgba(30,41,59,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
+                            className="bg-paper hover:bg-paper-dim text-[10px] font-bold text-ink px-3 py-1.5 rounded-lg border-2 border-ink uppercase tracking-widest transition-all shadow-sketch-ink active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
                         >
                             STATS
                         </button>
                         <button
                             onClick={() => dispatch({ type: 'LOGOUT' })}
-                            className="bg-white hover:bg-slate-50 text-[10px] font-bold text-red-500 px-3 py-1.5 rounded-lg border-2 border-red-500 uppercase tracking-widest transition-all shadow-[2px_2px_0px_0px_rgba(239,68,68,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
+                            className="bg-paper hover:bg-paper-dim text-[10px] font-bold text-red-500 px-3 py-1.5 rounded-lg border-2 border-red-500 uppercase tracking-widest transition-all shadow-[2px_2px_0px_0px_rgba(239,68,68,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
                         >
                             LOGOUT
                         </button>
@@ -1268,40 +1268,40 @@ const LandingPage = () => {
                     <div className="flex flex-col gap-6 mt-8 mb-16">
                         <button
                             onClick={() => dispatch({ type: 'CREATE_TABLE', payload: { userName: state.currentUser! } })}
-                            className="bg-white text-slate-800 font-black py-5 rounded-2xl text-xl border-4 border-slate-800 shadow-[6px_6px_0px_0px_rgba(30,41,59,1)] hover:translate-y-px hover:shadow-[4px_4px_0px_0px_rgba(30,41,59,1)] active:shadow-none active:translate-x-[4px] active:translate-y-[4px] transition-all uppercase tracking-[0.2em]"
+                            className="bg-paper text-ink font-black py-5 rounded-2xl text-xl border-4 border-ink shadow-sketch-ink hover:translate-y-px hover:shadow-sketch-ink active:shadow-none active:translate-x-[4px] active:translate-y-[4px] transition-all uppercase tracking-[0.2em]"
                         >
                             CREATE GAME
                         </button>
                         <button
                             onClick={() => setShowJoin(true)}
-                            className="bg-emerald-400 text-slate-900 font-black py-5 rounded-2xl text-xl border-4 border-slate-900 shadow-[6px_6px_0px_0px_rgba(30,41,59,1)] hover:translate-y-px hover:shadow-[4px_4px_0px_0px_rgba(30,41,59,1)] active:shadow-none active:translate-x-[4px] active:translate-y-[4px] transition-all uppercase tracking-[0.2em]"
+                            className="bg-brand-dim text-ink font-black py-5 rounded-2xl text-xl border-4 border-slate-900 shadow-sketch-ink hover:translate-y-px hover:shadow-sketch-ink active:shadow-none active:translate-x-[4px] active:translate-y-[4px] transition-all uppercase tracking-[0.2em]"
                         >
                             JOIN TABLE
                         </button>
                     </div>
                 ) : (
-                    <div className="bg-white p-6 rounded-[2rem] border-2 border-slate-800 shadow-[8px_8px_0px_0px_rgba(30,41,59,1)] mb-10 animate-in slide-in-from-right-8 fade-in duration-300">
+                    <div className="bg-paper p-6 rounded-[2rem] border-2 border-ink shadow-sketch-ink mb-10 animate-in slide-in-from-right-8 fade-in duration-300">
                         <div className="space-y-4">
-                            <label className="text-xs font-black text-slate-500 uppercase tracking-widest ml-2">Enter 6-Digit Code</label>
+                            <label className="text-xs font-black text-ink-dim uppercase tracking-widest ml-2">Enter 6-Digit Code</label>
                             <input
                                 autoFocus
                                 value={code}
                                 onChange={(e) => handleCodeChange(e.target.value)}
                                 maxLength={7}
-                                className="w-full bg-slate-50 border-2 border-slate-800 rounded-2xl px-6 py-4 text-4xl font-black text-slate-800 text-center focus:outline-none focus:ring-4 focus:ring-emerald-500/20 transition-all placeholder:text-slate-300 tracking-widest shadow-inner"
+                                className="w-full bg-paper-dim border-2 border-ink rounded-2xl px-6 py-4 text-4xl font-black text-ink text-center focus:outline-none focus:ring-4 focus:ring-emerald-500/20 transition-all placeholder:text-ink-dim/50 tracking-widest shadow-inner"
                                 placeholder="000-000"
                             />
                         </div>
                         <div className="grid grid-cols-2 gap-4 mt-6">
                             <button
                                 onClick={() => { setShowJoin(false); setCode(''); }}
-                                className="bg-slate-100 text-slate-600 font-black py-4 rounded-xl text-lg border-2 border-slate-300 hover:bg-slate-200 transition-all uppercase tracking-widest"
+                                className="bg-paper-dim text-slate-600 font-black py-4 rounded-xl text-lg border-2 border-ink-dim hover:bg-slate-200 transition-all uppercase tracking-widest"
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={handleJoinTable}
-                                className="bg-emerald-500 text-white font-black py-4 rounded-xl text-lg border-2 border-emerald-700 shadow-[4px_4px_0px_0px_rgba(6,95,70,1)] hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_rgba(6,95,70,1)] active:shadow-none active:translate-x-[4px] active:translate-y-[4px] transition-all uppercase tracking-widest"
+                                className="bg-brand text-white font-black py-4 rounded-xl text-lg border-2 border-brand-dark shadow-[4px_4px_0px_0px_rgba(6,95,70,1)] hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_rgba(6,95,70,1)] active:shadow-none active:translate-x-[4px] active:translate-y-[4px] transition-all uppercase tracking-widest"
                             >
                                 Join
                             </button>
@@ -1313,34 +1313,34 @@ const LandingPage = () => {
                 {savedGames.length > 0 && (
                     <div className="space-y-4">
                         {/* Tabs for game filtering */}
-                        <div className="flex gap-6 border-b-2 border-slate-200 pb-px px-2">
+                        <div className="flex gap-6 border-b-2 border-ink-dim/50 pb-px px-2">
                             <button
                                 onClick={() => setGameFilter('in-progress')}
                                 className={`text-xs font-black uppercase tracking-widest pb-3 transition-all relative ${gameFilter === 'in-progress'
-                                    ? 'text-emerald-600'
-                                    : 'text-slate-400 hover:text-slate-600'
+                                    ? 'text-brand'
+                                    : 'text-ink-dim hover:text-slate-600'
                                     }`}
                             >
                                 In Progress ({savedGames.filter(g => g.phase !== 'game_over').length})
                                 {gameFilter === 'in-progress' && (
-                                    <span className="absolute bottom-[-2px] left-0 w-full h-[3px] bg-emerald-500 rounded-full" />
+                                    <span className="absolute bottom-[-2px] left-0 w-full h-[3px] bg-brand rounded-full" />
                                 )}
                             </button>
                             <button
                                 onClick={() => setGameFilter('completed')}
                                 className={`text-xs font-black uppercase tracking-widest pb-3 transition-all relative ${gameFilter === 'completed'
-                                    ? 'text-emerald-600'
-                                    : 'text-slate-400 hover:text-slate-600'
+                                    ? 'text-brand'
+                                    : 'text-ink-dim hover:text-slate-600'
                                     }`}
                             >
                                 Completed ({savedGames.filter(g => g.phase === 'game_over').length})
                                 {gameFilter === 'completed' && (
-                                    <span className="absolute bottom-[-2px] left-0 w-full h-[3px] bg-emerald-500 rounded-full" />
+                                    <span className="absolute bottom-[-2px] left-0 w-full h-[3px] bg-brand rounded-full" />
                                 )}
                             </button>
                             <button
                                 onClick={() => setRefreshKey(prev => prev + 1)}
-                                className="ml-auto text-slate-400 hover:text-emerald-500 transition-colors"
+                                className="ml-auto text-ink-dim hover:text-brand transition-colors"
                                 title="Sync with Cloud"
                             >
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M4 4v5h5M20 20v-5h-5M20 5.138A9 9 0 004.862 13M4 18.862A9 9 0 0019.138 11" /></svg>
@@ -1353,37 +1353,37 @@ const LandingPage = () => {
                                 .map(game => (
                                     <div
                                         key={game.tableCode}
-                                        className="group relative bg-white border-2 border-dashed border-slate-300 hover:border-solid hover:border-emerald-500 rounded-xl p-4 transition-all hover:shadow-[4px_4px_0px_0px_rgba(16,185,129,0.2)] cursor-pointer"
+                                        className="group relative bg-paper border-2 border-dashed border-ink-dim hover:border-solid hover:border-brand rounded-xl p-4 transition-all hover:shadow-sketch-brand cursor-pointer"
                                         onClick={() => dispatch({ type: 'LOAD_EXISTING_GAME', payload: { gameState: game } })}
                                     >
                                         <div className="flex items-center justify-between">
                                             <div className="flex-1">
                                                 <div className="flex items-center gap-2 mb-1">
-                                                    <div className="bg-emerald-100 text-emerald-700 text-[10px] font-black px-2 py-0.5 rounded border border-emerald-200 uppercase tracking-wider">
+                                                    <div className="bg-brand/20 text-brand-dark text-[10px] font-black px-2 py-0.5 rounded border border-brand-dim uppercase tracking-wider">
                                                         {game.tableCode}
                                                     </div>
-                                                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                                                    <div className="text-[10px] font-bold text-ink-dim uppercase tracking-wider">
                                                         {getTimeAgo(game)}
                                                     </div>
                                                 </div>
-                                                <div className="text-lg font-black text-slate-800 leading-tight mb-1">
+                                                <div className="text-lg font-black text-ink leading-tight mb-1">
                                                     {game.tableName || 'Untitled Game'}
                                                 </div>
-                                                <div className="text-xs font-bold text-slate-500 flex items-center gap-3">
-                                                    <span className={game.scores.team1 >= 10 ? 'text-emerald-600' : ''}>Team A: {game.scores.team1}</span>
-                                                    <span className="text-slate-300">•</span>
-                                                    <span className={game.scores.team2 >= 10 ? 'text-emerald-600' : ''}>Team B: {game.scores.team2}</span>
+                                                <div className="text-xs font-bold text-ink-dim flex items-center gap-3">
+                                                    <span className={game.scores.team1 >= 10 ? 'text-brand' : ''}>Team A: {game.scores.team1}</span>
+                                                    <span className="text-ink-dim/50">•</span>
+                                                    <span className={game.scores.team2 >= 10 ? 'text-brand' : ''}>Team B: {game.scores.team2}</span>
                                                 </div>
                                             </div>
 
-                                            <div className="flex items-center gap-2 pl-4 border-l-2 border-slate-100">
+                                            <div className="flex items-center gap-2 pl-4 border-l-2 border-paper-dim">
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); handleDelete(game.tableCode); }}
-                                                    className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                                                    className="p-2 text-ink-dim/50 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
                                                 >
                                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                                                 </button>
-                                                <button className="bg-emerald-50 text-emerald-600 hover:bg-emerald-500 hover:text-white border-2 border-emerald-200 hover:border-emerald-600 p-2 rounded-lg transition-all">
+                                                <button className="bg-brand/10 text-brand hover:bg-brand hover:text-white border-2 border-brand-dim hover:border-brand p-2 rounded-lg transition-all">
                                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
                                                 </button>
                                             </div>
@@ -1397,7 +1397,7 @@ const LandingPage = () => {
 
             {/* Footer Version */}
             <div className="mt-auto pt-8 text-center w-full">
-                <div className="text-[10px] font-black text-slate-300 uppercase tracking-[0.5em]">
+                <div className="text-[10px] font-black text-ink-dim/50 uppercase tracking-[0.5em]">
                     Euchre Engine V1.30
                 </div>
             </div>
@@ -1433,7 +1433,7 @@ const GameView = () => {
                 <motion.div
                     initial={{ scale: 0, rotate: -10 }}
                     animate={{ scale: 1, rotate: 0 }}
-                    className="w-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-10 md:p-16 rounded-[3rem] border-4 border-emerald-500 shadow-[0_0_80px_rgba(16,185,129,0.5)] relative overflow-hidden"
+                    className="w-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-10 md:p-16 rounded-[3rem] border-4 border-brand shadow-[0_0_80px_rgba(16,185,129,0.5)] relative overflow-hidden"
                 >
                     <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent pointer-events-none" />
 
@@ -1443,25 +1443,25 @@ const GameView = () => {
                         </h1>
 
                         <div className="text-center space-y-2">
-                            <div className="text-2xl md:text-3xl font-black text-emerald-400 uppercase tracking-wide">
+                            <div className="text-2xl md:text-3xl font-black text-brand-dim uppercase tracking-wide">
                                 🏆 {winner} Wins! 🏆
                             </div>
-                            <div className="text-lg text-slate-400 font-bold">
+                            <div className="text-lg text-ink-dim font-bold">
                                 Final Score: {state.scores.team1} - {state.scores.team2}
                             </div>
                         </div>
 
-                        <div className="bg-slate-950/50 rounded-2xl p-6 border border-slate-700">
+                        <div className="bg-ink/50 rounded-2xl p-6 border border-slate-700">
                             <div className="grid grid-cols-2 gap-4 text-center">
                                 <div>
-                                    <div className="text-sm text-slate-500 font-black uppercase tracking-wider mb-2">{state.teamNames.team1}</div>
-                                    <div className={`text-5xl font-black ${state.scores.team1 >= 10 ? 'text-emerald-400' : 'text-slate-600'}`}>
+                                    <div className="text-sm text-ink-dim font-black uppercase tracking-wider mb-2">{state.teamNames.team1}</div>
+                                    <div className={`text-5xl font-black ${state.scores.team1 >= 10 ? 'text-brand-dim' : 'text-slate-600'}`}>
                                         {state.scores.team1}
                                     </div>
                                 </div>
                                 <div>
-                                    <div className="text-sm text-slate-500 font-black uppercase tracking-wider mb-2">{state.teamNames.team2}</div>
-                                    <div className={`text-5xl font-black ${state.scores.team2 >= 10 ? 'text-emerald-400' : 'text-slate-600'}`}>
+                                    <div className="text-sm text-ink-dim font-black uppercase tracking-wider mb-2">{state.teamNames.team2}</div>
+                                    <div className={`text-5xl font-black ${state.scores.team2 >= 10 ? 'text-brand-dim' : 'text-slate-600'}`}>
                                         {state.scores.team2}
                                     </div>
                                 </div>
@@ -1471,7 +1471,7 @@ const GameView = () => {
                         <div className="flex flex-col gap-4">
                             <button
                                 onClick={() => dispatch({ type: 'EXIT_TO_LANDING' })}
-                                className="w-full bg-emerald-500 hover:bg-emerald-400 text-white font-black py-6 rounded-2xl text-xl shadow-[0_0_30px_rgba(16,185,129,0.3)] transition-all active:scale-95"
+                                className="w-full bg-brand hover:bg-brand-dim text-white font-black py-6 rounded-2xl text-xl shadow-sketch-brand transition-all active:scale-95"
                             >
                                 GO HOME
                             </button>
@@ -1484,23 +1484,23 @@ const GameView = () => {
 
     return (
         <LayoutGroup>
-            <div className="w-full h-full max-w-7xl mx-auto max-h-screen flex flex-col md:flex-row px-2 py-2 gap-4 overflow-hidden bg-white/0 font-hand">
+            <div className="w-full h-full max-w-7xl mx-auto max-h-screen flex flex-col md:flex-row px-2 py-2 gap-4 overflow-hidden bg-paper/0 font-hand">
 
 
 
                 <StatsModal isOpen={isStatsOpen} onClose={() => setIsStatsOpen(false)} initialTab={statsInitialTab} />
 
                 {/* Main Game Area */}
-                <div className="flex-1 bg-white rounded-[2rem] md:rounded-[3rem] border-4 border-emerald-500 shadow-[6px_6px_0px_0px_rgba(16,185,129,0.2)] relative flex flex-col w-full h-full overflow-hidden">
+                <div className="flex-1 bg-paper rounded-[2rem] md:rounded-[3rem] border-4 border-brand shadow-sketch-brand relative flex flex-col w-full h-full overflow-hidden">
 
                     {/* Header (Separated) */}
-                    <div className="shrink-0 flex justify-between items-start p-5 md:p-8 bg-white border-b-2 border-emerald-100 z-30">
+                    <div className="shrink-0 flex justify-between items-start p-5 md:p-8 bg-paper border-b-2 border-brand-dim/50 z-30">
                         <div className="flex flex-col">
-                            <h1 className="text-2xl md:text-3xl font-black text-emerald-700 tracking-wide leading-none">
+                            <h1 className="text-2xl md:text-3xl font-black text-brand-dark tracking-wide leading-none">
                                 {state.tableName || 'The Green Table'}
                             </h1>
                             {state.tableCode && (
-                                <div className="text-[10px] md:text-xs font-bold text-emerald-400 mt-1 pl-1 tracking-widest font-mono">
+                                <div className="text-[10px] md:text-xs font-bold text-brand-dim mt-1 pl-1 tracking-widest font-mono">
                                     {state.tableCode}
                                 </div>
                             )}
@@ -1510,13 +1510,13 @@ const GameView = () => {
                             <div className="flex gap-2">
                                 <button
                                     onClick={() => { setStatsInitialTab('me'); setIsStatsOpen(true); }}
-                                    className="bg-white hover:bg-emerald-50 text-emerald-800 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border-2 border-emerald-500 transition-all shadow-[3px_3px_0px_0px_rgba(16,185,129,0.3)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
+                                    className="bg-paper hover:bg-brand/10 text-brand-dark px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border-2 border-brand transition-all shadow-[3px_3px_0px_0px_rgba(16,185,129,0.3)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
                                 >
                                     STATS
                                 </button>
                                 <button
                                     onClick={() => dispatch({ type: 'EXIT_TO_LANDING' })}
-                                    className="w-[34px] h-[34px] bg-white hover:bg-red-50 text-emerald-800 hover:text-red-500 rounded-xl border-2 border-emerald-500 hover:border-red-400 transition-all shadow-[3px_3px_0px_0px_rgba(16,185,129,0.3)] hover:shadow-[3px_3px_0px_0px_rgba(239,68,68,0.3)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none flex items-center justify-center"
+                                    className="w-[34px] h-[34px] bg-paper hover:bg-red-50 text-brand-dark hover:text-red-500 rounded-xl border-2 border-brand hover:border-red-400 transition-all shadow-[3px_3px_0px_0px_rgba(16,185,129,0.3)] hover:shadow-[3px_3px_0px_0px_rgba(239,68,68,0.3)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none flex items-center justify-center"
                                 >
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M6 18L18 6M6 6l12 12" /></svg>
                                 </button>
@@ -1534,7 +1534,7 @@ const GameView = () => {
                                             dispatch({ type: 'START_MATCH' });
                                         }
                                     }}
-                                    className="bg-emerald-500 hover:bg-emerald-400 text-white font-black text-[10px] px-3 py-1.5 rounded-lg border-2 border-emerald-600 shadow-sm animate-pulse"
+                                    className="bg-brand hover:bg-brand-dim text-white font-black text-[10px] px-3 py-1.5 rounded-lg border-2 border-brand shadow-sm animate-pulse"
                                 >
                                     START GAME
                                 </button>
@@ -1543,22 +1543,22 @@ const GameView = () => {
                     </div>
 
                     {/* Game Board Surface */}
-                    <div className="flex-1 relative bg-white flex flex-col items-center overflow-hidden w-full h-full scale-95 md:scale-100 origin-center">
+                    <div className="flex-1 relative bg-paper flex flex-col items-center overflow-hidden w-full h-full scale-95 md:scale-100 origin-center">
 
                         {/* Scoreboard (Green Ink) - Flowing inside Board */}
                         {state.phase !== 'lobby' && (
                             <div className="flex justify-between items-center w-full px-6 md:px-12 mt-2 md:mt-6 mb-2 pointer-events-none relative z-20 shrink-0">
                                 {/* Team 1 Score */}
                                 <div className="text-center">
-                                    <div className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-1">{state.teamNames.team1}</div>
-                                    <div className="text-3xl md:text-5xl font-black text-emerald-800 font-hand">{state.scores.team1}</div>
+                                    <div className="text-[10px] font-black text-brand-dim uppercase tracking-widest mb-1">{state.teamNames.team1}</div>
+                                    <div className="text-3xl md:text-5xl font-black text-brand-dark font-hand">{state.scores.team1}</div>
                                 </div>
 
                                 {/* Trump Display */}
                                 {state.trump && (
-                                    <div className="flex flex-col items-center bg-white px-4 py-2 rounded-2xl border-2 border-emerald-500 shadow-[4px_4px_0px_0px_rgba(16,185,129,0.2)]">
-                                        <div className="hidden md:block text-[8px] font-black text-emerald-400 uppercase tracking-widest mb-0.5">TRUMP</div>
-                                        <div className={`text-2xl md:text-4xl font-black leading-none ${state.trump === 'hearts' || state.trump === 'diamonds' ? 'text-red-500' : 'text-slate-800'}`}>
+                                    <div className="flex flex-col items-center bg-paper px-4 py-2 rounded-2xl border-2 border-brand shadow-sketch-brand">
+                                        <div className="hidden md:block text-[8px] font-black text-brand-dim uppercase tracking-widest mb-0.5">TRUMP</div>
+                                        <div className={`text-2xl md:text-4xl font-black leading-none ${state.trump === 'hearts' || state.trump === 'diamonds' ? 'text-red-500' : 'text-ink'}`}>
                                             {state.trump === 'hearts' ? '♥' : state.trump === 'diamonds' ? '♦' : state.trump === 'clubs' ? '♣' : '♠'}
                                         </div>
                                     </div>
@@ -1566,8 +1566,8 @@ const GameView = () => {
 
                                 {/* Team 2 Score */}
                                 <div className="text-center">
-                                    <div className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-1">{state.teamNames.team2}</div>
-                                    <div className="text-3xl md:text-5xl font-black text-emerald-800 font-hand">{state.scores.team2}</div>
+                                    <div className="text-[10px] font-black text-brand-dim uppercase tracking-widest mb-1">{state.teamNames.team2}</div>
+                                    <div className="text-3xl md:text-5xl font-black text-brand-dark font-hand">{state.scores.team2}</div>
                                 </div>
                             </div>
                         )}
@@ -1654,24 +1654,24 @@ const GameView = () => {
                                         >
                                             {state.biddingRound === 1 ? (
                                                 <div className="grid grid-cols-3 gap-3 w-full">
-                                                    <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit: state.upcard!.suit, callerIndex: myIdx, isLoner: false } })} className="bg-white hover:bg-emerald-50 text-emerald-800 w-full py-3 rounded-xl font-black text-xs md:text-sm uppercase tracking-wider border-2 border-emerald-500 transition-all shadow-[4px_4px_0px_0px_rgba(16,185,129,0.4)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none whitespace-nowrap">Order Up</button>
-                                                    <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit: state.upcard!.suit, callerIndex: myIdx, isLoner: true } })} className="bg-white hover:bg-emerald-50 text-emerald-800 w-full py-3 rounded-xl font-black text-xs md:text-sm uppercase tracking-wider border-2 border-emerald-500 transition-all shadow-[4px_4px_0px_0px_rgba(16,185,129,0.4)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none whitespace-nowrap">Go Alone</button>
-                                                    <button onClick={() => dispatch({ type: 'PASS_BID', payload: { playerIndex: myIdx } })} className="bg-white hover:bg-emerald-50 text-emerald-800 w-full py-3 rounded-xl font-black text-xs md:text-sm uppercase tracking-wider border-2 border-emerald-500 transition-all shadow-[4px_4px_0px_0px_rgba(16,185,129,0.4)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none whitespace-nowrap">Pass</button>
+                                                    <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit: state.upcard!.suit, callerIndex: myIdx, isLoner: false } })} className="bg-paper hover:bg-brand/10 text-brand-dark w-full py-3 rounded-xl font-black text-xs md:text-sm uppercase tracking-wider border-2 border-brand transition-all shadow-[4px_4px_0px_0px_rgba(16,185,129,0.4)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none whitespace-nowrap">Order Up</button>
+                                                    <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit: state.upcard!.suit, callerIndex: myIdx, isLoner: true } })} className="bg-paper hover:bg-brand/10 text-brand-dark w-full py-3 rounded-xl font-black text-xs md:text-sm uppercase tracking-wider border-2 border-brand transition-all shadow-[4px_4px_0px_0px_rgba(16,185,129,0.4)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none whitespace-nowrap">Go Alone</button>
+                                                    <button onClick={() => dispatch({ type: 'PASS_BID', payload: { playerIndex: myIdx } })} className="bg-paper hover:bg-brand/10 text-brand-dark w-full py-3 rounded-xl font-black text-xs md:text-sm uppercase tracking-wider border-2 border-brand transition-all shadow-[4px_4px_0px_0px_rgba(16,185,129,0.4)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none whitespace-nowrap">Pass</button>
                                                 </div>
                                             ) : (
                                                 <div className="flex flex-col gap-4 w-full">
                                                     <div className="flex gap-3">
                                                         {(['hearts', 'diamonds', 'clubs', 'spades'] as const).filter(s => s !== state.upcard!.suit).map(suit => (
                                                             <div key={suit} className="flex-1 flex flex-col gap-2">
-                                                                <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit, callerIndex: myIdx, isLoner: false } })} className="bg-white hover:bg-emerald-50 text-emerald-800 w-full py-3 rounded-xl font-black text-[10px] md:text-xs uppercase tracking-wider border-2 border-emerald-500 transition-all shadow-[3px_3px_0px_0px_rgba(16,185,129,0.4)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none">{suit}</button>
-                                                                <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit, callerIndex: myIdx, isLoner: true } })} className="bg-white hover:bg-emerald-50 text-emerald-600 w-full py-1.5 rounded-lg font-black text-[8px] uppercase tracking-wider border border-emerald-400 transition-all shadow-[2px_2px_0px_0px_rgba(16,185,129,0.3)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none">Alone</button>
+                                                                <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit, callerIndex: myIdx, isLoner: false } })} className="bg-paper hover:bg-brand/10 text-brand-dark w-full py-3 rounded-xl font-black text-[10px] md:text-xs uppercase tracking-wider border-2 border-brand transition-all shadow-[3px_3px_0px_0px_rgba(16,185,129,0.4)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none">{suit}</button>
+                                                                <button onClick={() => dispatch({ type: 'MAKE_BID', payload: { suit, callerIndex: myIdx, isLoner: true } })} className="bg-paper hover:bg-brand/10 text-brand w-full py-1.5 rounded-lg font-black text-[8px] uppercase tracking-wider border border-emerald-400 transition-all shadow-[2px_2px_0px_0px_rgba(16,185,129,0.3)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none">Alone</button>
                                                             </div>
                                                         ))}
                                                     </div>
                                                     {myIdx !== state.dealerIndex ? (
-                                                        <button onClick={() => dispatch({ type: 'PASS_BID', payload: { playerIndex: myIdx } })} className="bg-white hover:bg-pink-50 text-emerald-800 hover:text-pink-600 w-full py-3 rounded-xl font-black text-xs uppercase tracking-wider border-2 border-emerald-500 hover:border-pink-500 transition-all shadow-[4px_4px_0px_0px_rgba(16,185,129,0.4)] hover:shadow-[4px_4px_0px_0px_rgba(236,72,153,0.4)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none">Pass</button>
+                                                        <button onClick={() => dispatch({ type: 'PASS_BID', payload: { playerIndex: myIdx } })} className="bg-paper hover:bg-pink-50 text-brand-dark hover:text-pink-600 w-full py-3 rounded-xl font-black text-xs uppercase tracking-wider border-2 border-brand hover:border-pink-500 transition-all shadow-[4px_4px_0px_0px_rgba(16,185,129,0.4)] hover:shadow-[4px_4px_0px_0px_rgba(236,72,153,0.4)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none">Pass</button>
                                                     ) : (
-                                                        <div className="w-full bg-white border-2 border-red-500 text-red-500 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest text-center animate-pulse shadow-[4px_4px_0px_0px_rgba(239,68,68,0.2)]">
+                                                        <div className="w-full bg-paper border-2 border-red-500 text-red-500 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest text-center animate-pulse shadow-[4px_4px_0px_0px_rgba(239,68,68,0.2)]">
                                                             STICK THE DEALER: YOU MUST CALL
                                                         </div>
                                                     )}
@@ -1686,15 +1686,15 @@ const GameView = () => {
                                         <motion.div
                                             initial={{ scale: 0.8, opacity: 0 }}
                                             animate={{ scale: 1, opacity: 1 }}
-                                            className="pointer-events-auto p-12 bg-slate-900/95 rounded-[4rem] border-2 border-emerald-500 shadow-2xl text-center backdrop-blur-3xl max-w-md"
+                                            className="pointer-events-auto p-12 bg-ink/95 rounded-[4rem] border-2 border-brand shadow-2xl text-center backdrop-blur-3xl max-w-md"
                                         >
-                                            <h3 className="text-sm font-black text-emerald-500 uppercase tracking-[0.4em] mb-4 text-center">Hand Result</h3>
+                                            <h3 className="text-sm font-black text-brand uppercase tracking-[0.4em] mb-4 text-center">Hand Result</h3>
                                             <p className="text-4xl font-black text-white italic tracking-tighter mb-10 leading-tight">
                                                 {state.overlayMessage || state.logs[0]}
                                             </p>
                                             <button
                                                 onClick={() => dispatch({ type: 'FINISH_HAND' })}
-                                                className="w-full bg-white text-slate-950 font-black py-5 rounded-3xl shadow-xl text-2xl hover:scale-105 active:scale-95 transition-all"
+                                                className="w-full bg-paper text-slate-950 font-black py-5 rounded-3xl shadow-xl text-2xl hover:scale-105 active:scale-95 transition-all"
                                             >
                                                 NEXT HAND
                                             </button>
@@ -1777,7 +1777,7 @@ const GameView = () => {
                     {state.stepMode && (
                         <div className="p-6 bg-amber-500 text-white rounded-[2.5rem] shadow-xl text-center">
                             <div className="text-[10px] font-black uppercase tracking-widest opacity-80 mb-2">Step Mode</div>
-                            <button onClick={handleNextStep} className="w-full font-black py-4 bg-white/20 hover:bg-white/30 rounded-2xl transition transform active:scale-95">NEXT ACTION →</button>
+                            <button onClick={handleNextStep} className="w-full font-black py-4 bg-paper/20 hover:bg-paper/30 rounded-2xl transition transform active:scale-95">NEXT ACTION →</button>
                         </div>
                     )}
                 </div>
@@ -1826,7 +1826,7 @@ function App() {
 
     return (
         <div
-            className="w-screen h-screen bg-transparent text-slate-800 selection:bg-emerald-200 overflow-hidden font-hand relative"
+            className="w-screen h-screen bg-transparent text-ink selection:bg-emerald-200 overflow-hidden font-hand relative"
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
@@ -1837,9 +1837,9 @@ function App() {
                     className="fixed top-0 left-0 right-0 z-[200] flex items-center justify-center transition-all"
                     style={{ height: `${pullDistance}px`, opacity: Math.min(pullDistance / 60, 1) }}
                 >
-                    <div className="bg-emerald-500/20 backdrop-blur-sm rounded-full p-2">
+                    <div className="bg-brand/20 backdrop-blur-sm rounded-full p-2">
                         <svg
-                            className={`w-6 h-6 text-emerald-400 ${pullDistance > 60 ? 'animate-spin' : ''}`}
+                            className={`w-6 h-6 text-brand-dim ${pullDistance > 60 ? 'animate-spin' : ''}`}
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"

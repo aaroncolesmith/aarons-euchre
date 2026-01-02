@@ -2,7 +2,7 @@
 
 **Last Updated:** December 29, 2025  
 **Status:** Production-ready, deployed on Vercel  
-**Current Version:** V0.64  
+**Current Version:** V1.30  
 **Live URL:** [Vercel Deployment](https://aarons-euchre.vercel.app)
 
 ---
@@ -713,6 +713,7 @@ Clear with: `localStorage.clear()`
 3. **Responsive** - Works on mobile and desktop
 4. **Instant Feedback** - Hover effects, scale animations
 5. **Clear Information** - Dealer labels, seat positions (N/S/E/W)
+6. **Theme System** - See [STYLE_GUIDE.md](./STYLE_GUIDE.md) for theming instructions.
 
 ---
 
