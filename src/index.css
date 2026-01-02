@@ -33,13 +33,11 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  /* Background */
-  background-color: #f8fafc;
-  /* background-image: radial-gradient(#cbd5e1 1.5px, transparent 1.5px); */
+  background-color: rgb(var(--color-paper-dim));
   background-size: 24px 24px;
 }
 
-/* Custom Scrollbar for that 'sketchy' feel */
+/* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -58,12 +56,10 @@ body {
   background: #94a3b8;
 }
 
-/* Global inputs reset to look like handwriting */
 input {
-  font-family: 'Architects Daughter', cursive;
+  font-family: inherit;
 }
 
-/* Utility to hide scrollbar but keep functionality */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
@@ -71,4 +67,131 @@ input {
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* 
+   HOTFIX: Manual Utility Definitions 
+   Since tailwind.config.js changes require a server restart (which hasn't happened),
+   we manually define these classes to ensure the theme applies IMMEDIATELY.
+*/
+
+/* Backgrounds */
+.bg-brand {
+  background-color: rgb(var(--color-brand));
+}
+
+.bg-brand-dim {
+  background-color: rgb(var(--color-brand-dim));
+}
+
+.bg-brand-dark {
+  background-color: rgb(var(--color-brand-dark));
+}
+
+.bg-paper {
+  background-color: rgb(var(--color-paper));
+}
+
+.bg-paper-dim {
+  background-color: rgb(var(--color-paper-dim));
+}
+
+.bg-ink {
+  background-color: rgb(var(--color-ink));
+}
+
+/* Text */
+.text-brand {
+  color: rgb(var(--color-brand));
+}
+
+.text-brand-dim {
+  color: rgb(var(--color-brand-dim));
+}
+
+.text-brand-dark {
+  color: rgb(var(--color-brand-dark));
+}
+
+.text-ink {
+  color: rgb(var(--color-ink));
+}
+
+.text-ink-dim {
+  color: rgb(var(--color-ink-dim));
+}
+
+.text-paper {
+  color: rgb(var(--color-paper));
+}
+
+/* Borders */
+.border-brand {
+  border-color: rgb(var(--color-brand));
+}
+
+.border-brand-dim {
+  border-color: rgb(var(--color-brand-dim));
+}
+
+.border-brand-dark {
+  border-color: rgb(var(--color-brand-dark));
+}
+
+.border-ink {
+  border-color: rgb(var(--color-ink));
+}
+
+.border-ink-dim {
+  border-color: rgb(var(--color-ink-dim));
+}
+
+.border-paper-dim {
+  border-color: rgb(var(--color-paper-dim));
+}
+
+/* Opacity Modifiers */
+.bg-brand\/10 {
+  background-color: rgb(var(--color-brand) / 0.1);
+}
+
+.bg-brand\/20 {
+  background-color: rgb(var(--color-brand) / 0.2);
+}
+
+.bg-brand\/5 {
+  background-color: rgb(var(--color-brand) / 0.05);
+}
+
+.text-ink-dim\/50 {
+  color: rgb(var(--color-ink-dim) / 0.5);
+}
+
+.border-ink-dim\/50 {
+  border-color: rgb(var(--color-ink-dim) / 0.5);
+}
+
+.border-brand\/20 {
+  border-color: rgb(var(--color-brand) / 0.2);
+}
+
+/* Shadows */
+.shadow-sketch-ink {
+  box-shadow: 4px 4px 0px 0px rgb(var(--color-ink));
+}
+
+.shadow-sketch-ink-lg {
+  box-shadow: 6px 6px 0px 0px rgb(var(--color-ink));
+}
+
+.shadow-sketch-brand {
+  box-shadow: 4px 4px 0px 0px rgb(var(--color-brand) / 0.2);
+}
+
+.shadow-sketch-brand-strong {
+  box-shadow: 6px 6px 0px 0px rgb(var(--color-brand));
+}
+
+.hover\:shadow-sketch-ink-lg:hover {
+  box-shadow: 6px 6px 0px 0px rgb(var(--color-ink));
 }
