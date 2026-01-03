@@ -1469,7 +1469,10 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             if (lastBotDecisionRef.current === decisionKey) return;
             lastBotDecisionRef.current = decisionKey;
             const position = (state.currentPlayerIndex - state.dealerIndex + 4) % 4;
-            const personality = currentPlayer.personality || { aggressiveness: 5, riskTolerance: 5, consistency: 5, archetype: 'Generic' };
+            // Ensure bot has personality - check BOT_PERSONALITIES first, then player.personality, finally use Generic fallback
+            const personality = currentPlayer.personality
+                || (currentPlayer.name ? BOT_PERSONALITIES[currentPlayer.name] : undefined)
+                || { aggressiveness: 5, riskTolerance: 5, consistency: 5, archetype: 'Generic' };
             const isT1 = state.currentPlayerIndex === 0 || state.currentPlayerIndex === 2;
             const myScore = isT1 ? state.scores.team1 : state.scores.team2;
             const opponentScore = isT1 ? state.scores.team2 : state.scores.team1;
