@@ -3,7 +3,7 @@ import { GameState, Suit, HandResult, PlayerStats, Player, GameEvent, Card } fro
 import { supabase } from '../lib/supabase';
 import { createDeck, dealHands, shuffleDeck } from '../utils/deck';
 import { createTrumpCallLog } from '../utils/trumpCallLogger';
-import { BOT_PERSONALITIES, calculateBibleHandStrength, shouldCallTrump, getBestBid, getBotMove, sortHand, getEffectiveSuit, determineWinner, getCardValue } from '../utils/rules';
+import { BOT_PERSONALITIES, calculateBibleHandStrength, shouldCallTrump, shouldGoAlone, getBestBid, getBotMove, sortHand, getEffectiveSuit, determineWinner, getCardValue } from '../utils/rules';
 import { saveBotDecision } from '../utils/supabaseStats';
 import { debugGameState, suggestFix } from '../utils/freezeDebugger';
 import { createHeartbeatSnapshot, detectFreeze, applyRecovery, logFreezeToCloud } from '../utils/heartbeat';
@@ -1550,13 +1550,17 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                     if (state.upcard) {
                         const result = shouldCallTrump(currentPlayer.hand, state.upcard.suit, personality, position, false, null);
                         if (result.call) {
+                            // CHECK FOR LONER
+                            const lonerCheck = shouldGoAlone(currentPlayer.hand, state.upcard.suit, personality);
+                            const isLoner = lonerCheck.goAlone;
+
                             broadcastDispatch({
                                 type: 'MAKE_BID',
                                 payload: {
                                     suit: state.upcard.suit,
                                     callerIndex: state.currentPlayerIndex,
-                                    isLoner: false,
-                                    reasoning: result.reasoning,
+                                    isLoner,
+                                    reasoning: isLoner ? `${result.reasoning} | ${lonerCheck.reasoning}` : result.reasoning,
                                     strength: result.strength
                                 }
                             });
@@ -1565,8 +1569,8 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                                 playerName: currentPlayer.name || 'Bot',
                                 archetype: personality.archetype,
                                 decisionType: 'bid',
-                                decision: `Call ${state.upcard.suit}`,
-                                reasoning: result.reasoning,
+                                decision: `Call ${state.upcard.suit}${isLoner ? ' (GOING ALONE!)' : ''}`,
+                                reasoning: isLoner ? `${result.reasoning} | ${lonerCheck.reasoning}` : result.reasoning,
                                 handStrength: result.strength,
                                 currentScoreUs: myScore,
                                 currentScoreThem: opponentScore,
@@ -1617,13 +1621,17 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                         state.upcard?.suit || null
                     );
                     if (result.suit) {
+                        // CHECK FOR LONER
+                        const lonerCheck = shouldGoAlone(currentPlayer.hand, result.suit, personality);
+                        const isLoner = lonerCheck.goAlone;
+
                         broadcastDispatch({
                             type: 'MAKE_BID',
                             payload: {
                                 suit: result.suit,
                                 callerIndex: state.currentPlayerIndex,
-                                isLoner: false,
-                                reasoning: result.reasoning,
+                                isLoner,
+                                reasoning: isLoner ? `${result.reasoning} | ${lonerCheck.reasoning}` : result.reasoning,
                                 strength: result.strength
                             }
                         });
@@ -1632,8 +1640,8 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                             playerName: currentPlayer.name || 'Bot',
                             archetype: personality.archetype,
                             decisionType: 'bid',
-                            decision: `Call ${result.suit}`,
-                            reasoning: result.reasoning,
+                            decision: `Call ${result.suit}${isLoner ? ' (GOING ALONE!)' : ''}`,
+                            reasoning: isLoner ? `${result.reasoning} | ${lonerCheck.reasoning}` : result.reasoning,
                             handStrength: result.strength,
                             currentScoreUs: myScore,
                             currentScoreThem: opponentScore,

@@ -229,6 +229,68 @@ export const shouldCallTrump = (
     return { call, reasoning: finalReasoning, strength: total };
 };
 
+/**
+ * Determine if bot should go alone
+ * Conservative threshold: 10.5+ (Both bowers + Ace, or equivalent)
+ * Aggressive personalities will go alone with slightly less
+ */
+export const shouldGoAlone = (
+    hand: Card[],
+    suit: Suit,
+    personality: BotPersonality = { aggressiveness: 5, riskTolerance: 5, consistency: 5, archetype: 'Generic' }
+): { goAlone: boolean; reasoning: string } => {
+    const { total, reasoning } = calculateBibleHandStrength(hand, suit);
+
+    // Count trump cards including left bower
+    const oppositeSuit = getOppositeSuit(suit);
+    const trumpCards = hand.filter(c => c.suit === suit || (c.rank === 'J' && c.suit === oppositeSuit));
+    const trumpCount = trumpCards.length;
+
+    // Check for key cards
+    const hasRightBower = hand.some(c => c.rank === 'J' && c.suit === suit);
+    const hasLeftBower = hand.some(c => c.rank === 'J' && c.suit === oppositeSuit);
+    const hasTrumpAce = hand.some(c => c.rank === 'A' && c.suit === suit);
+    const bowerCount = (hasRightBower ? 1 : 0) + (hasLeftBower ? 1 : 0);
+
+    // Base loner threshold: 10.5 (Conservative - both bowers + ace level)
+    // Aggressiveness adjusts threshold: More aggressive = lower threshold
+    let lonerThreshold = 11.0 - (personality.aggressiveness - 5) * 0.3;
+
+    // MUST have at least 3 trump to go alone
+    if (trumpCount < 3) {
+        return {
+            goAlone: false,
+            reasoning: `Only ${trumpCount} trump - need at least 3 to go alone`
+        };
+    }
+
+    // Strong loner indicators
+    const hasBothBowers = hasRightBower && hasLeftBower;
+    const hasThreeTopTrump = hasBothBowers && hasTrumpAce;
+
+    // Bonus for having both bowers - nearly guaranteed 2 tricks
+    if (hasBothBowers) {
+        lonerThreshold -= 1.0;
+    }
+
+    // Decision logic
+    const shouldGo = total >= lonerThreshold;
+
+    let lonerReason = '';
+    if (shouldGo) {
+        const indicators = [];
+        if (hasBothBowers) indicators.push('Both Bowers');
+        if (hasTrumpAce) indicators.push('Trump Ace');
+        if (trumpCount >= 4) indicators.push(`${trumpCount} Trump`);
+
+        lonerReason = `LONER: Strength ${total.toFixed(1)} >= ${lonerThreshold.toFixed(1)} | ${indicators.join(', ')}`;
+    } else {
+        lonerReason = `No loner: Strength ${total.toFixed(1)} < ${lonerThreshold.toFixed(1)} threshold`;
+    }
+
+    return { goAlone: shouldGo, reasoning: lonerReason };
+};
+
 export const getBestBid = (
     hand: Card[],
     personality: BotPersonality,
