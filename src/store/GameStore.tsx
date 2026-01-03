@@ -908,7 +908,19 @@ const gameReducer = (state: GameState, action: Action): GameState => {
         }
 
         case 'CLEAR_TRICK': {
-            const totalCardsLeft = state.players.reduce((sum, p) => sum + p.hand.length, 0);
+            // Calculate if hand is over
+            // LONER FIX: If loner, exclude partner's cards from the count since they don't play
+            let totalCardsLeft;
+            if (state.isLoner && state.trumpCallerIndex !== null) {
+                const partnerIndex = (state.trumpCallerIndex + 2) % 4;
+                totalCardsLeft = state.players.reduce((sum, p, i) => {
+                    // Don't count partner's cards
+                    if (i === partnerIndex) return sum;
+                    return sum + p.hand.length;
+                }, 0);
+            } else {
+                totalCardsLeft = state.players.reduce((sum, p) => sum + p.hand.length, 0);
+            }
             const isHandOver = totalCardsLeft === 0;
 
             let logs = state.logs;
