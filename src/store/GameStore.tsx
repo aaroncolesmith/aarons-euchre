@@ -8,6 +8,7 @@ import { saveBotDecision } from '../utils/supabaseStats';
 import { debugGameState, suggestFix } from '../utils/freezeDebugger';
 import { createHeartbeatSnapshot, detectFreeze, applyRecovery, logFreezeToCloud } from '../utils/heartbeat';
 import { saveMultiplePlayerStats, clearAllPlayerStats, getAllPlayerStats, mergeAllStats } from '../utils/supabaseStats';
+import { logPlayEvent } from '../utils/eventLogger';
 import Logger from '../utils/logger';
 
 // --- Actions ---
@@ -568,6 +569,21 @@ const gameReducer = (state: GameState, action: Action): GameState => {
                 timestamp: Date.now()
             };
 
+            // EVENT SOURCING: Log bid
+            logPlayEvent({
+                gameCode: state.tableCode || 'unknown',
+                handNumber: state.handsPlayed + 1,
+                eventType: 'bid',
+                eventData: {
+                    suit,
+                    isLoner,
+                    round: state.biddingRound,
+                    upcard: state.upcard
+                },
+                playerName: caller.name || undefined,
+                playerSeat: callerIndex
+            }).catch(err => console.error('[EVENT LOG] Failed to log bid:', err));
+
             const newPlayers = state.players.map((p, i) => {
                 let updatedHand = p.hand;
                 if (p.name === state.currentViewPlayerName && !p.isComputer) updatedHand = sortHand(p.hand, suit);
@@ -845,6 +861,23 @@ const gameReducer = (state: GameState, action: Action): GameState => {
                 i === playerIndex ? { ...p, hand: p.hand.filter(c => c.id !== cardId) } : p
             );
 
+            // EVENT SOURCING: Log card play
+            const trickNum = Math.floor((20 - state.players.reduce((sum, p) => sum + p.hand.length, 0)) / (state.isLoner ? 3 : 4));
+            logPlayEvent({
+                gameCode: state.tableCode || 'unknown',
+                handNumber: state.handsPlayed + 1,
+                trickNumber: trickNum,
+                eventType: 'play_card',
+                eventData: {
+                    card,
+                    leadSuit: state.currentTrick[0]?.card ? getEffectiveSuit(state.currentTrick[0].card, state.trump) : null,
+                    isLead: state.currentTrick.length === 0,
+                    trump: state.trump
+                },
+                playerName: player.name || undefined,
+                playerSeat: playerIndex
+            }).catch(err => console.error('[EVENT LOG] Failed to log play_card:', err));
+
             let nextPlayerIndex = (playerIndex + 1) % 4;
             if (state.isLoner) {
                 const partnerIndex = (state.trumpCallerIndex! + 2) % 4;
@@ -1029,6 +1062,26 @@ const gameReducer = (state: GameState, action: Action): GameState => {
             };
 
             const newEventLog = [...state.eventLog, handEvent];
+
+            // EVENT SOURCING: Log hand result
+            logPlayEvent({
+                gameCode: state.tableCode || 'unknown',
+                handNumber: state.handsPlayed + 1,
+                eventType: 'hand_won',
+                eventData: {
+                    winner_team: p1 > p2 ? 1 : 2,
+                    team1_tricks: t1Tricks,
+                    team2_tricks: t2Tricks,
+                    points_scored: p1 > p2 ? p1 : p2,
+                    team1_score: newScores.team1,
+                    team2_score: newScores.team2,
+                    euchre: callerTricks < 3,
+                    sweep: callerTricks === 5,
+                    isLoner: state.isLoner,
+                    trump: state.trump,
+                    trumpCaller: state.players[state.trumpCallerIndex!]?.name
+                }
+            }).catch(err => console.error('[EVENT LOG] Failed to log hand_won:', err));
             if (isGameOver) {
                 newEventLog.push({
                     type: 'game_over',
@@ -1036,6 +1089,21 @@ const gameReducer = (state: GameState, action: Action): GameState => {
                     winner: newScores.team1 >= 10 ? state.teamNames.team1 : state.teamNames.team2,
                     timestamp: Date.now()
                 });
+
+                // EVENT SOURCING: Log game completion
+                logPlayEvent({
+                    gameCode: state.tableCode || 'unknown',
+                    handNumber: state.handsPlayed + 1,
+                    eventType: 'game_won',
+                    eventData: {
+                        winner_team: newScores.team1 >= 10 ? 1 : 2,
+                        final_score: newScores,
+                        total_hands: state.handsPlayed + 1,
+                        winners: newScores.team1 >= 10
+                            ? [state.players[0].name, state.players[2].name]
+                            : [state.players[1].name, state.players[3].name]
+                    }
+                }).catch(err => console.error('[EVENT LOG] Failed to log game_won:', err));
             }
 
             const updatedPlayers = state.players.map((p, i) => {
