@@ -1048,18 +1048,6 @@ const gameReducer = (state: GameState, action: Action): GameState => {
                 };
             });
 
-            if (isGameOver) {
-                // Determine which team won finally
-                const winnerName = newScores.team1 >= 10 ? state.teamNames.team1 : state.teamNames.team2;
-
-                newEventLog.push({
-                    type: 'game_over',
-                    scores: newScores,
-                    winner: winnerName,
-                    timestamp: Date.now()
-                });
-            }
-
             return {
                 ...state,
                 players: updatedPlayers,
