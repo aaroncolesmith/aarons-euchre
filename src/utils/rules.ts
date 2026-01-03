@@ -239,7 +239,7 @@ export const shouldGoAlone = (
     suit: Suit,
     personality: BotPersonality = { aggressiveness: 5, riskTolerance: 5, consistency: 5, archetype: 'Generic' }
 ): { goAlone: boolean; reasoning: string } => {
-    const { total, reasoning } = calculateBibleHandStrength(hand, suit);
+    const { total } = calculateBibleHandStrength(hand, suit);
 
     // Count trump cards including left bower
     const oppositeSuit = getOppositeSuit(suit);
@@ -250,7 +250,6 @@ export const shouldGoAlone = (
     const hasRightBower = hand.some(c => c.rank === 'J' && c.suit === suit);
     const hasLeftBower = hand.some(c => c.rank === 'J' && c.suit === oppositeSuit);
     const hasTrumpAce = hand.some(c => c.rank === 'A' && c.suit === suit);
-    const bowerCount = (hasRightBower ? 1 : 0) + (hasLeftBower ? 1 : 0);
 
     // Base loner threshold: 10.5 (Conservative - both bowers + ace level)
     // Aggressiveness adjusts threshold: More aggressive = lower threshold
@@ -266,7 +265,6 @@ export const shouldGoAlone = (
 
     // Strong loner indicators
     const hasBothBowers = hasRightBower && hasLeftBower;
-    const hasThreeTopTrump = hasBothBowers && hasTrumpAce;
 
     // Bonus for having both bowers - nearly guaranteed 2 tricks
     if (hasBothBowers) {
