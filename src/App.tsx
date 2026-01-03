@@ -1401,7 +1401,7 @@ const LandingPage = () => {
             {/* Footer Version */}
             <div className="mt-auto pt-8 text-center w-full">
                 <div className="text-[10px] font-black text-ink-dim/50 uppercase tracking-[0.5em]">
-                    Euchre Engine V1.38
+                    Euchre Engine V1.39
                 </div>
             </div>
 
