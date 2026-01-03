@@ -1517,6 +1517,24 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                                     strength: strength
                                 }
                             });
+                            // Log the pass decision
+                            saveBotDecision({
+                                gameCode: state.tableCode || 'unknown',
+                                playerName: currentPlayer.name || 'Bot',
+                                archetype: personality.archetype,
+                                decisionType: 'pass',
+                                decision: `Pass on ${state.upcard.suit}`,
+                                reasoning: reason,
+                                handStrength: strength,
+                                currentScoreUs: myScore,
+                                currentScoreThem: opponentScore,
+                                gamePhase: 'bidding (round 1)',
+                                handState: currentPlayer.hand,
+                                tableState: { upcard: state.upcard, biddingRound: state.biddingRound },
+                                aggressiveness: personality.aggressiveness,
+                                riskTolerance: personality.riskTolerance,
+                                consistency: personality.consistency
+                            });
                         }
                     }
                 } else {
@@ -1555,8 +1573,9 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                             riskTolerance: personality.riskTolerance,
                             consistency: personality.consistency
                         });
-                    } else if (position === 3) {
-                        // STICK THE DEALER: Bot is dealer in round 2 and nothing met threshold
+                    } else if (state.currentPlayerIndex === state.dealerIndex) {
+                        // STICK THE DEALER: Bot IS the dealer in round 2 and nothing met threshold
+                        // CRITICAL: Only stick the actual dealer, verified by dealerIndex match
                         const forcedSuit = result.bestSuitAnyway;
                         const forcedReason = `STICK THE DEALER: Forced to call best available suit (${forcedSuit}). ${result.bestReasoningAnyway}`;
                         broadcastDispatch({
@@ -1594,6 +1613,24 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                                 reasoning: result.reasoning,
                                 strength: result.strength
                             }
+                        });
+                        // Log the pass decision
+                        saveBotDecision({
+                            gameCode: state.tableCode || 'unknown',
+                            playerName: currentPlayer.name || 'Bot',
+                            archetype: personality.archetype,
+                            decisionType: 'pass',
+                            decision: `Pass (best: ${result.bestSuitAnyway})`,
+                            reasoning: result.reasoning,
+                            handStrength: result.strength,
+                            currentScoreUs: myScore,
+                            currentScoreThem: opponentScore,
+                            gamePhase: 'bidding (round 2)',
+                            handState: currentPlayer.hand,
+                            tableState: { biddingRound: state.biddingRound, turnedDownSuit: state.upcard?.suit, bestSuitAvailable: result.bestSuitAnyway },
+                            aggressiveness: personality.aggressiveness,
+                            riskTolerance: personality.riskTolerance,
+                            consistency: personality.consistency
                         });
                     }
                 }
