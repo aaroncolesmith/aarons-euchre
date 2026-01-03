@@ -353,13 +353,13 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                     setGlobalStats(supabaseStats);
                 } else {
                     // Fallback to localStorage
-                    const localStats = JSON.parse(localStorage.getItem('euchre_global_profiles') || '{}');
+                    const localStats = JSON.parse(localStorage.getItem('euchre_global_stats_v3') || '{}');
                     console.log('[STATS] Using localStorage fallback:', Object.keys(localStats).length, 'players');
                     setGlobalStats(localStats);
                 }
             } catch (err) {
                 console.error('[STATS] Error loading from Supabase, using localStorage:', err);
-                const localStats = JSON.parse(localStorage.getItem('euchre_global_profiles') || '{}');
+                const localStats = JSON.parse(localStorage.getItem('euchre_global_stats_v3') || '{}');
                 setGlobalStats(localStats);
             }
         };
