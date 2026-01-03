@@ -103,13 +103,13 @@ const runDataMigration = () => {
 runDataMigration();
 
 const getGlobalStats = (): { [name: string]: PlayerStats } => {
-    const saved = localStorage.getItem('euchre_global_stats_v3');
+    const saved = localStorage.getItem('euchre_global_stats_v4');
     return saved ? JSON.parse(saved) : {};
 };
 
 const saveGlobalStats = async (stats: { [name: string]: PlayerStats }) => {
     // Save to localStorage
-    localStorage.setItem('euchre_global_stats_v3', JSON.stringify(stats));
+    localStorage.setItem('euchre_global_stats_v4', JSON.stringify(stats));
 
     // Sync each player's stats to Supabase using unified util
     await saveMultiplePlayerStats(stats);

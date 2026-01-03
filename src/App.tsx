@@ -353,13 +353,13 @@ const StatsModal = ({ isOpen, onClose, initialTab = 'me' }: { isOpen: boolean; o
                     setGlobalStats(supabaseStats);
                 } else {
                     // Fallback to localStorage
-                    const localStats = JSON.parse(localStorage.getItem('euchre_global_stats_v3') || '{}');
+                    const localStats = JSON.parse(localStorage.getItem('euchre_global_stats_v4') || '{}');
                     console.log('[STATS] Using localStorage fallback:', Object.keys(localStats).length, 'players');
                     setGlobalStats(localStats);
                 }
             } catch (err) {
                 console.error('[STATS] Error loading from Supabase, using localStorage:', err);
-                const localStats = JSON.parse(localStorage.getItem('euchre_global_stats_v3') || '{}');
+                const localStats = JSON.parse(localStorage.getItem('euchre_global_stats_v4') || '{}');
                 setGlobalStats(localStats);
             }
         };
@@ -1401,7 +1401,7 @@ const LandingPage = () => {
             {/* Footer Version */}
             <div className="mt-auto pt-8 text-center w-full">
                 <div className="text-[10px] font-black text-ink-dim/50 uppercase tracking-[0.5em]">
-                    Euchre Engine V1.37
+                    Euchre Engine V1.38
                 </div>
             </div>
 
