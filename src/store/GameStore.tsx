@@ -1296,11 +1296,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                     }, { onConflict: 'code' });
 
                 if (state.phase === 'game_over') {
-                    console.log(`[SYNC] Game ${state.tableCode} is OVER. Triggering cleanup in 10s...`);
-                    // Wait a bit so other players can see the "Game Over" screen before the record vanishes
-                    setTimeout(() => {
-                        deleteActiveGame(state.tableCode!);
-                    }, 10000);
+                    console.log(`[SYNC] Game ${state.tableCode} is OVER. Record will persist in Completed games.`);
                 }
             };
             syncToCloud();
