@@ -219,7 +219,7 @@ const CardComponent = ({
             layout
             disabled={disabled}
             onClick={onClick}
-            whileHover={isValid && !disabled && onClick ? { y: -15, scale: 1.05, transition: { type: 'spring', stiffness: 300 } } : {}}
+            whileHover={isValid && !disabled && onClick ? { scale: 1.05, transition: { type: 'spring', stiffness: 300 } } : {}}
             whileTap={isValid && !disabled && onClick ? { scale: 0.95 } : {}}
             className={`
                 ${sizes[size]} rounded-[1.25rem] border-2 shadow-[0_8px_30px_rgba(0,0,0,0.5)] 
@@ -1727,8 +1727,10 @@ const GameView = () => {
                             const myPlayer = state.players[myIdx];
                             const handSize = myPlayer.hand.length;
 
+                            const isMyTurnToPlay = state.currentPlayerIndex === myIdx && (state.phase === 'playing' || state.phase === 'discard');
+
                             return (
-                                <div className="flex justify-center items-end relative mx-auto pointer-events-auto" style={{ width: '100%', maxWidth: '380px' }}>
+                                <div className={`flex justify-center items-end relative mx-auto pointer-events-auto ${isMyTurnToPlay ? 'w-full max-w-[600px] px-1' : 'w-full max-w-[380px]'}`}>
                                     {myPlayer.hand.map((card: Card, index: number) => {
                                         let isValid = false;
                                         const isPickedUpCard = state.phase === 'discard' && card.id === state.upcard?.id;
@@ -1743,7 +1745,8 @@ const GameView = () => {
                                         }
 
                                         // Calculate overlap - cards overlap by 60% (77px * 0.6 = ~46px)
-                                        const overlapAmount = handSize > 1 ? -46 : 0;
+                                        // Spread out more when it's the user's turn
+                                        const overlapAmount = isMyTurnToPlay ? (handSize > 1 ? -15 : 0) : (handSize > 1 ? -46 : 0);
                                         const isFirstCard = index === 0;
 
                                         return (
