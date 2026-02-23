@@ -351,7 +351,6 @@ const gameReducer = (state: GameState, action: Action): GameState => {
         }
 
         case 'SIT_PLAYER': {
-            const globalStats = getGlobalStats();
             const name = action.payload.name;
             const seatIndex = action.payload.seatIndex;
 
@@ -364,7 +363,7 @@ const gameReducer = (state: GameState, action: Action): GameState => {
                     ...p,
                     name,
                     isComputer: false,
-                    stats: globalStats[name] || getEmptyStats(),
+                    stats: getEmptyStats(),
                     personality: BOT_PERSONALITIES[name] // Assign personality if it's a known bot name
                 } : p
             );
@@ -376,7 +375,6 @@ const gameReducer = (state: GameState, action: Action): GameState => {
         }
 
         case 'ADD_BOT': {
-            const globalStats = getGlobalStats();
             const botName = action.payload.botName;
 
             return {
@@ -385,14 +383,13 @@ const gameReducer = (state: GameState, action: Action): GameState => {
                     ...p,
                     name: botName,
                     isComputer: true,
-                    stats: globalStats[botName] || getEmptyStats(),
+                    stats: getEmptyStats(),
                     personality: BOT_PERSONALITIES[botName]
                 } : p)
             };
         }
 
         case 'AUTOFILL_BOTS': {
-            const globalStats = getGlobalStats();
             const usedBotNames = state.players.filter(p => p.isComputer && p.name).map(p => p.name);
             const availableBots = BOT_NAMES_POOL.filter(name => !usedBotNames.includes(name));
 
@@ -407,7 +404,7 @@ const gameReducer = (state: GameState, action: Action): GameState => {
                             ...p,
                             name: botName,
                             isComputer: true,
-                            stats: globalStats[botName] || getEmptyStats()
+                            stats: getEmptyStats()
                         };
                     }
                     return p;
@@ -441,13 +438,8 @@ const gameReducer = (state: GameState, action: Action): GameState => {
         }
 
         case 'LOAD_GLOBAL_STATS': {
-            return {
-                ...state,
-                players: state.players.map(p => p.name ? ({
-                    ...p,
-                    stats: action.payload[p.name] || p.stats
-                }) : p)
-            };
+            // No longer overwrite the current game stats!
+            return state;
         }
 
         case 'TOGGLE_STEP_MODE':
@@ -1231,12 +1223,12 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const init = async () => {
             if (await performTotalWipe()) return;
 
-            // Load local stats (v3)
+            // Load local stats (v4)
             const localStats = getGlobalStats();
             const cloudStats = await getAllPlayerStats();
             const mergedStats = mergeAllStats(localStats, cloudStats);
 
-            localStorage.setItem('euchre_global_stats_v3', JSON.stringify(mergedStats));
+            localStorage.setItem('euchre_global_stats_v4', JSON.stringify(mergedStats));
             dispatch({ type: 'LOAD_GLOBAL_STATS', payload: mergedStats });
         };
 
