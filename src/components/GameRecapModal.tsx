@@ -78,7 +78,10 @@ export const GameRecapModal = ({ isOpen, onClose, gameState }: GameRecapModalPro
         let t2Score = 0;
         const data = [{ hand: 0, t1: 0, t2: 0 }];
 
-        gameState.history.forEach((h, i) => {
+        // The game store history is prepended (most recent hand first)
+        const chronological = [...gameState.history].reverse();
+
+        chronological.forEach((h, i) => {
             t1Score += h.pointsScored.team1;
             t2Score += h.pointsScored.team2;
             data.push({ hand: i + 1, t1: t1Score, t2: t2Score });
@@ -211,48 +214,91 @@ export const GameRecapModal = ({ isOpen, onClose, gameState }: GameRecapModalPro
                                         SCORE
                                     </text>
 
+                                    {/* Y Axis Ticks */}
+                                    {[0, 2, 4, 6, 8, 10].map(score => {
+                                        if (score > yMax) return null;
+                                        return (
+                                            <g key={`y-${score}`}>
+                                                <line x1={padding - 1} y1={getY(score)} x2={padding} y2={getY(score)} stroke="currentColor" className="text-brand-dim" strokeWidth="0.3" />
+                                                <text
+                                                    x={padding - 1.5}
+                                                    y={getY(score) + 1}
+                                                    textAnchor="end"
+                                                    className="text-[3px] font-black text-ink-dim fill-current"
+                                                    style={{ fontFamily: 'inherit' }}
+                                                >
+                                                    {score}
+                                                </text>
+                                            </g>
+                                        );
+                                    })}
+
+                                    {/* X Axis Ticks */}
+                                    {chartData.map((d, i) => (
+                                        <g key={`x-${i}`}>
+                                            <line x1={getX(i)} y1={height - padding} x2={getX(i)} y2={height - padding + 1} stroke="currentColor" className="text-brand-dim" strokeWidth="0.3" />
+                                            {i % 2 === 0 && (
+                                                <text
+                                                    x={getX(i)}
+                                                    y={height - padding + 3.5}
+                                                    textAnchor="middle"
+                                                    className="text-[2.5px] font-black text-ink-dim fill-current"
+                                                    style={{ fontFamily: 'inherit' }}
+                                                >
+                                                    {d.hand}
+                                                </text>
+                                            )}
+                                        </g>
+                                    ))}
+
                                     {/* Axes */}
                                     <line x1={padding} y1={padding} x2={padding} y2={height - padding} stroke="currentColor" className="text-brand" strokeWidth="0.5" strokeLinecap="round" />
                                     <line x1={padding} y1={height - padding} x2={width - padding} y2={height - padding} stroke="currentColor" className="text-brand" strokeWidth="0.5" strokeLinecap="round" />
 
                                     {/* Target Line (10 Points) */}
-                                    <line
-                                        x1={padding}
-                                        y1={getY(10)}
-                                        x2={width - padding}
-                                        y2={getY(10)}
-                                        stroke="currentColor"
-                                        className="text-brand-dim"
-                                        strokeWidth="0.3"
-                                        strokeDasharray="1.5 1.5"
-                                    />
+                                    <g>
+                                        <line
+                                            x1={padding}
+                                            y1={getY(10)}
+                                            x2={width - padding}
+                                            y2={getY(10)}
+                                            stroke="currentColor"
+                                            className="text-brand-dim"
+                                            strokeWidth="0.3"
+                                            strokeDasharray="1.5 1.5"
+                                        />
+                                        <text x={width - padding - 1} y={getY(10) - 1} textAnchor="end" className="text-[2px] font-black text-brand-dim fill-current">TARGET (10)</text>
+                                    </g>
 
                                     {/* Lines */}
                                     <path d={t1Path} fill="none" stroke="currentColor" className="text-brand-dark" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
                                     <path d={t2Path} fill="none" stroke="currentColor" className="text-red-500" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
 
                                     {/* Dots with Hit Area */}
-                                    {chartData.map((d, i) => (
-                                        <g key={i} onMouseEnter={() => setHoveredHand(i)} className="cursor-crosshair group">
-                                            {/* Invisible Heat Target */}
-                                            <rect
-                                                x={getX(i) - 2}
-                                                y={padding}
-                                                width="4"
-                                                height={height - 2 * padding}
-                                                fill="transparent"
-                                            />
-                                            {/* Guide Line on Hover */}
-                                            {hoveredHand === i && (
-                                                <line
-                                                    x1={getX(i)} y1={padding} x2={getX(i)} y2={height - padding}
-                                                    stroke="currentColor" strokeWidth="0.2" className="text-ink-dim" strokeDasharray="1 1"
+                                    {chartData.map((d, i) => {
+                                        const hitWidth = Math.max(4, (width - 2 * padding) / xMax);
+                                        return (
+                                            <g key={i} onMouseEnter={() => setHoveredHand(i)} className="cursor-crosshair group">
+                                                {/* Invisible Hit Target */}
+                                                <rect
+                                                    x={getX(i) - hitWidth / 2}
+                                                    y={padding}
+                                                    width={hitWidth}
+                                                    height={height - 2 * padding}
+                                                    fill="transparent"
                                                 />
-                                            )}
-                                            <circle cx={getX(i)} cy={getY(d.t1)} r="1" className="fill-brand-dark group-hover:r-[1.5] transition-all" />
-                                            <circle cx={getX(i)} cy={getY(d.t2)} r="1" className="fill-red-500 group-hover:r-[1.5] transition-all" />
-                                        </g>
-                                    ))}
+                                                {/* Guide Line on Hover */}
+                                                {hoveredHand === i && (
+                                                    <line
+                                                        x1={getX(i)} y1={padding} x2={getX(i)} y2={height - padding}
+                                                        stroke="currentColor" strokeWidth="0.2" className="text-ink-dim" strokeDasharray="1 1"
+                                                    />
+                                                )}
+                                                <circle cx={getX(i)} cy={getY(d.t1)} r="1" className="fill-brand-dark group-hover:r-[1.5] transition-all" />
+                                                <circle cx={getX(i)} cy={getY(d.t2)} r="1" className="fill-red-500 group-hover:r-[1.5] transition-all" />
+                                            </g>
+                                        );
+                                    })}
                                 </svg>
                             </div>
 

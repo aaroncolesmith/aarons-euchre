@@ -1135,7 +1135,7 @@ const gameReducer = (state: GameState, action: Action): GameState => {
                 dealerIndex: (state.dealerIndex + 1) % 4,
                 phase: isGameOver ? 'game_over' : 'waiting_for_next_deal',
                 handsPlayed: state.handsPlayed + 1,
-                history: [handResult, ...state.history].slice(0, 10),
+                history: [handResult, ...state.history].slice(0, 50),
                 eventLog: newEventLog,
                 logs: [isGameOver ? 'GAME OVER!' : 'Hand finished. Next deal in 4 seconds...', ...state.logs],
                 overlayMessage: null,
