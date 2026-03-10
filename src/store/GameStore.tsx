@@ -36,6 +36,7 @@ type Action =
     | { type: 'CLEAR_OVERLAY' }
     | { type: 'ADD_LOG'; payload: string }
     | { type: 'EXIT_TO_LANDING' }
+    | { type: 'PLAY_AGAIN' }
     | { type: 'FORCE_PHASE'; payload: { phase: GameState['phase'] } }
     | { type: 'FORCE_NEXT_PLAYER'; payload: { nextPlayerIndex: number } };
 
@@ -630,6 +631,31 @@ const gameReducer = (state: GameState, action: Action): GameState => {
                     });
                 }
 
+                // Generate announcement for ordering up
+                const generateOrderUpMessage = () => {
+                    const currentViewer = state.currentViewPlayerName;
+                    const viewerIndex = state.players.findIndex(p => p.name === currentViewer);
+                    const dealerName = state.players[state.dealerIndex].name || 'Bot';
+                    const callerName = caller.name || 'Bot';
+
+                    // Determine relationships from viewer's perspective
+                    const isTeam1 = (idx: number) => idx === 0 || idx === 2;
+                    const viewerTeam1 = isTeam1(viewerIndex);
+                    const callerTeam1 = isTeam1(callerIndex);
+
+                    const callerRelationship = viewerTeam1 === callerTeam1 ? 'teammate' : 'opponent';
+                    const callerPrefix = callerIndex === viewerIndex ? 'You have' : `Your ${callerRelationship} ${callerName} has`;
+                    const dealerPrefix = state.dealerIndex === viewerIndex ? 'you' : `the dealer ${dealerName}`;
+
+                    const suitName = suit.charAt(0).toUpperCase() + suit.slice(1);
+                    return `${callerPrefix} ordered up ${suitName} to ${dealerPrefix}. Waiting for discard...`;
+                };
+
+                // Pre-acknowledge all bots
+                const botAcknowledgments = state.players
+                    .filter(p => p.isComputer && p.name)
+                    .reduce((acc, p) => ({ ...acc, [p.name!]: true }), {});
+
                 return {
                     ...state,
                     players: updatedPlayers,
@@ -640,6 +666,8 @@ const gameReducer = (state: GameState, action: Action): GameState => {
                     currentPlayerIndex: state.dealerIndex,
                     logs: [logMsg, ...state.logs],
                     eventLog: [...state.eventLog, bidEvent],
+                    overlayMessage: generateOrderUpMessage(),
+                    overlayAcknowledged: botAcknowledgments,
                     trumpCallLogs: trumpLog ? [...state.trumpCallLogs, trumpLog] : state.trumpCallLogs
                 };
             }
@@ -649,7 +677,13 @@ const gameReducer = (state: GameState, action: Action): GameState => {
                 const currentViewer = state.currentViewPlayerName;
                 const viewerIndex = state.players.findIndex(p => p.name === currentViewer);
                 const callerName = caller.name || 'Bot';
-                const firstPlayerIndex = (state.dealerIndex + 1) % 4;
+                let firstPlayerIndex = (state.dealerIndex + 1) % 4;
+                if (isLoner) {
+                    const partnerIndex = (callerIndex + 2) % 4;
+                    if (firstPlayerIndex === partnerIndex) {
+                        firstPlayerIndex = (firstPlayerIndex + 1) % 4;
+                    }
+                }
                 const firstPlayerName = state.players[firstPlayerIndex].name || 'Bot';
 
                 // Determine relationships from viewer's perspective
@@ -764,7 +798,13 @@ const gameReducer = (state: GameState, action: Action): GameState => {
                 const viewerIndex = state.players.findIndex(p => p.name === currentViewer);
                 const dealerName = state.players[state.dealerIndex].name || 'Bot';
                 const callerName = state.players[state.trumpCallerIndex!].name || 'Bot';
-                const firstPlayerIndex = (state.dealerIndex + 1) % 4;
+                let firstPlayerIndex = (state.dealerIndex + 1) % 4;
+                if (state.isLoner) {
+                    const partnerIndex = (state.trumpCallerIndex! + 2) % 4;
+                    if (firstPlayerIndex === partnerIndex) {
+                        firstPlayerIndex = (firstPlayerIndex + 1) % 4;
+                    }
+                }
                 const firstPlayerName = state.players[firstPlayerIndex].name || 'Bot';
 
                 // Determine relationships from viewer's perspective
@@ -1131,6 +1171,35 @@ const gameReducer = (state: GameState, action: Action): GameState => {
                 eventLog: newEventLog,
                 logs: [isGameOver ? 'GAME OVER!' : 'Hand finished. Next deal in 4 seconds...', ...state.logs],
                 overlayMessage: null,
+            };
+        }
+
+        case 'PLAY_AGAIN': {
+            const tableCode = state.tableCode;
+            const tableId = state.tableId;
+            const tableName = state.tableName;
+            const players = state.players.map((p, i) => ({
+                ...createEmptyPlayer(i),
+                id: p.id,
+                name: p.name,
+                isComputer: p.isComputer,
+                personality: p.personality
+            }));
+
+            return {
+                ...INITIAL_STATE_FUNC(),
+                tableCode,
+                tableId,
+                tableName,
+                players,
+                phase: 'randomizing_dealer',
+                currentViewPlayerName: state.currentViewPlayerName,
+                currentUser: state.currentUser,
+                teamNames: {
+                    team1: getTeamName(players[0].name, players[2].name),
+                    team2: getTeamName(players[1].name, players[3].name)
+                },
+                logs: ['Starting a new match!', ...state.logs]
             };
         }
 

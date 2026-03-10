@@ -7,7 +7,7 @@ import { supabase } from './lib/supabase';
 import { fetchUserCloudGames, mergeLocalAndCloudGames } from './utils/cloudGames';
 import { getFreezeStats, getFreezeRate } from './utils/cloudFreezeLogger';
 import { getAllPlayerStats } from './utils/supabaseStats';
-import { GameRecapModal } from './components/GameRecapModal';
+import { GameOver } from './components/GameOver';
 
 const getCardJitter = (id: string) => {
     let hash = 0;
@@ -167,12 +167,12 @@ const PlayerSeat = ({
                     </div>
                 )}
 
-                {/* Tricks Won */}
-                {!inLobby && state.phase !== 'randomizing_dealer' && (state.tricksWon[player.id] || 0) > 0 && (
+                {/* Tricks Won (Hand) */}
+                {!inLobby && state.phase !== 'randomizing_dealer' && ['playing', 'waiting_for_trick', 'scoring'].includes(state.phase) && (
                     <motion.div
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
-                        className="absolute -bottom-2 -right-6 bg-paper text-brand text-sm font-black w-7 h-7 rounded-full flex items-center justify-center border-2 border-brand shadow-sm font-hand"
+                        className="absolute -bottom-2 -right-6 bg-paper text-brand text-sm font-black w-7 h-7 rounded-full flex items-center justify-center border-2 border-brand shadow-sketch-brand font-hand tabular-nums"
                     >
                         {state.tricksWon[player.id] || 0}
                     </motion.div>
@@ -1401,7 +1401,7 @@ const LandingPage = () => {
             {/* Footer Version */}
             <div className="mt-auto pt-8 text-center w-full">
                 <div className="text-[10px] font-black text-ink-dim/50 uppercase tracking-[0.5em]">
-                    Euchre Engine V1.40
+                    Euchre Engine V1.41
                 </div>
             </div>
 
@@ -1419,7 +1419,6 @@ const GameView = () => {
     const [isStatsOpen, setIsStatsOpen] = useState(false);
     // @ts-ignore - Will be used when admin button is added to GameView
     const [statsInitialTab, setStatsInitialTab] = useState<'me' | 'league' | 'bot_audit' | 'freeze_incidents' | 'state_management' | 'commentary'>('me');
-    const [showGameRecap, setShowGameRecap] = useState(false);
 
 
     const handleNextStep = () => {
@@ -1431,65 +1430,12 @@ const GameView = () => {
 
     // Game Over Screen
     if (state.phase === 'game_over') {
-        const winner = state.scores.team1 >= 10 ? state.teamNames.team1 : state.teamNames.team2;
         return (
-            <div className="flex flex-col items-center justify-center h-full w-full max-w-2xl mx-auto p-8 animate-in fade-in zoom-in duration-700">
-                <motion.div
-                    initial={{ scale: 0, rotate: -10 }}
-                    animate={{ scale: 1, rotate: 0 }}
-                    className="w-full bg-paper p-10 md:p-16 rounded-[3rem] border-4 border-brand shadow-sketch-brand-strong relative overflow-hidden"
-                >
-                    <div className="absolute inset-0 bg-brand/5 pointer-events-none" />
-
-                    <div className="relative z-10 space-y-8">
-                        <h1 className="text-6xl md:text-7xl font-black text-brand-dark text-center leading-none">
-                            GAME OVER!
-                        </h1>
-
-                        <div className="text-center space-y-2">
-                            <div className="text-2xl md:text-3xl font-black text-brand-dim uppercase tracking-wide">
-                                🏆 {winner} Wins! 🏆
-                            </div>
-                            <div className="text-lg text-ink-dim font-bold">
-                                Final Score: {state.scores.team1} - {state.scores.team2}
-                            </div>
-                        </div>
-
-                        <div className="bg-paper-dim rounded-2xl p-6 border-2 border-brand/20">
-                            <div className="grid grid-cols-2 gap-4 text-center">
-                                <div>
-                                    <div className="text-sm text-ink-dim font-black uppercase tracking-wider mb-2">{state.teamNames.team1}</div>
-                                    <div className={`text-5xl font-black ${state.scores.team1 >= 10 ? 'text-brand' : 'text-ink-dim'}`}>
-                                        {state.scores.team1}
-                                    </div>
-                                </div>
-                                <div>
-                                    <div className="text-sm text-ink-dim font-black uppercase tracking-wider mb-2">{state.teamNames.team2}</div>
-                                    <div className={`text-5xl font-black ${state.scores.team2 >= 10 ? 'text-brand' : 'text-ink-dim'}`}>
-                                        {state.scores.team2}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="flex flex-col gap-4">
-                            <button
-                                onClick={() => setShowGameRecap(true)}
-                                className="w-full bg-paper hover:bg-paper-dim text-ink font-black py-4 rounded-2xl text-lg border-4 border-ink shadow-sketch-ink transition-all active:scale-95"
-                            >
-                                GAME RECAP
-                            </button>
-                            <button
-                                onClick={() => dispatch({ type: 'EXIT_TO_LANDING' })}
-                                className="w-full bg-brand hover:bg-brand-dim text-white font-black py-6 rounded-2xl text-xl shadow-sketch-brand transition-all active:scale-95"
-                            >
-                                GO HOME
-                            </button>
-                        </div>
-                    </div>
-                </motion.div>
-                <GameRecapModal isOpen={showGameRecap} onClose={() => setShowGameRecap(false)} gameState={state} />
-            </div>
+            <GameOver
+                state={state}
+                onPlayAgain={() => dispatch({ type: 'PLAY_AGAIN' })}
+                onExit={() => dispatch({ type: 'EXIT_TO_LANDING' })}
+            />
         );
     }
 
