@@ -465,3 +465,24 @@ export async function getDailyLeaderboard(date_string: string | 'all') {
         return [];
     }
 }
+
+export async function hasUserPlayedDaily(playerName: string, dateString: string): Promise<boolean> {
+    try {
+        const { data, error } = await supabase
+            .from('daily_challenge_scores')
+            .select('player_name')
+            .eq('player_name', playerName)
+            .eq('date_string', dateString)
+            .maybeSingle();
+
+        if (error) {
+            console.error('[SUPABASE DAILY] Error checking play status:', error);
+            return false;
+        }
+
+        return !!data;
+    } catch (err) {
+        console.error('[SUPABASE DAILY] Exception checking play status:', err);
+        return false;
+    }
+}

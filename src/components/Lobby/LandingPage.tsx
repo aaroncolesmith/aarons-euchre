@@ -3,6 +3,7 @@ import { useGame, getSavedGames, deleteActiveGame } from '../../store/GameStore'
 import { StatsModal } from '../common/StatsModal';
 import { supabase } from '../../lib/supabase';
 import { fetchUserCloudGames, mergeLocalAndCloudGames } from '../../utils/cloudGames';
+import { hasUserPlayedDaily } from '../../utils/supabaseStats';
 
 export const LandingPage = () => {
     const { state, dispatch } = useGame();
@@ -13,6 +14,7 @@ export const LandingPage = () => {
     const [statsInitialTab, setStatsInitialTab] = useState<'me' | 'league' | 'daily_challenge' | 'trump_analytics' | 'bot_audit' | 'freeze_incidents' | 'state_management' | 'commentary'>('me');
     const [cloudGames, setCloudGames] = useState<any[]>([]);
     const [gameFilter, setGameFilter] = useState<'in-progress' | 'completed'>('in-progress');
+    const [hasPlayedDaily, setHasPlayedDaily] = useState(false);
 
     useEffect(() => {
         const loadCloudGames = async () => {
@@ -21,6 +23,11 @@ export const LandingPage = () => {
             }
             const games = await fetchUserCloudGames(state.currentUser);
             setCloudGames(games);
+
+            // Check if played daily
+            const dateString = new Date().toISOString().split('T')[0];
+            const played = await hasUserPlayedDaily(state.currentUser, dateString);
+            setHasPlayedDaily(played);
         };
         loadCloudGames();
     }, [state.currentUser, _refreshKey]);
@@ -125,6 +132,7 @@ export const LandingPage = () => {
                         </button>
 
                         <button
+                            disabled={hasPlayedDaily}
                             onClick={() => {
                                 const dateString = new Date().toISOString().split('T')[0];
                                 const tableCode = `DAILY-${dateString}-${state.currentUser}`;
@@ -135,12 +143,22 @@ export const LandingPage = () => {
                                     dispatch({ type: 'START_DAILY_CHALLENGE', payload: { userName: state.currentUser || '', dateString } });
                                 }
                             }}
-                            className="group w-full max-w-2xl bg-gradient-to-br from-amber-400 to-amber-600 p-8 rounded-2xl border-4 border-ink shadow-sketch-ink-lg hover:shadow-[4px_4px_0px_0px_rgba(251,191,36,0.5)] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all text-center flex flex-col justify-center overflow-hidden relative cursor-pointer"
+                            className={`group w-full max-w-2xl p-8 rounded-2xl border-4 border-ink shadow-sketch-ink-lg transition-all text-center flex flex-col justify-center overflow-hidden relative ${hasPlayedDaily ? 'bg-slate-100 opacity-80 cursor-default grayscale' : 'bg-gradient-to-br from-amber-400 to-amber-600 hover:shadow-[4px_4px_0px_0px_rgba(251,191,36,0.5)] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none cursor-pointer'}`}
                         >
                             <div className="absolute top-0 right-0 w-32 h-32 bg-amber-200 rounded-full blur-3xl opacity-30 transform translate-x-10 -translate-y-10 group-hover:scale-150 transition-transform duration-700"></div>
-                            <div className="relative z-10 text-[10px] font-black uppercase tracking-[0.3em] text-white/80 mb-2">Daily Seeded Mode</div>
-                            <div className="relative z-10 text-3xl font-black uppercase text-white tracking-widest leading-none mb-2 group-hover:scale-105 transition-transform">Hand of the Day</div>
-                            <div className="relative z-10 text-[10px] text-white/90 font-bold uppercase tracking-wider">Play today's exact seeded game and compete globally.</div>
+                            <div className="relative z-10 text-[10px] font-black uppercase tracking-[0.3em] text-white/80 mb-2">
+                                {hasPlayedDaily ? 'Challenge Complete' : 'Daily Seeded Mode'}
+                            </div>
+                            <div className="relative z-10 text-3xl font-black uppercase text-white tracking-widest leading-none mb-2 group-hover:scale-105 transition-transform">
+                                Hand of the Day
+                            </div>
+                            {hasPlayedDaily ? (
+                                <div onClick={(e) => { e.stopPropagation(); setStatsInitialTab('daily_challenge'); setIsStatsOpen(true); }} className="relative z-10 text-[10px] text-white bg-amber-700/50 self-center px-4 py-2 rounded-full font-black uppercase tracking-widest hover:bg-amber-700 transition-colors pointer-events-auto cursor-pointer">
+                                    View Leaderboard
+                                </div>
+                            ) : (
+                                <div className="relative z-10 text-[10px] text-white/90 font-bold uppercase tracking-wider">Play today's exact seeded game and compete globally.</div>
+                            )}
                         </button>
                     </div>
                 ) : (
