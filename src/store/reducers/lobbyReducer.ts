@@ -139,9 +139,9 @@ export const lobbyReducer = (state: GameState, action: Action): GameState | null
             return {
                 ...state,
                 isDailyChallenge: true,
-                tableId: `daily-${dateString}`,
+                tableId: `daily-${dateString}-${userName}`,
                 tableName: `Hand of the Day (${dateString})`,
-                tableCode: `DAILY-${dateString}`,
+                tableCode: `DAILY-${dateString}-${userName}`,
                 currentViewPlayerName: userName,
                 players: dailyPlayers,
                 phase: 'waiting_for_next_deal',

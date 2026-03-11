@@ -127,7 +127,7 @@ export const LandingPage = () => {
                         <button
                             onClick={() => {
                                 const dateString = new Date().toISOString().split('T')[0];
-                                const tableCode = `DAILY-${dateString}`;
+                                const tableCode = `DAILY-${dateString}-${state.currentUser}`;
                                 const existingDaily = savedGames.find(g => g.tableCode === tableCode);
                                 if (existingDaily) {
                                     dispatch({ type: 'LOAD_EXISTING_GAME', payload: { gameState: existingDaily } });
