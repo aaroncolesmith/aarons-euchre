@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { GameState } from '../types/game';
+import { GameState } from '../../types/game';
 import { GameRecapModal } from './GameRecapModal';
 
 interface GameOverProps {

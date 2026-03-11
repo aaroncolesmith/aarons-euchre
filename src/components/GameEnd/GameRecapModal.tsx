@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Trophy } from 'lucide-react';
-import { GameState } from '../types/game';
+import { GameState } from '../../types/game';
 
 interface GameRecapModalProps {
     isOpen: boolean;
@@ -19,7 +19,7 @@ export const GameRecapModal = ({ isOpen, onClose, gameState }: GameRecapModalPro
             const team = (index === 0 || index === 2) ? 1 : 2;
 
             // Aggregate stats from history
-            const playerStats = gameState.history.reduce((acc, hand) => {
+            const playerStats = gameState.history.reduce((acc, hand, i) => {
                 // Tricks Taken
                 const tricks = hand.tricksWon[player.id] || 0;
 
@@ -32,8 +32,13 @@ export const GameRecapModal = ({ isOpen, onClose, gameState }: GameRecapModalPro
                 const callerTeam = (hand.trumpCallerIndex === 0 || hand.trumpCallerIndex === 2) ? 1 : 2;
                 const isEuchre = handWon && callerTeam !== team;
 
+                // Calculate points scored in THIS hand
+                const prevHandInTime = gameState.history[i + 1]; // history is newest-first
+                const prevScores = prevHandInTime ? prevHandInTime.scoresAtEnd : { team1: 0, team2: 0 };
+                const deltaPoints = hand.scoresAtEnd[team === 1 ? 'team1' : 'team2'] - prevScores[team === 1 ? 'team1' : 'team2'];
+
                 // Loners Won
-                const isLonerWon = hand.isLoner && handWon && hand.trumpCallerIndex === index && hand.pointsScored[team === 1 ? 'team1' : 'team2'] >= 4;
+                const isLonerWon = hand.isLoner && handWon && hand.trumpCallerIndex === index && deltaPoints >= 4;
 
                 // Loner Call
                 const isLonerCall = hand.isLoner && hand.trumpCallerIndex === index;
@@ -82,8 +87,8 @@ export const GameRecapModal = ({ isOpen, onClose, gameState }: GameRecapModalPro
         const chronological = [...gameState.history].reverse();
 
         chronological.forEach((h, i) => {
-            t1Score += h.pointsScored.team1;
-            t2Score += h.pointsScored.team2;
+            t1Score = h.scoresAtEnd.team1;
+            t2Score = h.scoresAtEnd.team2;
             data.push({ hand: i + 1, t1: t1Score, t2: t2Score });
         });
         return data;
