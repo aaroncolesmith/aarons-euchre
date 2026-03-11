@@ -146,9 +146,17 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         };
     }, [state.tableCode]);
 
-    // Persist active game state
+    // Persist active game state (Host Only with Throttling)
     useEffect(() => {
-        if (state.tableCode && state.phase !== 'login' && state.phase !== 'landing') {
+        if (!state.tableCode || state.phase === 'login' || state.phase === 'landing') return;
+        
+        // Always save local game state immediately for responsiveness on own machine
+        saveActiveGame(state);
+
+        // Only the host (or solo daily player) syncs the authoritative state to the cloud
+        if (!isHost) return;
+
+        const timer = setTimeout(async () => {
             const syncToCloud = async () => {
                 await supabase
                     .from('games')
@@ -159,9 +167,10 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                     }, { onConflict: 'code' });
             };
             syncToCloud();
-            saveActiveGame(state);
-        }
-    }, [state]);
+        }, 1000); // 1000ms debounce
+
+        return () => clearTimeout(timer);
+    }, [state, isHost]);
 
     // Handle Match Completion and Stats Saving (Authority Based)
     useEffect(() => {
