@@ -26,6 +26,9 @@ export const StatsModal = ({
             getAllPlayerStats().then(stats => {
                 setAllStats(stats);
                 setIsLoading(false);
+            }).catch(err => {
+                console.error('[STATS MODAL] Failed to load stats:', err);
+                setIsLoading(false);
             });
         }
     }, [isOpen]);
@@ -33,16 +36,22 @@ export const StatsModal = ({
     if (!isOpen) return null;
 
     const myStats = allStats[state.currentViewPlayerName!] || {
+        gamesPlayed: 0,
+        gamesWon: 0,
         handsPlayed: 0,
         handsWon: 0,
         tricksPlayed: 0,
-        tricksWon: 0,
+        tricksTaken: 0,
         tricksWonTeam: 0,
         callsMade: 0,
         callsWon: 0,
         lonersAttempted: 0,
         lonersWon: 0,
-        pointsScored: 0
+        pointsScored: 0,
+        euchresMade: 0,
+        euchred: 0,
+        sweeps: 0,
+        swept: 0
     };
 
     return (

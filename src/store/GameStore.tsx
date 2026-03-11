@@ -3,7 +3,7 @@ import { GameState, Action, PlayerStats } from '../types/game';
 import { supabase } from '../lib/supabase';
 import { createDeck, dealHands, shuffleDeck } from '../utils/deck';
 import { shouldCallTrump, shouldGoAlone, getBestBid, getBotMove, getCardValue } from '../utils/rules';
-import { saveMultiplePlayerStats, getAllPlayerStats, mergeAllStats, submitDailyScore } from '../utils/supabaseStats';
+import { saveMultiplePlayerStats, getAllPlayerStats, getPlayersStats, mergeAllStats, submitDailyScore, LOCAL_STORAGE_KEY } from '../utils/supabaseStats';
 import { useHostElection } from '../utils/presence';
 import { createDailyRNG } from '../utils/rng';
 import { detectFreeze, applyRecovery, createHeartbeatSnapshot, logFreezeToCloud, HeartbeatState } from '../utils/heartbeat';
@@ -85,12 +85,12 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
 
     const getGlobalStats = (): { [name: string]: PlayerStats } => {
-        const saved = localStorage.getItem('euchre_global_stats_v4');
+        const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
         return saved ? JSON.parse(saved) : {};
     };
 
     const saveGlobalStats = async (stats: { [name: string]: PlayerStats }) => {
-        localStorage.setItem('euchre_global_stats_v4', JSON.stringify(stats));
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(stats));
         await saveMultiplePlayerStats(stats);
     };
 
@@ -215,7 +215,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 Logger.info(`[STATS] AUTHORITY (${state.currentUser}): Saving final match stats`);
                 
                 if (state.isDailyChallenge) {
-                    const date_string = state.tableCode!.split('-')[1] + '-' + state.tableCode!.split('-')[2] + '-' + state.tableCode!.split('-')[3]; // Derived from "DAILY-2024-03-24"
+                    const date_string = state.tableCode!.split('-').slice(1, 4).join('-');
                     const hero = state.players.find(p => p.name === state.currentUser)!;
                     await submitDailyScore({
                         date_string,
@@ -228,36 +228,43 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                     });
                 }
 
-                const globalStats = getGlobalStats();
+                // IMPORTANT: Fetch current stats from cloud before incrementing
+                // This prevents cross-device overwrites.
+                const involvedPlayerNames = state.players.map(p => p.name).filter((n): n is string => !!n);
+                const cloudStats = await getPlayersStats(involvedPlayerNames);
+                const localStats = getGlobalStats();
 
                 state.players.forEach((p, i) => {
                     if (!p.name) return;
                     const playerTeam = (i === 0 || i === 2) ? 'team1' : 'team2';
                     const isGameWinner = playerTeam === 'team1' ? state.scores.team1 >= 10 : state.scores.team2 >= 10;
-                    const prevGlobal = globalStats[p.name] || getEmptyStats();
+                    
+                    // Use cloud stats as base if available, then local, then empty
+                    const baseStats = cloudStats[p.name] || localStats[p.name] || getEmptyStats();
 
-                    globalStats[p.name] = {
-                        gamesPlayed: (prevGlobal.gamesPlayed || 0) + 1,
-                        gamesWon: isGameWinner ? (prevGlobal.gamesWon || 0) + 1 : (prevGlobal.gamesWon || 0),
-                        handsPlayed: (prevGlobal.handsPlayed || 0) + p.stats.handsPlayed,
-                        handsWon: (prevGlobal.handsWon || 0) + p.stats.handsWon,
-                        tricksPlayed: (prevGlobal.tricksPlayed || 0) + p.stats.tricksPlayed,
-                        tricksTaken: (prevGlobal.tricksTaken || 0) + p.stats.tricksTaken,
-                        tricksWonTeam: (prevGlobal.tricksWonTeam || 0) + p.stats.tricksWonTeam,
-                        callsMade: (prevGlobal.callsMade || 0) + p.stats.callsMade,
-                        callsWon: (prevGlobal.callsWon || 0) + p.stats.callsWon,
-                        lonersAttempted: (prevGlobal.lonersAttempted || 0) + p.stats.lonersAttempted,
-                        lonersWon: (prevGlobal.lonersWon || 0) + p.stats.lonersWon,
-                        pointsScored: (prevGlobal.pointsScored || 0) + p.stats.pointsScored,
-                        euchresMade: (prevGlobal.euchresMade || 0) + p.stats.euchresMade,
-                        euchred: (prevGlobal.euchred || 0) + p.stats.euchred,
-                        sweeps: (prevGlobal.sweeps || 0) + p.stats.sweeps,
-                        swept: (prevGlobal.swept || 0) + p.stats.swept,
+                    localStats[p.name] = {
+                        gamesPlayed: (baseStats.gamesPlayed || 0) + 1,
+                        gamesWon: isGameWinner ? (baseStats.gamesWon || 0) + 1 : (baseStats.gamesWon || 0),
+                        handsPlayed: (baseStats.handsPlayed || 0) + p.stats.handsPlayed,
+                        handsWon: (baseStats.handsWon || 0) + p.stats.handsWon,
+                        tricksPlayed: (baseStats.tricksPlayed || 0) + p.stats.tricksPlayed,
+                        tricksTaken: (baseStats.tricksTaken || 0) + p.stats.tricksTaken,
+                        tricksWonTeam: (baseStats.tricksWonTeam || 0) + p.stats.tricksWonTeam,
+                        callsMade: (baseStats.callsMade || 0) + p.stats.callsMade,
+                        callsWon: (baseStats.callsWon || 0) + p.stats.callsWon,
+                        lonersAttempted: (baseStats.lonersAttempted || 0) + p.stats.lonersAttempted,
+                        lonersWon: (baseStats.lonersWon || 0) + p.stats.lonersWon,
+                        pointsScored: (baseStats.pointsScored || 0) + p.stats.pointsScored,
+                        euchresMade: (baseStats.euchresMade || 0) + p.stats.euchresMade,
+                        euchred: (baseStats.euchred || 0) + p.stats.euchred,
+                        sweeps: (baseStats.sweeps || 0) + p.stats.sweeps,
+                        swept: (baseStats.swept || 0) + p.stats.swept,
                     } as PlayerStats;
                 });
 
                 try {
-                    await saveGlobalStats(globalStats);
+                    await saveGlobalStats(localStats);
+                    Logger.info(`[STATS] Successfully synced stats for ${involvedPlayerNames.length} players to cloud`);
                 } catch (err) {
                     Logger.error('[STATS] Global sync failed', err);
                 }

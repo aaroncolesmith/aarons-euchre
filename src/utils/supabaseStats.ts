@@ -1,7 +1,7 @@
 import { supabase } from '../lib/supabase';
 import { PlayerStats } from '../types/game';
 
-export const LOCAL_STORAGE_KEY = 'euchre_global_stats_v3';
+export const LOCAL_STORAGE_KEY = 'euchre_global_stats_v4';
 
 // Convert between camelCase (app) and snake_case (database)
 function toSnakeCase(stats: PlayerStats) {
@@ -123,6 +123,7 @@ export function mergeAllStats(localStats: Record<string, PlayerStats>, cloudStat
  */
 export async function getAllPlayerStats(): Promise<Record<string, PlayerStats>> {
     try {
+        console.log('[SUPABASE STATS] Fetching all player stats...');
         const { data, error } = await supabase
             .from('player_stats')
             .select('*');
@@ -137,9 +138,38 @@ export async function getAllPlayerStats(): Promise<Record<string, PlayerStats>> 
             stats[row.player_name] = fromSnakeCase(row);
         });
 
+        console.log(`[SUPABASE STATS] Loaded ${Object.keys(stats).length} player stats`);
         return stats;
     } catch (err) {
         console.error('[SUPABASE STATS] Exception fetching stats:', err);
+        return {};
+    }
+}
+
+/**
+ * Get specific player stats from Supabase
+ */
+export async function getPlayersStats(playerNames: string[]): Promise<Record<string, PlayerStats>> {
+    try {
+        console.log('[SUPABASE STATS] Fetching stats for:', playerNames);
+        const { data, error } = await supabase
+            .from('player_stats')
+            .select('*')
+            .in('player_name', playerNames);
+
+        if (error) {
+            console.error('[SUPABASE STATS] Error fetching batch stats:', error);
+            return {};
+        }
+
+        const stats: Record<string, PlayerStats> = {};
+        data?.forEach((row: any) => {
+            stats[row.player_name] = fromSnakeCase(row);
+        });
+
+        return stats;
+    } catch (err) {
+        console.error('[SUPABASE STATS] Exception fetching batch stats:', err);
         return {};
     }
 }
