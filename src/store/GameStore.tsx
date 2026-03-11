@@ -402,9 +402,11 @@ export const deleteActiveGame = async (tableCode: string) => {
         localStorage.setItem('euchre_active_games', JSON.stringify(games));
     }
     
-    // Attempt to delete from Supabase if we have cloud access
+    // Attempt to soft-delete from Supabase if we have cloud access
     try {
-        await supabase.from('games').delete().eq('code', tableCode);
+        await supabase.from('games')
+            .update({ deleted_at: new Date().toISOString() })
+            .eq('code', tableCode);
     } catch (e) {
         // Ignore error
     }
