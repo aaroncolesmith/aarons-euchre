@@ -1,1 +1,3 @@
 - **Versioning:** EVERY time code is changed and committed, YOU MUST bump the version number in `package.json` using `npm version patch --no-git-tag-version` and update the version displayed in the UI (e.g. in `src/App.tsx` or `LandingPage.tsx`).
+
+- ALWAYS edit the version number inside `src/App.tsx` and `src/components/Lobby/LandingPage.tsx`
