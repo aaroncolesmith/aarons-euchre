@@ -144,7 +144,8 @@ export const lobbyReducer = (state: GameState, action: Action): GameState | null
                 tableCode: `DAILY-${dateString}`,
                 currentViewPlayerName: userName,
                 players: dailyPlayers,
-                phase: 'randomizing_dealer',
+                phase: 'waiting_for_next_deal',
+                dealerIndex: 0,
                 displayDealerIndex: 0,
                 teamNames: {
                     team1: getTeamName(userName, 'J-Bock'),

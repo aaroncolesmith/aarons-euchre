@@ -16,7 +16,7 @@ export const matchReducer = (state: GameState, action: Action): GameState | null
 
             if (!isValidHands || !isValidUpcard) {
                 const isDaily = state.isDailyChallenge;
-                const dailySeed = isDaily ? `${new Date().toISOString().split('T')[0]}-hand-${state.handsPlayed}` : undefined;
+                const dailySeed = isDaily && state.tableCode ? `${state.tableCode.replace('DAILY-', '')}-hand-${state.handsPlayed}` : undefined;
                 const deck = shuffleDeck(createDeck(), isDaily ? createDailyRNG(dailySeed!) : undefined);
                 const { hands: h, kitty: k } = dealHands(deck);
                 return {

@@ -245,7 +245,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
                         if (shouldIGenerate) {
                             const isDaily = state.isDailyChallenge;
-                            const dailySeed = isDaily ? `${new Date().toISOString().split('T')[0]}-hand-${state.handsPlayed}` : undefined;
+                            const dailySeed = isDaily && state.tableCode ? `${state.tableCode.replace('DAILY-', '')}-hand-${state.handsPlayed}` : undefined;
                             const deck = shuffleDeck(createDeck(), isDaily ? createDailyRNG(dailySeed!) : undefined);
                             const { hands, kitty } = dealHands(deck);
                             broadcastDispatch({
@@ -271,7 +271,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
             const dealNewHand = () => {
                 const isDaily = state.isDailyChallenge;
-                const dailySeed = isDaily ? `${new Date().toISOString().split('T')[0]}-hand-${state.handsPlayed}` : undefined;
+                const dailySeed = isDaily && state.tableCode ? `${state.tableCode.replace('DAILY-', '')}-hand-${state.handsPlayed}` : undefined;
                 const deck = shuffleDeck(createDeck(), isDaily ? createDailyRNG(dailySeed!) : undefined);
                 const { hands, kitty } = dealHands(deck);
                 broadcastDispatch({
