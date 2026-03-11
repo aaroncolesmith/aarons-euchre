@@ -103,7 +103,7 @@ function App() {
             {/* Version Footer */}
             <div className="fixed bottom-2 left-1/2 -translate-x-1/2 pointer-events-none opacity-30 z-[100]">
                 <div className="text-[10px] font-black uppercase tracking-[0.5em]">
-                    Euchre Engine V1.47
+                    Euchre Engine V1.48
                 </div>
             </div>
         </div>
