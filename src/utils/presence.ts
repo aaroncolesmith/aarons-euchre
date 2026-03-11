@@ -17,6 +17,13 @@ export function useHostElection(tableCode: string | null, playerName: string | n
             return;
         }
 
+        // Daily challenges are single-player local instances, even if they share the same tableCode.
+        // There is no need for presence channels or host election. The local user is ALWAYS the host.
+        if (tableCode.startsWith('DAILY-')) {
+            setIsHost(true);
+            return;
+        }
+
         const channel = supabase.channel(`presence-${tableCode}`, {
             config: {
                 presence: {

@@ -385,3 +385,25 @@ export const useGame = () => {
     if (!context) throw new Error('useGame must be used within GameProvider');
     return context;
 };
+
+// --- Local Storage Helpers for Active Games ---
+export const getSavedGames = (): { [code: string]: GameState } => {
+    const saved = localStorage.getItem('euchre_active_games');
+    return saved ? JSON.parse(saved) : {};
+};
+
+export const deleteActiveGame = async (tableCode: string) => {
+    const saved = localStorage.getItem('euchre_active_games');
+    if (saved) {
+        const games = JSON.parse(saved);
+        delete games[tableCode];
+        localStorage.setItem('euchre_active_games', JSON.stringify(games));
+    }
+    
+    // Attempt to delete from Supabase if we have cloud access
+    try {
+        await supabase.from('games').delete().eq('code', tableCode);
+    } catch (e) {
+        // Ignore error
+    }
+};
