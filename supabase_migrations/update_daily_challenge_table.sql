@@ -1,0 +1,3 @@
+ALTER TABLE public.daily_challenge_scores
+ADD COLUMN IF NOT EXISTS opp_points INTEGER DEFAULT 0,
+ADD COLUMN IF NOT EXISTS opp_tricks INTEGER DEFAULT 0;

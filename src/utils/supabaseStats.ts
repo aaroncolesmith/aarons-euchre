@@ -393,6 +393,8 @@ export async function submitDailyScore(score: {
     team_points: number;
     team_tricks: number;
     individual_tricks: number;
+    opp_points: number;
+    opp_tricks: number;
 }): Promise<boolean> {
     try {
         const { error } = await supabase
@@ -413,16 +415,18 @@ export async function submitDailyScore(score: {
     }
 }
 
-export async function getDailyLeaderboard(date_string: string) {
+export async function getDailyLeaderboard(date_string: string | 'all') {
     try {
-        const { data, error } = await supabase
-            .from('daily_challenge_scores')
-            .select('*')
-            .eq('date_string', date_string)
+        let query = supabase.from('daily_challenge_scores').select('*');
+        if (date_string !== 'all') {
+            query = query.eq('date_string', date_string);
+        }
+
+        const { data, error } = await query
             .order('team_points', { ascending: false })
             .order('team_tricks', { ascending: false })
             .order('individual_tricks', { ascending: false })
-            .limit(10);
+            .limit(date_string === 'all' ? 1000 : 50);
 
         if (error) throw error;
         return data || [];

@@ -182,7 +182,9 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                         player_name: hero.name!,
                         team_points: state.scores.team1,
                         team_tricks: hero.stats.tricksWonTeam || 0,
-                        individual_tricks: hero.stats.tricksTaken || 0
+                        individual_tricks: hero.stats.tricksTaken || 0,
+                        opp_points: state.scores.team2,
+                        opp_tricks: (state.handsPlayed * 5) - (hero.stats.tricksWonTeam || 0)
                     });
                 }
 

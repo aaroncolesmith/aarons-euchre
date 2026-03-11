@@ -41,12 +41,7 @@ export const TableView = ({ handleNextStep }: { handleNextStep: () => void }) =>
                 <div className="flex flex-col items-end gap-2">
                     <div className="flex gap-2">
                         {state.trump && (
-                            <button
-                                onClick={() => setIsTrumpHandOpen(true)}
-                                className="bg-paper hover:bg-emerald-50 text-emerald-600 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border-2 border-emerald-500 transition-all shadow-[3px_3px_0px_0px_rgba(16,185,129,0.3)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none whitespace-nowrap hidden md:block"
-                            >
-                                CALLER HAND
-                            </button>
+                            <div className="hidden md:block w-0 h-0" />
                         )}
                         <button
                             onClick={() => setIsBotAuditOpen(true)}
@@ -95,12 +90,6 @@ export const TableView = ({ handleNextStep }: { handleNextStep: () => void }) =>
 
                 {state.trump && (
                     <div className="absolute top-[80px] md:hidden z-30 pointer-events-auto">
-                        <button
-                            onClick={() => setIsTrumpHandOpen(true)}
-                            className="bg-paper hover:bg-emerald-50 text-emerald-600 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest border-2 border-emerald-500 transition-all shadow-[2px_2px_0px_0px_rgba(16,185,129,0.3)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none whitespace-nowrap"
-                        >
-                            CALLER HAND
-                        </button>
                     </div>
                 )}
 

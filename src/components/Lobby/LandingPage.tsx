@@ -127,7 +127,13 @@ export const LandingPage = () => {
                         <button
                             onClick={() => {
                                 const dateString = new Date().toISOString().split('T')[0];
-                                dispatch({ type: 'START_DAILY_CHALLENGE', payload: { userName: state.currentUser || '', dateString } });
+                                const tableCode = `DAILY-${dateString}`;
+                                const existingDaily = savedGames.find(g => g.tableCode === tableCode);
+                                if (existingDaily) {
+                                    dispatch({ type: 'LOAD_EXISTING_GAME', payload: { gameState: existingDaily } });
+                                } else {
+                                    dispatch({ type: 'START_DAILY_CHALLENGE', payload: { userName: state.currentUser || '', dateString } });
+                                }
                             }}
                             className="group w-full max-w-2xl bg-gradient-to-br from-amber-400 to-amber-600 p-8 rounded-2xl border-4 border-ink shadow-sketch-ink-lg hover:shadow-[4px_4px_0px_0px_rgba(251,191,36,0.5)] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all text-center flex flex-col justify-center overflow-hidden relative cursor-pointer"
                         >
@@ -233,12 +239,14 @@ export const LandingPage = () => {
                                             </div>
 
                                             <div className="flex items-center gap-2 pl-4 border-l-2 border-paper-dim">
-                                                <button
-                                                    onClick={(e) => { e.stopPropagation(); handleDelete(game.tableCode); }}
-                                                    className="p-2 text-ink-dim/50 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
-                                                >
-                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                                                </button>
+                                                {!game.tableCode?.startsWith('DAILY-') && (
+                                                    <button
+                                                        onClick={(e) => { e.stopPropagation(); handleDelete(game.tableCode); }}
+                                                        className="p-2 text-ink-dim/50 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                                                    >
+                                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                                    </button>
+                                                )}
                                                 <button className="bg-brand/10 text-brand hover:bg-brand hover:text-white border-2 border-brand-dim hover:border-brand p-2 rounded-lg transition-all">
                                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
                                                 </button>
