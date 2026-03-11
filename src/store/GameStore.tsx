@@ -3,8 +3,9 @@ import { GameState, Action, PlayerStats } from '../types/game';
 import { supabase } from '../lib/supabase';
 import { createDeck, dealHands, shuffleDeck } from '../utils/deck';
 import { shouldCallTrump, shouldGoAlone, getBestBid, getBotMove, getCardValue } from '../utils/rules';
-import { saveMultiplePlayerStats, getAllPlayerStats, mergeAllStats } from '../utils/supabaseStats';
+import { saveMultiplePlayerStats, getAllPlayerStats, mergeAllStats, submitDailyScore } from '../utils/supabaseStats';
 import { useHostElection } from '../utils/presence';
+import { createDailyRNG } from '../utils/rng';
 import Logger from '../utils/logger';
 
 // Reducers
@@ -172,6 +173,19 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
             const syncGlobalStats = async () => {
                 Logger.info(`[STATS] AUTHORITY (${state.currentUser}): Saving final match stats`);
+                
+                if (state.isDailyChallenge) {
+                    const date_string = state.tableCode!.split('-')[1] + '-' + state.tableCode!.split('-')[2] + '-' + state.tableCode!.split('-')[3]; // Derived from "DAILY-2024-03-24"
+                    const hero = state.players.find(p => p.name === state.currentUser)!;
+                    await submitDailyScore({
+                        date_string,
+                        player_name: hero.name!,
+                        team_points: state.scores.team1,
+                        team_tricks: hero.stats.tricksWonTeam || 0,
+                        individual_tricks: hero.stats.tricksTaken || 0
+                    });
+                }
+
                 const globalStats = getGlobalStats();
 
                 state.players.forEach((p, i) => {
@@ -230,7 +244,9 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                         const shouldIGenerate = allBotsGame ? true : isHost;
 
                         if (shouldIGenerate) {
-                            const deck = shuffleDeck(createDeck());
+                            const isDaily = state.isDailyChallenge;
+                            const dailySeed = isDaily ? `${new Date().toISOString().split('T')[0]}-hand-${state.handsPlayed}` : undefined;
+                            const deck = shuffleDeck(createDeck(), isDaily ? createDailyRNG(dailySeed!) : undefined);
                             const { hands, kitty } = dealHands(deck);
                             broadcastDispatch({
                                 type: 'SET_DEALER',
@@ -254,7 +270,9 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             const nextDealer = state.players[state.dealerIndex];
 
             const dealNewHand = () => {
-                const deck = shuffleDeck(createDeck());
+                const isDaily = state.isDailyChallenge;
+                const dailySeed = isDaily ? `${new Date().toISOString().split('T')[0]}-hand-${state.handsPlayed}` : undefined;
+                const deck = shuffleDeck(createDeck(), isDaily ? createDailyRNG(dailySeed!) : undefined);
                 const { hands, kitty } = dealHands(deck);
                 broadcastDispatch({
                     type: 'SET_DEALER',

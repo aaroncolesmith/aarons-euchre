@@ -114,6 +114,46 @@ export const lobbyReducer = (state: GameState, action: Action): GameState | null
             };
         }
 
+        case 'START_DAILY_CHALLENGE': {
+            const { userName, dateString } = action.payload;
+            
+            // Build fixed 4-player board: User, Huber, J-Bock, Wooden
+            // We guarantee seats: 0 (User), 1 (Huber), 2 (J-Bock - Partner), 3 (Wooden)
+            const botNames = ['Huber', 'J-Bock', 'Wooden'];
+            const dailyPlayers = [
+                {
+                    ...createEmptyPlayer(0),
+                    name: userName,
+                    isComputer: false,
+                    stats: getEmptyStats()
+                },
+                ...botNames.map((botName, i) => ({
+                    ...createEmptyPlayer(i + 1),
+                    name: botName,
+                    isComputer: true,
+                    stats: getEmptyStats(),
+                    personality: BOT_PERSONALITIES[botName]
+                }))
+            ];
+
+            return {
+                ...state,
+                isDailyChallenge: true,
+                tableId: `daily-${dateString}`,
+                tableName: `Hand of the Day (${dateString})`,
+                tableCode: `DAILY-${dateString}`,
+                currentViewPlayerName: userName,
+                players: dailyPlayers,
+                phase: 'randomizing_dealer',
+                displayDealerIndex: 0,
+                teamNames: {
+                    team1: getTeamName(userName, 'J-Bock'),
+                    team2: getTeamName('Huber', 'Wooden')
+                },
+                logs: [`Welcome to the Hand of the Day for ${dateString}!`, ...state.logs]
+            };
+        }
+
         default:
             return null;
     }

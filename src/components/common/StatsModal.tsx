@@ -4,6 +4,7 @@ import { useGame } from '../../store/GameStore';
 import { PlayerStats } from '../../types/game';
 import { getAllPlayerStats } from '../../utils/supabaseStats';
 import { TrumpCallsTable } from '../Stats/TrumpCallsTable';
+import { DailyLeaderboard } from './DailyLeaderboard';
 
 export const StatsModal = ({
     isOpen,
@@ -12,7 +13,7 @@ export const StatsModal = ({
 }: {
     isOpen: boolean;
     onClose: () => void;
-    initialTab?: 'me' | 'league' | 'trump_analytics' | 'bot_audit' | 'freeze_incidents' | 'state_management' | 'commentary';
+    initialTab?: 'me' | 'league' | 'daily_challenge' | 'trump_analytics' | 'bot_audit' | 'freeze_incidents' | 'state_management' | 'commentary';
 }) => {
     const { state } = useGame();
     const [allStats, setAllStats] = useState<{ [name: string]: PlayerStats }>({});
@@ -72,7 +73,7 @@ export const StatsModal = ({
 
                     {/* Tabs */}
                     <div className="flex border-b-2 border-slate-200 overflow-x-auto no-scrollbar">
-                        {(['me', 'league', 'trump_analytics', 'bot_audit', 'freeze_incidents', 'state_management', 'commentary'] as const).map(tab => (
+                        {(['me', 'league', 'daily_challenge', 'trump_analytics', 'bot_audit', 'freeze_incidents', 'state_management', 'commentary'] as const).map(tab => (
                             <button
                                 key={tab}
                                 onClick={() => setActiveTab(tab)}
@@ -114,6 +115,10 @@ export const StatsModal = ({
 
                                 {activeTab === 'trump_analytics' && (
                                     <TrumpCallsTable />
+                                )}
+
+                                {activeTab === 'daily_challenge' && (
+                                    <DailyLeaderboard />
                                 )}
                             </div>
                         )}

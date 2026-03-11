@@ -19,10 +19,10 @@ export const createDeck = (): Card[] => {
     return deck;
 };
 
-export const shuffleDeck = (deck: Card[]): Card[] => {
+export const shuffleDeck = (deck: Card[], rng: () => number = Math.random): Card[] => {
     const newDeck = [...deck];
     for (let i = newDeck.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
+        const j = Math.floor(rng() * (i + 1));
         [newDeck[i], newDeck[j]] = [newDeck[j], newDeck[i]];
     }
     Logger.debug('Deck shuffled.');

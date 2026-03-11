@@ -33,7 +33,8 @@ export const scoringReducer = (state: GameState, action: Action): GameState | nu
             };
 
             const isWinnerT1 = p1 > p2;
-            const isGameOver = newScores.team1 >= 10 || newScores.team2 >= 10;
+            const handCount = state.handsPlayed + 1;
+            const isGameOver = state.isDailyChallenge ? (handCount >= 4) : (newScores.team1 >= 10 || newScores.team2 >= 10);
             const isTeam1 = (idx: number) => idx === 0 || idx === 2;
 
             const handResult: HandResult = {
@@ -76,7 +77,7 @@ export const scoringReducer = (state: GameState, action: Action): GameState | nu
                 ...state,
                 players: updatedPlayers,
                 scores: newScores,
-                handsPlayed: state.handsPlayed + 1,
+                handsPlayed: handCount,
                 dealerIndex: (state.dealerIndex + 1) % 4,
                 phase: isGameOver ? 'game_over' : 'waiting_for_next_deal',
                 history: [handResult, ...state.history].slice(0, 50),

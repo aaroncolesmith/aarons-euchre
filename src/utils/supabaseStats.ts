@@ -383,3 +383,51 @@ export const getBotDecisions = async (limit: number = 100) => {
         return [];
     }
 };
+
+/**
+ * Hand of the Day Scoring
+ */
+export async function submitDailyScore(score: {
+    date_string: string;
+    player_name: string;
+    team_points: number;
+    team_tricks: number;
+    individual_tricks: number;
+}): Promise<boolean> {
+    try {
+        const { error } = await supabase
+            .from('daily_challenge_scores')
+            .upsert(score, {
+                onConflict: 'date_string,player_name'
+            });
+
+        if (error) {
+            console.error('[SUPABASE DAILY] Error saving daily score:', error);
+            return false;
+        }
+
+        return true;
+    } catch (err) {
+        console.error('[SUPABASE DAILY] Exception saving daily score:', err);
+        return false;
+    }
+}
+
+export async function getDailyLeaderboard(date_string: string) {
+    try {
+        const { data, error } = await supabase
+            .from('daily_challenge_scores')
+            .select('*')
+            .eq('date_string', date_string)
+            .order('team_points', { ascending: false })
+            .order('team_tricks', { ascending: false })
+            .order('individual_tricks', { ascending: false })
+            .limit(10);
+
+        if (error) throw error;
+        return data || [];
+    } catch (error) {
+        console.error('Error fetching daily leaderboard:', error);
+        return [];
+    }
+}

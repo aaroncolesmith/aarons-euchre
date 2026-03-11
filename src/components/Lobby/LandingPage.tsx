@@ -71,6 +71,19 @@ export const LandingPage = () => {
             </div>
 
             <button
+                onClick={() => {
+                    const dateString = new Date().toISOString().split('T')[0];
+                    dispatch({ type: 'START_DAILY_CHALLENGE', payload: { userName: '', dateString } });
+                }}
+                className="group mt-8 w-full max-w-2xl bg-gradient-to-br from-amber-400 to-amber-600 p-8 rounded-[2rem] border-2 border-ink shadow-sketch-ink hover:-translate-y-2 hover:shadow-[4px_4px_0px_0px_rgba(251,191,36,0.5)] transition-all text-center flex flex-col justify-center overflow-hidden relative"
+            >
+                <div className="absolute top-0 right-0 w-32 h-32 bg-amber-200 rounded-full blur-3xl opacity-30 transform translate-x-10 -translate-y-10 group-hover:scale-150 transition-transform duration-700"></div>
+                <div className="relative z-10 text-xs font-black uppercase tracking-[0.3em] text-white/80 mb-2">Daily Leaderboard</div>
+                <div className="relative z-10 text-4xl font-black uppercase text-white mb-2 group-hover:scale-105 transition-transform">Hand of the Day</div>
+                <div className="relative z-10 text-xs text-white/90 font-bold uppercase tracking-wide">Play today's exact seeded game and compete globally.</div>
+            </button>
+
+            <button
                 onClick={() => dispatch({ type: 'LOGOUT' })}
                 className="mt-16 text-[10px] font-black uppercase tracking-[0.3em] text-ink-dim hover:text-red-500 transition-colors"
             >
