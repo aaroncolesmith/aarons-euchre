@@ -1,6 +1,5 @@
 import { GameState, Action, GameEvent } from '../../types/game';
-import { shuffleDeck, createDeck, dealHands, sortHand, trackTrumpCall, createTrumpCallLog, determineWinner, logPlayEvent, getEffectiveSuit } from './utils';
-
+import { shuffleDeck, createDeck, dealHands, sortHand, trackTrumpCall, createTrumpCallLog, determineWinner, logPlayEvent, getEffectiveSuit, isValidPlay } from './utils';
 export const matchReducer = (state: GameState, action: Action): GameState | null => {
     switch (action.type) {
         case 'SET_DEALER': {
@@ -306,6 +305,11 @@ export const matchReducer = (state: GameState, action: Action): GameState | null
             const card = player.hand.find(c => c.id === cardId);
 
             if (!card) return state;
+
+            const leadSuit = state.currentTrick.length > 0 ? getEffectiveSuit(state.currentTrick[0].card, state.trump) : null;
+            if (!isValidPlay(card, player.hand, leadSuit, state.trump)) {
+                return state;
+            }
 
             const newTrick = [...state.currentTrick, { playerId: player.id, playerIndex, card }];
             const newPlayers = state.players.map((p, i) =>

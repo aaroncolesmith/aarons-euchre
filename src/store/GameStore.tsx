@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase';
 import { createDeck, dealHands, shuffleDeck } from '../utils/deck';
 import { shouldCallTrump, shouldGoAlone, getBestBid, getBotMove, getCardValue } from '../utils/rules';
 import { saveMultiplePlayerStats, getAllPlayerStats, mergeAllStats } from '../utils/supabaseStats';
+import { useHostElection } from '../utils/presence';
 import Logger from '../utils/logger';
 
 // Reducers
@@ -51,6 +52,8 @@ const gameReducerFixed = (state: GameState, action: Action): GameState => {
 interface GameContextType {
     state: GameState;
     dispatch: (action: Action) => void;
+    isHost: boolean;
+    onlinePlayers: string[];
 }
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
@@ -60,6 +63,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const channelRef = useRef<any>(null);
     const lastBotDecisionRef = useRef<string | null>(null);
     const lastGameStatsSavedRef = useRef<string | null>(null);
+    const { isHost, onlinePlayers } = useHostElection(state.tableCode, state.currentUser);
 
     // Enhanced dispatch that broadcasts to others
     const broadcastDispatch = async (action: Action) => {
@@ -158,19 +162,10 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
     }, [state]);
 
-    // Authority Check Helper
-    const getScoringAuthority = () => {
-        const humanPlayers = state.players.filter(p => p.name !== null && !p.isComputer);
-        if (humanPlayers.length > 0) return humanPlayers[0].name;
-        return state.currentUser;
-    };
-
     // Handle Match Completion and Stats Saving (Authority Based)
     useEffect(() => {
         if (state.phase === 'game_over' && state.tableCode && lastGameStatsSavedRef.current !== state.tableCode) {
-            const scoringAuthority = getScoringAuthority();
-
-            if (state.currentUser !== scoringAuthority) {
+            if (!isHost) {
                 lastGameStatsSavedRef.current = state.tableCode;
                 return;
             }
@@ -215,7 +210,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
             syncGlobalStats();
         }
-    }, [state.phase, state.tableCode, state.currentUser]);
+    }, [state.phase, state.tableCode, isHost]);
 
     // Dealer Animation and Selection
     useEffect(() => {
@@ -229,10 +224,10 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 if (count >= maxCycles) {
                     clearInterval(interval);
                     setTimeout(() => {
-                        const firstHumanSeat = state.players.findIndex(p => p.name && !p.isComputer);
-                        const myPlayerIndex = state.players.findIndex(p => p.name === state.currentUser);
                         const allBotsGame = state.players.every(p => p.isComputer);
-                        const shouldIGenerate = allBotsGame ? true : (myPlayerIndex !== -1 && (myPlayerIndex === firstHumanSeat || firstHumanSeat === -1));
+                        // If all bots, randomizely generate dealer.
+                        // If humans exist, ONLY the `isHost` human will generate and broadcast.
+                        const shouldIGenerate = allBotsGame ? true : isHost;
 
                         if (shouldIGenerate) {
                             const deck = shuffleDeck(createDeck());
@@ -257,8 +252,6 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     useEffect(() => {
         if (state.phase === 'waiting_for_next_deal') {
             const nextDealer = state.players[state.dealerIndex];
-            const scoringAuthority = getScoringAuthority();
-            const isBroadcaster = state.currentUser === scoringAuthority;
 
             const dealNewHand = () => {
                 const deck = shuffleDeck(createDeck());
@@ -275,36 +268,34 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
             if (nextDealer.name === state.currentUser) {
                 setTimeout(dealNewHand, 100);
-            } else if (nextDealer.isComputer && isBroadcaster) {
+            } else if (nextDealer.isComputer && isHost) {
                 setTimeout(dealNewHand, 500);
             }
         }
-    }, [state.phase, state.dealerIndex, state.currentUser]);
+    }, [state.phase, state.dealerIndex, state.currentUser, isHost]);
 
     // Trick/Hand Completion
     useEffect(() => {
         if (state.phase === 'waiting_for_trick') {
-            const primaryHumanName = state.players.find(p => !p.isComputer && p.name)?.name;
-            if (state.currentViewPlayerName !== primaryHumanName && !state.players.every(p => p.isComputer)) return;
+            if (!isHost && !state.players.every(p => p.isComputer)) return;
 
             const timer = setTimeout(() => {
                 broadcastDispatch({ type: 'CLEAR_TRICK' });
             }, 3000);
             return () => clearTimeout(timer);
         }
-    }, [state.phase, state.players, state.currentViewPlayerName]);
+    }, [state.phase, state.players, isHost]);
 
     useEffect(() => {
         if (state.phase === 'scoring') {
-            const primaryHumanName = state.players.find(p => !p.isComputer && p.name)?.name;
-            if (state.currentViewPlayerName !== primaryHumanName && !state.players.every(p => p.isComputer)) return;
+            if (!isHost && !state.players.every(p => p.isComputer)) return;
 
             const timer = setTimeout(() => {
                 broadcastDispatch({ type: 'FINISH_HAND' });
             }, 2000);
             return () => clearTimeout(timer);
         }
-    }, [state.phase, state.players, state.currentViewPlayerName]);
+    }, [state.phase, state.players, isHost]);
 
     // Bot Logic
     useEffect(() => {
@@ -312,8 +303,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         if (!currentPlayer || !currentPlayer.isComputer || ['game_over', 'scoring', 'waiting_for_trick', 'randomizing_dealer', 'landing', 'lobby'].includes(state.phase)) return;
         if (state.stepMode) return;
 
-        const primaryHumanName = state.players.find(p => !p.isComputer && p.name)?.name;
-        if (state.currentViewPlayerName !== primaryHumanName) return;
+        if (!isHost && !state.players.every(p => p.isComputer)) return;
 
         const decisionKey = `${state.tableCode}-${state.phase}-${state.biddingRound}-${state.currentPlayerIndex}-${currentPlayer.hand.length}`;
         if (lastBotDecisionRef.current === decisionKey) return;
@@ -363,10 +353,10 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }, 1200);
 
         return () => clearTimeout(timer);
-    }, [state.currentPlayerIndex, state.phase]);
+    }, [state.currentPlayerIndex, state.phase, isHost, state.players, state.tableCode, state.biddingRound, state.stepMode]);
 
     return (
-        <GameContext.Provider value={{ state, dispatch: broadcastDispatch }}>
+        <GameContext.Provider value={{ state, dispatch: broadcastDispatch, isHost, onlinePlayers }}>
             {children}
         </GameContext.Provider>
     );
