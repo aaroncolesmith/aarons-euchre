@@ -1,6 +1,5 @@
-// Cloud Freeze Logging - Log freeze incidents to Supabase for monitoring
-import { supabase } from '../lib/supabase';
-import Logger from './logger';
+import { supabase } from '../lib/supabase.ts';
+import Logger from './logger.ts';
 
 interface FreezeIncident {
     game_code: string;
@@ -113,6 +112,7 @@ export async function getFreezeRate(hoursBack: number = 24) {
  * Get app version from package.json or UI
  */
 export function getAppVersion(): string {
+    if (typeof document === 'undefined') return 'server';
     // Try to extract from the UI version display
     const versionElement = document.querySelector('[class*="uppercase tracking"]');
     const match = versionElement?.textContent?.match(/V(\d+\.\d+)/);

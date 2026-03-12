@@ -1,10 +1,10 @@
-import { GameState, Player, PlayerStats, Card, Suit } from '../../types/game';
+import { GameState, Player, PlayerStats, Card, Suit } from '../../types/game.ts';
 
-export { generateTableCode, generateTableName } from '../../utils/gameUtils';
-export { shuffleDeck, createDeck, dealHands } from '../../utils/deck';
-export { sortHand, determineWinner, getEffectiveSuit, isValidPlay } from '../../utils/rules';
-export { logPlayEvent } from '../../utils/eventLogger';
-export { createTrumpCallLog } from '../../utils/trumpCallLogger';
+export { generateTableCode, generateTableName } from '../../utils/gameUtils.ts';
+export { shuffleDeck, createDeck, dealHands } from '../../utils/deck.ts';
+export { sortHand, determineWinner, getEffectiveSuit, isValidPlay } from '../../utils/rules.ts';
+export { logPlayEvent } from '../../utils/eventLogger.ts';
+export { createTrumpCallLog } from '../../utils/trumpCallLogger.ts';
 
 // Helper for team names
 export const getTeamName = (n1: string | null, n2: string | null) => {

@@ -1,4 +1,4 @@
-import { Card, Suit, Rank, BotPersonality } from '../types/game';
+import { Card, Suit, Rank, BotPersonality } from '../types/game.ts';
 
 const RANK_VALUES: Record<Rank, number> = {
     '9': 9,

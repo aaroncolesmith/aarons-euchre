@@ -1,6 +1,6 @@
-import { GameState, Action, GameEvent } from '../../types/game';
-import { shuffleDeck, createDeck, dealHands, sortHand, trackTrumpCall, createTrumpCallLog, determineWinner, logPlayEvent, getEffectiveSuit, isValidPlay } from './utils';
-import { createDailyRNG } from '../../utils/rng';
+import { GameState, Action, GameEvent } from '../../types/game.ts';
+import { shuffleDeck, createDeck, dealHands, sortHand, trackTrumpCall, createTrumpCallLog, determineWinner, logPlayEvent, getEffectiveSuit, isValidPlay } from './utils.ts';
+import { createDailyRNG } from '../../utils/rng.ts';
 export const matchReducer = (state: GameState, action: Action): GameState | null => {
     switch (action.type) {
         case 'SET_DEALER': {

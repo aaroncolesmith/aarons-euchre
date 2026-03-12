@@ -1,8 +1,8 @@
 // Heartbeat Monitor - Detects and auto-recovers from game freezes
 // Runs every 10 seconds to ensure game is progressing
 
-import Logger from './logger';
-import { logFreezeIncident, getAppVersion } from './cloudFreezeLogger';
+import Logger from './logger.ts';
+import { logFreezeIncident, getAppVersion } from './cloudFreezeLogger.ts';
 
 export interface HeartbeatState {
     phase: string;

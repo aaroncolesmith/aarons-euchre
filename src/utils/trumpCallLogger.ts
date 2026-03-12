@@ -1,4 +1,4 @@
-import { Card } from '../types/game';
+import { Card } from '../types/game.ts';
 
 export interface TrumpCallLog {
     whoCalled: string;
@@ -203,6 +203,7 @@ export function trumpCallsToCSV(logs: TrumpCallLog[]): string {
  * Get stored trump call logs from localStorage
  */
 export function getTrumpCallLogs(): TrumpCallLog[] {
+    if (typeof localStorage === 'undefined') return [];
     const stored = localStorage.getItem('euchre_trump_calls');
     return stored ? JSON.parse(stored) : [];
 }
@@ -212,13 +213,16 @@ export function getTrumpCallLogs(): TrumpCallLog[] {
  */
 export async function saveTrumpCallLog(log: TrumpCallLog): Promise<void> {
     // Save to localStorage (backup)
-    const logs = getTrumpCallLogs();
-    logs.push(log);
-    localStorage.setItem('euchre_trump_calls', JSON.stringify(logs));
+    if (typeof localStorage !== 'undefined') {
+        const logs = getTrumpCallLogs();
+        logs.push(log);
+        localStorage.setItem('euchre_trump_calls', JSON.stringify(logs));
+    }
 
     // Save to Supabase (primary) - fire and forget
     try {
-        const { saveTrumpCall } = await import('./supabaseStats');
+        if (typeof window === 'undefined') return; // Skip in Deno for now to avoid dependency circularity
+        const { saveTrumpCall } = await import('./supabaseStats.ts');
 
         // Parse dealer name and relationship from dealer string
         // Format: "relationship - dealerName" (e.g., "Teammate - Aaron")
@@ -255,7 +259,9 @@ export async function saveTrumpCallLog(log: TrumpCallLog): Promise<void> {
  * Clear all trump call logs
  */
 export function clearTrumpCallLogs(): void {
-    localStorage.removeItem('euchre_trump_calls');
+    if (typeof localStorage !== 'undefined') {
+        localStorage.removeItem('euchre_trump_calls');
+    }
 }
 
 /**

@@ -1,5 +1,5 @@
-import { supabase } from '../lib/supabase';
-import { PlayerStats } from '../types/game';
+import { supabase } from '../lib/supabase.ts';
+import { PlayerStats } from '../types/game.ts';
 
 export const LOCAL_STORAGE_KEY = 'euchre_global_stats_v4';
 

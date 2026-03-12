@@ -1,5 +1,5 @@
-import { GameState, Action } from '../../types/game';
-import { generateTableCode, generateTableName, createEmptyPlayer, getEmptyStats, BOT_PERSONALITIES, BOT_NAMES_POOL, getTeamName } from './utils';
+import { GameState, Action } from '../../types/game.ts';
+import { generateTableCode, generateTableName, createEmptyPlayer, getEmptyStats, BOT_PERSONALITIES, BOT_NAMES_POOL, getTeamName } from './utils.ts';
 
 export const lobbyReducer = (state: GameState, action: Action): GameState | null => {
     switch (action.type) {

@@ -1,5 +1,5 @@
-import { Card, Suit, Rank } from '../types/game';
-import Logger from './logger';
+import { Card, Suit, Rank } from '../types/game.ts';
+import Logger from './logger.ts';
 
 const SUITS: Suit[] = ['hearts', 'diamonds', 'clubs', 'spades'];
 const RANKS: Rank[] = ['9', '10', 'J', 'Q', 'K', 'A'];

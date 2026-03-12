@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { supabase } from '../lib/supabase';
+import { supabase } from '../lib/supabase.ts';
 import { RealtimeChannel } from '@supabase/supabase-js';
 
 export function useHostElection(tableCode: string | null, playerName: string | null) {

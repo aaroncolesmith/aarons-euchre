@@ -1,5 +1,5 @@
-import { GameState, Action } from '../../types/game';
-import { INITIAL_STATE_FUNC } from './utils';
+import { GameState, Action } from '../../types/game.ts';
+import { INITIAL_STATE_FUNC } from './utils.ts';
 
 export const systemReducer = (state: GameState, action: Action): GameState | null => {
     switch (action.type) {

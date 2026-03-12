@@ -1,10 +1,10 @@
-import { GameState, Action } from '../types/game';
-import { lobbyReducer } from './reducers/lobbyReducer';
-import { matchReducer } from './reducers/matchReducer';
-import { scoringReducer } from './reducers/scoringReducer';
-import { systemReducer } from './reducers/systemReducer';
-import { INITIAL_STATE_FUNC as BASE_INITIAL_STATE_FUNC } from './reducers/utils';
-import Logger from '../utils/logger';
+import { GameState, Action } from '../types/game.ts';
+import { lobbyReducer } from './reducers/lobbyReducer.ts';
+import { matchReducer } from './reducers/matchReducer.ts';
+import { scoringReducer } from './reducers/scoringReducer.ts';
+import { systemReducer } from './reducers/systemReducer.ts';
+import { INITIAL_STATE_FUNC as BASE_INITIAL_STATE_FUNC } from './reducers/utils.ts';
+import Logger from '../utils/logger.ts';
 
 export const INITIAL_STATE = BASE_INITIAL_STATE_FUNC();
 

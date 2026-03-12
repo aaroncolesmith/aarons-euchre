@@ -1,5 +1,5 @@
-import { supabase } from '../lib/supabase';
-import { GameState } from '../types/game';
+import { supabase } from '../lib/supabase.ts';
+import { GameState } from '../types/game.ts';
 
 export async function fetchUserCloudGames(currentUser: string): Promise<GameState[]> {
     try {

@@ -1,4 +1,4 @@
-import { GameState, Action, HandResult } from '../../types/game';
+import { GameState, Action, HandResult } from '../../types/game.ts';
 
 export const scoringReducer = (state: GameState, action: Action): GameState | null => {
     switch (action.type) {
