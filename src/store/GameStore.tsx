@@ -205,6 +205,17 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         };
     }, [state.tableCode]);
 
+    // Handle Match Persistence and Transitions
+    useEffect(() => {
+        if (state.tableCode || state.currentUser) {
+            Logger.setMetadata({
+                tableCode: state.tableCode || undefined,
+                userName: state.currentUser || undefined,
+                appVersion: '1.54'
+            });
+        }
+    }, [state.tableCode, state.currentUser]);
+
     // Persist active game state (Host Only with Throttling)
     useEffect(() => {
         if (!state.tableCode || state.phase === 'login' || state.phase === 'landing') return;

@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1";
 // Note: We use the import map to resolve "src/" to the symlinked source directory
 import { gameReducerFixed, sanitizeState } from "src/store/engine.ts";
+import Logger from "src/utils/logger.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -24,8 +25,15 @@ serve(async (req) => {
       throw new Error("Missing tableCode or action");
     }
 
+    // Set Logger metadata for this request
+    Logger.setMetadata({
+        tableCode,
+        environment: 'server',
+        appVersion: '1.54'
+    });
+
     // 1. Fetch current FULL state from games_auth (Source of Truth)
-    // Fallback to games table if auth state doesn't exist yet
+    // ... rest of the code ...
     let { data: authGame, error: authError } = await supabase
       .from("games_auth")
       .select("full_state")
@@ -34,7 +42,6 @@ serve(async (req) => {
 
     let currentState;
     if (authError || !authGame) {
-      // console.log(`[SERVER] No auth state found for ${tableCode}, falling back to games state.`);
       const { data: game, error: gameError } = await supabase
         .from("games")
         .select("state")
@@ -92,13 +99,13 @@ serve(async (req) => {
       .from("play_events")
       .insert(eventsToLog);
     
-    if (eventError) console.error("[SERVER] Event logging error:", eventError);
+    if (eventError) Logger.error("[SERVER] Event logging error:", eventError);
 
     // If we just logged a hand result, refresh the materialized stats
     const hasHandResult = newEvents.some((ev: any) => ev.type === 'hand_result');
     if (hasHandResult) {
       const { error: refreshError } = await supabase.rpc('refresh_player_stats_from_events');
-      if (refreshError) console.error("[SERVER] Stats refresh error:", refreshError);
+      if (refreshError) Logger.error("[SERVER] Stats refresh error:", refreshError);
     }
 
     // 4. Update FULL State (Private)
@@ -138,7 +145,7 @@ serve(async (req) => {
       status: 200,
     });
   } catch (err) {
-    console.error(err);
+    Logger.error(`[SERVER ERROR] ${err.message}`, { stack: err.stack });
     return new Response(JSON.stringify({ error: err.message }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
