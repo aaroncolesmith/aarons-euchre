@@ -61,3 +61,39 @@ export const gameReducerFixed = (state: GameState, action: Action): GameState =>
     }
     return newState;
 };
+
+/**
+ * Removes sensitive and redundant data for storage in the public "games" table.
+ * Redundant data (logs, events) is moved to the play_events stream.
+ */
+export function sanitizeState(state: GameState): GameState {
+    return {
+        ...state,
+        // Clear redundant logs/history (now in play_events)
+        logs: [],
+        eventLog: [],
+        history: [],
+        trumpCallLogs: [],
+        // Clear sensitive hand data for security
+        // In a real join, the client will rehydrate their own hand from play_events
+        players: state.players.map(p => ({
+            ...p,
+            hand: [] 
+        }))
+    };
+}
+
+/**
+ * Reconstructs the full state for a specific player by applying play_events.
+ * (Placeholder for client-side/server-side reconstruction logic)
+ */
+export function rehydrateState(baseState: GameState, events: any[], _forPlayer?: string): GameState {
+    let state = { ...baseState };
+    // Apply events
+    events.forEach(event => {
+        if (event.action) {
+            state = gameReducerFixed(state, event.action);
+        }
+    });
+    return state;
+}

@@ -1,13 +1,16 @@
 import { supabase } from '../lib/supabase.ts';
+import { Action } from '../types/game.ts';
 
 export interface PlayEvent {
     gameCode: string;
     handNumber: number;
     trickNumber?: number;
-    eventType: 'game_start' | 'deal' | 'bid' | 'pass' | 'trump_set' | 'play_card' | 'trick_won' | 'hand_won' | 'game_won';
+    eventType: string;
     eventData: any;
     playerName?: string;
     playerSeat?: number;
+    stateVersion?: number;
+    action?: Action;
 }
 
 // Global queue for asynchronous event batching
@@ -83,4 +86,31 @@ export async function logPlayEvents(events: PlayEvent[]): Promise<boolean> {
     eventQueue.push(...events);
     initFlushInterval();
     return true; // Return immediately to unblock main thread
+}
+/**
+ * Fetches the event stream for a specific game code.
+ */
+export async function fetchPlayEvents(gameCode: string): Promise<PlayEvent[]> {
+    const { data, error } = await supabase
+        .from('play_events')
+        .select('*')
+        .eq('game_code', gameCode)
+        .order('state_version', { ascending: true });
+
+    if (error) {
+        console.error('[EVENT LOG] Error fetching play events:', error);
+        return [];
+    }
+
+    return (data || []).map(row => ({
+        gameCode: row.game_code,
+        handNumber: row.hand_number,
+        trickNumber: row.trick_number,
+        eventType: row.event_type,
+        eventData: row.event_data,
+        playerName: row.player_name,
+        playerSeat: row.player_seat,
+        stateVersion: row.state_version,
+        action: row.action_payload // The full action object
+    } as any));
 }

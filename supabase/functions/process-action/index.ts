@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1";
 // Note: We use the import map to resolve "src/" to the symlinked source directory
-import { gameReducerFixed } from "src/store/engine.ts";
+import { gameReducerFixed, sanitizeState } from "src/store/engine.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -24,43 +24,75 @@ serve(async (req) => {
       throw new Error("Missing tableCode or action");
     }
 
-    // 1. Fetch current state from DB (Source of Truth)
-    const { data: game, error: fetchError } = await supabase
-      .from("games")
-      .select("state")
-      .eq("code", tableCode)
+    // 1. Fetch current FULL state from games_auth (Source of Truth)
+    // Fallback to games table if auth state doesn't exist yet
+    let { data: authGame, error: authError } = await supabase
+      .from("games_auth")
+      .select("full_state")
+      .eq("game_code", tableCode)
       .single();
 
-    if (fetchError || !game) {
-      throw new Error(`Game ${tableCode} not found`);
+    let currentState;
+    if (authError || !authGame) {
+      // console.log(`[SERVER] No auth state found for ${tableCode}, falling back to games state.`);
+      const { data: game, error: gameError } = await supabase
+        .from("games")
+        .select("state")
+        .eq("code", tableCode)
+        .single();
+      
+      if (gameError || !game) throw new Error(`Game ${tableCode} not found`);
+      currentState = game.state;
+    } else {
+      currentState = authGame.full_state;
     }
 
-    const currentState = game.state;
-
     // 2. Authoritative Processing
-    // Assign a server version if none exists, or ensure it's at least current + 1
     const nextState = gameReducerFixed(currentState, action);
 
-    // If no state change occurred, it might be a duplicate or invalid action
-    if (nextState === currentState && action.type !== 'UPDATE_ANIMATION_DEALER') {
-      console.log(`[SERVER] No state change for action ${action.type}. Likely duplicate.`);
+    // If no state change occurred, skip persistence (unless it's a non-state action)
+    if (nextState === currentState && !['UPDATE_ANIMATION_DEALER'].includes(action.type)) {
+      console.log(`[SERVER] No state change for action ${action.type}. Skipping update.`);
       return new Response(JSON.stringify({ success: true, processed: false }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
       });
     }
 
-    // 3. Persist State
+    // 3. Persist Event Stream
+    const { error: eventError } = await supabase
+      .from("play_events")
+      .insert({
+        game_code: tableCode,
+        state_version: nextState.stateVersion,
+        hand_number: nextState.handsPlayed || 0,
+        trick_number: (nextState.currentTrick?.length || 0),
+        action_type: action.type,
+        action_payload: action,
+        actor_name: action.payload?.userName || action.payload?.name || 'System',
+        actor_seat: action.payload?.playerIndex ?? action.payload?.seatIndex
+      });
+    if (eventError) console.error("[SERVER] Event logging error:", eventError);
+
+    // 4. Update FULL State (Private)
+    const { error: authUpdateError } = await supabase
+      .from("games_auth")
+      .upsert({ 
+        game_code: tableCode, 
+        full_state: nextState,
+        updated_at: new Date().toISOString()
+      });
+    if (authUpdateError) throw authUpdateError;
+
+    // 5. Update MINIMAL Snapshot (Public & Broadcast)
+    const sanitizedSnapshot = sanitizeState(nextState);
     const { error: updateError } = await supabase
       .from("games")
-      .update({ state: nextState })
+      .update({ state: sanitizedSnapshot })
       .eq("code", tableCode);
-
     if (updateError) throw updateError;
 
-    // 4. Authoritative Broadcast
-    // We broadcast the specific action that triggered the state change
-    // Clients will apply it locally to reach the same state
+    // 6. Authoritative Broadcast
     const channel = supabase.channel(`table-${tableCode}`);
     await channel.send({
       type: "broadcast",
@@ -68,7 +100,7 @@ serve(async (req) => {
       payload: { 
         action: { 
             ...action, 
-            version: nextState.stateVersion // Pass the new server-assigned version
+            version: nextState.stateVersion
         }, 
         tableCode 
       },

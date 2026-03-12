@@ -11,7 +11,8 @@ import Logger from '../utils/logger';
 
 // Reducers
 import { gameReducerFixed, INITIAL_STATE as ENGINE_INITIAL_STATE } from './engine';
-import { getEmptyStats, BOT_PERSONALITIES } from './reducers/utils';
+import { getEmptyStats, BOT_PERSONALITIES, INITIAL_STATE_FUNC } from './reducers/utils';
+import { fetchPlayEvents } from '../utils/eventLogger';
 
 const INITIAL_STATE: GameState = {
     ...ENGINE_INITIAL_STATE,
@@ -42,9 +43,23 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     // Enhanced dispatch that calls the authoritative server
     const serverDispatch = async (action: Action) => {
         // Optimistically apply locally for smooth UI (Phase C: Optional)
-        // For now, we'll wait for the server broadcast to ensure authority
         // However, LOGIN and local-only actions should stay local
-        if (['LOGIN', 'LOGOUT', 'LOAD_EXISTING_GAME', 'CLEAR_HISTORY'].includes(action.type)) {
+        if (['LOGIN', 'LOGOUT', 'LOAD_GLOBAL_STATS', 'CLEAR_HISTORY'].includes(action.type)) {
+            dispatch(action);
+            return;
+        }
+
+        // LOAD_EXISTING_GAME needs special rehydration logic if hands are missing
+        if (action.type === 'LOAD_EXISTING_GAME') {
+            const gameState = action.payload.gameState;
+            const needsRehydration = gameState.tableCode && 
+                                   !gameState.tableCode.startsWith('DAILY-') &&
+                                   gameState.players.every(p => !p.hand || p.hand.length === 0);
+            
+            if (needsRehydration) {
+                rehydrateGame(gameState);
+                return;
+            }
             dispatch(action);
             return;
         }
@@ -108,8 +123,36 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         if (!state.tableCode) return;
         const saved = localStorage.getItem('euchre_active_games');
         const games = saved ? JSON.parse(saved) : {};
+        // We save the full local state (with hands) to local storage
         games[state.tableCode] = state;
         localStorage.setItem('euchre_active_games', JSON.stringify(games));
+    };
+
+    const rehydrateGame = async (sanitizedState: GameState) => {
+        if (!sanitizedState.tableCode) return;
+        Logger.info(`[REHYDRATE] Fetching events for ${sanitizedState.tableCode}...`);
+        
+        const events = await fetchPlayEvents(sanitizedState.tableCode);
+        if (events.length === 0) {
+            Logger.warn('[REHYDRATE] No events found, using snapshot.');
+            dispatch({ type: 'LOAD_EXISTING_GAME', payload: { gameState: sanitizedState } });
+            return;
+        }
+
+        // Start from initial state and apply all events
+        let fullState: GameState = { 
+            ...(INITIAL_STATE_FUNC() as GameState), 
+            tableCode: sanitizedState.tableCode 
+        };
+        
+        events.forEach(event => {
+            if (event.action) {
+                fullState = gameReducerFixed(fullState, event.action);
+            }
+        });
+
+        Logger.info(`[REHYDRATE] Reconstructed state to version ${fullState.stateVersion}`);
+        dispatch({ type: 'LOAD_EXISTING_GAME', payload: { gameState: fullState } });
     };
 
     useEffect(() => {
@@ -166,11 +209,16 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     useEffect(() => {
         if (!state.tableCode || state.phase === 'login' || state.phase === 'landing') return;
         
-        // Always save local game state immediately for responsiveness on own machine
+        // Always save local game state immediately for responsiveness on own machine (LocalStorage only)
         saveActiveGame(state);
 
         // Only the host (or solo daily player) syncs the authoritative state to the cloud
         if (!isHost) return;
+
+        // SKIP cloud sync for regular multi-player games (Server-Authoritative)
+        // This prevents the host from overwriting the server's sanitized snapshot with their local full-state
+        const isDaily = state.tableCode?.startsWith('DAILY-');
+        if (!isDaily) return;
 
         const timer = setTimeout(async () => {
             const syncToCloud = async () => {
