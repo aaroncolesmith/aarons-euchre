@@ -59,10 +59,9 @@ serve(async (req) => {
       });
     }
 
-    // 3. Persist Event Stream
-    const { error: eventError } = await supabase
-      .from("play_events")
-      .insert({
+    // 3. Persist Event Stream (Intent + Outcomes)
+    const eventsToLog = [
+      {
         game_code: tableCode,
         state_version: nextState.stateVersion,
         hand_number: nextState.handsPlayed || 0,
@@ -71,8 +70,36 @@ serve(async (req) => {
         action_payload: action,
         actor_name: action.payload?.userName || action.payload?.name || 'System',
         actor_seat: action.payload?.playerIndex ?? action.payload?.seatIndex
+      }
+    ];
+
+    // Add new internal events (outcomes)
+    const newEvents = nextState.eventLog.slice(currentState.eventLog?.length || 0);
+    newEvents.forEach((ev: any) => {
+      eventsToLog.push({
+        game_code: tableCode,
+        state_version: nextState.stateVersion,
+        hand_number: nextState.handsPlayed || 0,
+        trick_number: (nextState.currentTrick?.length || 0),
+        action_type: `EVENT:${ev.type}`,
+        action_payload: ev,
+        actor_name: 'System',
+        actor_seat: null
       });
+    });
+
+    const { error: eventError } = await supabase
+      .from("play_events")
+      .insert(eventsToLog);
+    
     if (eventError) console.error("[SERVER] Event logging error:", eventError);
+
+    // If we just logged a hand result, refresh the materialized stats
+    const hasHandResult = newEvents.some((ev: any) => ev.type === 'hand_result');
+    if (hasHandResult) {
+      const { error: refreshError } = await supabase.rpc('refresh_player_stats_from_events');
+      if (refreshError) console.error("[SERVER] Stats refresh error:", refreshError);
+    }
 
     // 4. Update FULL State (Private)
     const { error: authUpdateError } = await supabase

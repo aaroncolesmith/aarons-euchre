@@ -92,6 +92,11 @@ export const scoringReducer = (state: GameState, action: Action): GameState | nu
                 eventLog: [...state.eventLog, {
                     type: 'hand_result',
                     handResult,
+                    participantStats: updatedPlayers.map(p => ({
+                        name: p.name,
+                        seat: state.players.findIndex(pl => pl.id === p.id),
+                        stats: p.stats
+                    })),
                     timestamp: Date.now()
                 }]
             };

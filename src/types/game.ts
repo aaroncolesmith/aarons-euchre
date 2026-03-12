@@ -96,7 +96,12 @@ export type GameEvent =
     | { type: 'bid'; playerIndex: number; playerName: string; suit: Suit; isLoner: boolean; round: 1 | 2; timestamp: number }
     | { type: 'pass'; playerIndex: number; playerName: string; round: 1 | 2; timestamp: number }
     | { type: 'play'; playerIndex: number; playerName: string; card: Card; trickIndex: number; timestamp: number }
-    | { type: 'hand_result'; handResult: HandResult; timestamp: number }
+    | { 
+        type: 'hand_result', 
+        handResult: HandResult, 
+        participantStats?: { name: string | null, seat: number, stats: PlayerStats }[],
+        timestamp: number 
+      }
     | { type: 'game_over'; scores: { team1: number; team2: number }; winner: string; timestamp: number };
 
 export interface TrumpCallLog {

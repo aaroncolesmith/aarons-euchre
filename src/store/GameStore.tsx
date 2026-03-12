@@ -268,13 +268,22 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     // Handle Match Completion and Stats Saving (Authority Based)
     useEffect(() => {
         if (state.phase === 'game_over' && state.tableCode && lastGameStatsSavedRef.current !== state.tableCode) {
+            const isDaily = state.tableCode.startsWith('DAILY-');
+            
+            // Skip manual stats saving for regular games (Server does this via Event Stream mapping)
+            if (!isDaily) {
+                Logger.info(`[STATS] Server will derive stats for ${state.tableCode}. Skipping client-side write.`);
+                lastGameStatsSavedRef.current = state.tableCode;
+                return;
+            }
+
             if (!isHost) {
                 lastGameStatsSavedRef.current = state.tableCode;
                 return;
             }
 
             const syncGlobalStats = async () => {
-                Logger.info(`[STATS] AUTHORITY (${state.currentUser}): Saving final match stats`);
+                Logger.info(`[STATS] AUTHORITY (${state.currentUser}): Saving final match stats (DAILY)`);
                 
                 if (state.isDailyChallenge) {
                     const date_string = state.tableCode!.split('-').slice(1, 4).join('-');
