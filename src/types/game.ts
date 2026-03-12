@@ -2,7 +2,7 @@ export type Suit = 'hearts' | 'diamonds' | 'clubs' | 'spades';
 export type Rank = '9' | '10' | 'J' | 'Q' | 'K' | 'A';
 export type Color = 'red' | 'black';
 
-export type Action =
+export type Action = (
     | { type: 'CREATE_TABLE'; payload: { userName: string } }
     | { type: 'JOIN_TABLE'; payload: { code: string; userName: string } }
     | { type: 'LOGIN'; payload: { userName: string } }
@@ -29,7 +29,11 @@ export type Action =
     | { type: 'EXIT_TO_LANDING' }
     | { type: 'PLAY_AGAIN' }
     | { type: 'FORCE_PHASE'; payload: { phase: GameState['phase'] } }
-    | { type: 'FORCE_NEXT_PLAYER'; payload: { nextPlayerIndex: number } };
+    | { type: 'FORCE_NEXT_PLAYER'; payload: { nextPlayerIndex: number } }
+) & {
+    version?: number;
+    actionId?: string;
+};
 
 export interface BotPersonality {
     aggressiveness: number; // 1-10
@@ -140,4 +144,6 @@ export interface GameState {
     overlayAcknowledged: { [playerName: string]: boolean }; // Track who has acknowledged the overlay
     lastActive: number; // Timestamp of last activity
     isDailyChallenge?: boolean; // Flag for Hand of the Day mode
+    stateVersion: number; // Current version of the game state
+    processedActionIds: string[]; // List of action IDs already processed to ensure idempotency
 }

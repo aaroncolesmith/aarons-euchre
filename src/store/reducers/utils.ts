@@ -91,5 +91,7 @@ export const INITIAL_STATE_FUNC = (): GameState => ({
     trumpCallLogs: [],
     stepMode: false,
     isBotThinking: false,
-    lastActive: Date.now()
+    lastActive: Date.now(),
+    stateVersion: 0,
+    processedActionIds: []
 });

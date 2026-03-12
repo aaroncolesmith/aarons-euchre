@@ -1,9 +1,7 @@
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1";
-
-// Note: In a real deployment, you'd handle the imports using an import map 
-// that points to the shared logic. For now, we'll assume the engine logic
-// can be instantiated or we provide a simplified authoritative transition.
+// Note: We use the import map to resolve "src/" to the symlinked source directory
+import { gameReducerFixed } from "src/store/engine.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -39,35 +37,44 @@ serve(async (req) => {
 
     const currentState = game.state;
 
-    // 2. Validation & Processing
-    // We would import the gameReducer here. 
-    // For this implementation, we'll mark the action as 'intent' and let the 
-    // server broadcast it back as 'validated' once saved.
-    
-    // In a fully authoritative model, we calculate nextState = reducer(currentState, action)
-    // and only save/broadcast if nextState !== currentState.
-    
-    // For now, we update the DB state with the action
-    // This acknowledges the move was received by the server.
+    // 2. Authoritative Processing
+    // Assign a server version if none exists, or ensure it's at least current + 1
+    const nextState = gameReducerFixed(currentState, action);
+
+    // If no state change occurred, it might be a duplicate or invalid action
+    if (nextState === currentState && action.type !== 'UPDATE_ANIMATION_DEALER') {
+      console.log(`[SERVER] No state change for action ${action.type}. Likely duplicate.`);
+      return new Response(JSON.stringify({ success: true, processed: false }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
+
+    // 3. Persist State
     const { error: updateError } = await supabase
       .from("games")
-      .update({ 
-        state: { ...currentState, lastAction: action, updatedAt: Date.now() } 
-      })
+      .update({ state: nextState })
       .eq("code", tableCode);
 
     if (updateError) throw updateError;
 
-    // 3. Authoritative Broadcast
-    // Instead of clients broadcasting locally, they wait for this.
+    // 4. Authoritative Broadcast
+    // We broadcast the specific action that triggered the state change
+    // Clients will apply it locally to reach the same state
     const channel = supabase.channel(`table-${tableCode}`);
     await channel.send({
       type: "broadcast",
       event: "authoritative_action",
-      payload: { action, tableCode },
+      payload: { 
+        action: { 
+            ...action, 
+            version: nextState.stateVersion // Pass the new server-assigned version
+        }, 
+        tableCode 
+      },
     });
 
-    return new Response(JSON.stringify({ success: true, action }), {
+    return new Response(JSON.stringify({ success: true, version: nextState.stateVersion }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });

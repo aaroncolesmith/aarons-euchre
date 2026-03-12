@@ -55,31 +55,41 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             return;
         }
 
+        const actionWithId: Action = {
+            ...action,
+            actionId: action.actionId || crypto.randomUUID()
+        };
+
         try {
-            Logger.debug(`[SERVER AUTH] Sending intent: ${action.type}`);
+            Logger.debug(`[SERVER AUTH] Sending intent: ${actionWithId.type} (${actionWithId.actionId})`);
             const { error } = await supabase.functions.invoke('process-action', {
-                body: { action, tableCode: state.tableCode }
+                body: { action: actionWithId, tableCode: state.tableCode }
             });
 
             if (error) {
                 Logger.warn('[SERVER AUTH] Failed, falling back to local broadcast:', error);
-                broadcastDispatch(action);
+                broadcastDispatch(actionWithId);
             }
         } catch (err) {
             Logger.error('[SERVER AUTH] Error:', err);
-            broadcastDispatch(action);
+            broadcastDispatch(actionWithId);
         }
     };
 
     // Legacy broadcast for syncing between clients directly
     const broadcastDispatch = async (action: Action) => {
-        dispatch(action);
+        const actionWithId: Action = {
+            ...action,
+            actionId: action.actionId || crypto.randomUUID()
+        };
+
+        dispatch(actionWithId);
         if (channelRef.current && state.tableCode) {
-            Logger.debug(`Broadcasting action: ${action.type}`);
+            Logger.debug(`Broadcasting action: ${actionWithId.type} (${actionWithId.actionId})`);
             await channelRef.current.send({
                 type: 'broadcast',
                 event: 'game_action',
-                payload: action
+                payload: actionWithId
             });
         }
     };
