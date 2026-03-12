@@ -1,32 +1,81 @@
-// Follow this setup guide to integrate the Deno language server with your editor:
-// https://deno.land/manual/getting_started/setup_your_environment
-// This enables autocomplete, go to definition, etc.
+import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1";
 
-// Setup type definitions for built-in Supabase Runtime APIs
-import "@supabase/functions-js/edge-runtime.d.ts"
+// Note: In a real deployment, you'd handle the imports using an import map 
+// that points to the shared logic. For now, we'll assume the engine logic
+// can be instantiated or we provide a simplified authoritative transition.
 
-console.log("Hello from Functions!")
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
 
-Deno.serve(async (req) => {
-  const { name } = await req.json()
-  const data = {
-    message: `Hello ${name}!`,
+serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { headers: corsHeaders });
   }
 
-  return new Response(
-    JSON.stringify(data),
-    { headers: { "Content-Type": "application/json" } },
-  )
-})
+  try {
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!; 
+    const supabase = createClient(supabaseUrl, supabaseKey);
 
-/* To invoke locally:
+    const { action, tableCode } = await req.json();
 
-  1. Run `supabase start` (see: https://supabase.com/docs/reference/cli/supabase-start)
-  2. Make an HTTP request:
+    if (!tableCode || !action) {
+      throw new Error("Missing tableCode or action");
+    }
 
-  curl -i --location --request POST 'http://127.0.0.1:54321/functions/v1/process-action' \
-    --header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0' \
-    --header 'Content-Type: application/json' \
-    --data '{"name":"Functions"}'
+    // 1. Fetch current state from DB (Source of Truth)
+    const { data: game, error: fetchError } = await supabase
+      .from("games")
+      .select("state")
+      .eq("code", tableCode)
+      .single();
 
-*/
+    if (fetchError || !game) {
+      throw new Error(`Game ${tableCode} not found`);
+    }
+
+    const currentState = game.state;
+
+    // 2. Validation & Processing
+    // We would import the gameReducer here. 
+    // For this implementation, we'll mark the action as 'intent' and let the 
+    // server broadcast it back as 'validated' once saved.
+    
+    // In a fully authoritative model, we calculate nextState = reducer(currentState, action)
+    // and only save/broadcast if nextState !== currentState.
+    
+    // For now, we update the DB state with the action
+    // This acknowledges the move was received by the server.
+    const { error: updateError } = await supabase
+      .from("games")
+      .update({ 
+        state: { ...currentState, lastAction: action, updatedAt: Date.now() } 
+      })
+      .eq("code", tableCode);
+
+    if (updateError) throw updateError;
+
+    // 3. Authoritative Broadcast
+    // Instead of clients broadcasting locally, they wait for this.
+    const channel = supabase.channel(`table-${tableCode}`);
+    await channel.send({
+      type: "broadcast",
+      event: "authoritative_action",
+      payload: { action, tableCode },
+    });
+
+    return new Response(JSON.stringify({ success: true, action }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 200,
+    });
+  } catch (err) {
+    console.error(err);
+    return new Response(JSON.stringify({ error: err.message }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 500,
+    });
+  }
+});

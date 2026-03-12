@@ -68,7 +68,7 @@ export const INITIAL_STATE_FUNC = (): GameState => ({
     tableName: null,
     tableCode: null,
     currentViewPlayerName: null,
-    currentUser: localStorage.getItem('euchre_current_user'),
+    currentUser: null,
     players: Array(4).fill(null).map((_, i) => createEmptyPlayer(i)),
     currentPlayerIndex: -1,
     dealerIndex: -1,

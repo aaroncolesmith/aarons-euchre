@@ -10,45 +10,16 @@ import { detectFreeze, applyRecovery, createHeartbeatSnapshot, logFreezeToCloud,
 import Logger from '../utils/logger';
 
 // Reducers
-import { lobbyReducer } from './reducers/lobbyReducer';
-import { matchReducer } from './reducers/matchReducer';
-import { scoringReducer } from './reducers/scoringReducer';
-import { systemReducer } from './reducers/systemReducer';
-import { INITIAL_STATE_FUNC, BOT_PERSONALITIES, getEmptyStats } from './reducers/utils';
+import { gameReducerFixed, INITIAL_STATE as ENGINE_INITIAL_STATE } from './engine';
+import { getEmptyStats, BOT_PERSONALITIES } from './reducers/utils';
 
-const INITIAL_STATE = INITIAL_STATE_FUNC();
-
-// --- Combined Reducer ---
-const gameReducer = (state: GameState, action: Action): GameState => {
-    Logger.debug('Action Dispatched:', action);
-
-    // 1. Try lobby actions
-    const lobbyState = lobbyReducer(state, action);
-    if (lobbyState) return lobbyState;
-
-    // 2. Try match actions
-    const matchState = matchReducer(state, action);
-    if (matchState) return matchState;
-
-    // 3. Try scoring actions
-    const scoringState = scoringReducer(state, action);
-    if (scoringState) return scoringState;
-
-    // 4. Try system actions
-    const systemState = systemReducer(state, action);
-    if (systemState) return systemState;
-
-    return state; // Default fallback
+const INITIAL_STATE: GameState = {
+    ...ENGINE_INITIAL_STATE,
+    currentUser: typeof window !== 'undefined' ? localStorage.getItem('euchre_current_user') : null
 };
 
-const gameReducerFixed = (state: GameState, action: Action): GameState => {
-    const newState = gameReducer(state, action);
-
-    if (newState !== state && action.type !== 'UPDATE_ANIMATION_DEALER') {
-        return { ...newState, lastActive: Date.now() };
-    }
-    return newState;
-};
+// Reducer is moved to engine.ts
+const reducer = gameReducerFixed;
 
 // --- Context ---
 interface GameContextType {
@@ -61,26 +32,55 @@ interface GameContextType {
 const GameContext = createContext<GameContextType | undefined>(undefined);
 
 export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    const [state, dispatch] = useReducer(gameReducerFixed, INITIAL_STATE);
+    const [state, dispatch] = useReducer(reducer, INITIAL_STATE);
     const channelRef = useRef<any>(null);
     const lastBotDecisionRef = useRef<string | null>(null);
     const lastGameStatsSavedRef = useRef<string | null>(null);
     const lastHeartbeatRef = useRef<HeartbeatState | null>(null);
     const { isHost, onlinePlayers } = useHostElection(state.tableCode, state.currentUser);
 
-    // Enhanced dispatch that broadcasts to others
+    // Enhanced dispatch that calls the authoritative server
+    const serverDispatch = async (action: Action) => {
+        // Optimistically apply locally for smooth UI (Phase C: Optional)
+        // For now, we'll wait for the server broadcast to ensure authority
+        // However, LOGIN and local-only actions should stay local
+        if (['LOGIN', 'LOGOUT', 'LOAD_EXISTING_GAME', 'CLEAR_HISTORY'].includes(action.type)) {
+            dispatch(action);
+            return;
+        }
+
+        if (!state.tableCode || state.tableCode.startsWith('DAILY-')) {
+            // Daily challenges are solo and local-first for now
+            broadcastDispatch(action);
+            return;
+        }
+
+        try {
+            Logger.debug(`[SERVER AUTH] Sending intent: ${action.type}`);
+            const { error } = await supabase.functions.invoke('process-action', {
+                body: { action, tableCode: state.tableCode }
+            });
+
+            if (error) {
+                Logger.warn('[SERVER AUTH] Failed, falling back to local broadcast:', error);
+                broadcastDispatch(action);
+            }
+        } catch (err) {
+            Logger.error('[SERVER AUTH] Error:', err);
+            broadcastDispatch(action);
+        }
+    };
+
+    // Legacy broadcast for syncing between clients directly
     const broadcastDispatch = async (action: Action) => {
         dispatch(action);
         if (channelRef.current && state.tableCode) {
             Logger.debug(`Broadcasting action: ${action.type}`);
-            const result = await channelRef.current.send({
+            await channelRef.current.send({
                 type: 'broadcast',
                 event: 'game_action',
                 payload: action
             });
-            if (result !== 'ok') {
-                Logger.error('Failed to broadcast action', result);
-            }
         }
     };
 
@@ -133,6 +133,10 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             .on('broadcast', { event: 'game_action' }, ({ payload }) => {
                 Logger.debug('Received Remote Action:', payload);
                 dispatch(payload);
+            })
+            .on('broadcast', { event: 'authoritative_action' }, ({ payload }) => {
+                Logger.info('[SERVER AUTH] Authority confirmed action:', payload.action.type);
+                dispatch(payload.action);
             })
             .subscribe((status) => {
                 if (status === 'SUBSCRIBED') {
@@ -423,7 +427,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }, [state.currentPlayerIndex, state.phase, isHost, state.players, state.tableCode, state.biddingRound, state.stepMode]);
 
     return (
-        <GameContext.Provider value={{ state, dispatch: broadcastDispatch, isHost, onlinePlayers }}>
+        <GameContext.Provider value={{ state, dispatch: serverDispatch, isHost, onlinePlayers }}>
             {children}
         </GameContext.Provider>
     );
