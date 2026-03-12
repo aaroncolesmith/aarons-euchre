@@ -75,6 +75,13 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             actionId: action.actionId || crypto.randomUUID()
         };
 
+        // --- OPTIMISTIC UI ---
+        // Apply locally immediately so the user sees the card move/bid happen
+        // The gameReducerFixed idempotency logic will ignore the server broadcast later.
+        if (!['CREATE_TABLE', 'JOIN_TABLE'].includes(action.type)) {
+            dispatch(actionWithId);
+        }
+
         try {
             Logger.debug(`[SERVER AUTH] Sending intent: ${actionWithId.type} (${actionWithId.actionId})`);
             const { error } = await supabase.functions.invoke('process-action', {
@@ -82,12 +89,17 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             });
 
             if (error) {
-                Logger.warn('[SERVER AUTH] Failed, falling back to local broadcast:', error);
-                broadcastDispatch(actionWithId);
+                Logger.warn('[SERVER AUTH] Failed:', error);
+                // If it wasn't already applied optimistically, or we need a fallback:
+                if (['CREATE_TABLE', 'JOIN_TABLE'].includes(action.type)) {
+                    broadcastDispatch(actionWithId);
+                }
             }
         } catch (err) {
             Logger.error('[SERVER AUTH] Error:', err);
-            broadcastDispatch(actionWithId);
+            if (['CREATE_TABLE', 'JOIN_TABLE'].includes(action.type)) {
+                broadcastDispatch(actionWithId);
+            }
         }
     };
 
@@ -379,7 +391,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                             const dailySeed = isDaily && state.tableCode ? `${state.tableCode.split('-').slice(1, 4).join('-')}-hand-${state.handsPlayed}` : undefined;
                             const deck = shuffleDeck(createDeck(), isDaily ? createDailyRNG(dailySeed!) : undefined);
                             const { hands, kitty } = dealHands(deck);
-                            broadcastDispatch({
+                            serverDispatch({
                                 type: 'SET_DEALER',
                                 payload: {
                                     dealerIndex: count % 4,
@@ -405,7 +417,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 const dailySeed = isDaily && state.tableCode ? `${state.tableCode.split('-').slice(1, 4).join('-')}-hand-${state.handsPlayed}` : undefined;
                 const deck = shuffleDeck(createDeck(), isDaily ? createDailyRNG(dailySeed!) : undefined);
                 const { hands, kitty } = dealHands(deck);
-                broadcastDispatch({
+                serverDispatch({
                     type: 'SET_DEALER',
                     payload: {
                         dealerIndex: state.dealerIndex,
@@ -429,7 +441,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             if (!isHost && !state.players.every(p => p.isComputer)) return;
 
             const timer = setTimeout(() => {
-                broadcastDispatch({ type: 'CLEAR_TRICK' });
+                serverDispatch({ type: 'CLEAR_TRICK' });
             }, 3000);
             return () => clearTimeout(timer);
         }
@@ -440,7 +452,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             if (!isHost && !state.players.every(p => p.isComputer)) return;
 
             const timer = setTimeout(() => {
-                broadcastDispatch({ type: 'FINISH_HAND' });
+                serverDispatch({ type: 'FINISH_HAND' });
             }, 2000);
             return () => clearTimeout(timer);
         }
@@ -468,36 +480,36 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                     const result = shouldCallTrump(currentPlayer.hand, state.upcard.suit, personality, position, false, null);
                     if (result.call) {
                         const lonerCheck = shouldGoAlone(currentPlayer.hand, state.upcard.suit, personality);
-                        broadcastDispatch({
+                        serverDispatch({
                             type: 'MAKE_BID',
                             payload: { suit: state.upcard.suit, callerIndex: state.currentPlayerIndex, isLoner: lonerCheck.goAlone, reasoning: result.reasoning }
                         });
                     } else {
-                        broadcastDispatch({ type: 'PASS_BID', payload: { playerIndex: state.currentPlayerIndex, reasoning: result.reasoning } });
+                        serverDispatch({ type: 'PASS_BID', payload: { playerIndex: state.currentPlayerIndex, reasoning: result.reasoning } });
                     }
                 } else if (state.biddingRound === 2) {
                     const result = getBestBid(currentPlayer.hand.filter(c => state.upcard && c.suit !== state.upcard.suit), personality, position, true, state.upcard?.suit || null);
                     if (result.suit) {
                         const lonerCheck = shouldGoAlone(currentPlayer.hand, result.suit, personality);
-                        broadcastDispatch({
+                        serverDispatch({
                             type: 'MAKE_BID',
                             payload: { suit: result.suit, callerIndex: state.currentPlayerIndex, isLoner: lonerCheck.goAlone, reasoning: result.reasoning }
                         });
                     } else if (state.currentPlayerIndex === state.dealerIndex) {
-                        broadcastDispatch({
+                        serverDispatch({
                             type: 'MAKE_BID',
                             payload: { suit: result.bestSuitAnyway, callerIndex: state.currentPlayerIndex, isLoner: false, reasoning: 'Stuck dealer' }
                         });
                     } else {
-                        broadcastDispatch({ type: 'PASS_BID', payload: { playerIndex: state.currentPlayerIndex, reasoning: result.reasoning } });
+                        serverDispatch({ type: 'PASS_BID', payload: { playerIndex: state.currentPlayerIndex, reasoning: result.reasoning } });
                     }
                 }
             } else if (state.phase === 'discard') {
                 const cardToDiscard = [...currentPlayer.hand].sort((a, b) => getCardValue(a, state.trump, null) - getCardValue(b, state.trump, null))[0];
-                broadcastDispatch({ type: 'DISCARD_CARD', payload: { playerIndex: state.currentPlayerIndex, cardId: cardToDiscard.id } });
+                        serverDispatch({ type: 'DISCARD_CARD', payload: { playerIndex: state.currentPlayerIndex, cardId: cardToDiscard.id } });
             } else if (state.phase === 'playing') {
                 const result = getBotMove(currentPlayer.hand, state.currentTrick, state.trump!, state.players.map(p => p.id), currentPlayer.id, state.trumpCallerIndex, personality);
-                broadcastDispatch({ type: 'PLAY_CARD', payload: { playerIndex: state.currentPlayerIndex, cardId: result.card.id, reasoning: result.reasoning } });
+                serverDispatch({ type: 'PLAY_CARD', payload: { playerIndex: state.currentPlayerIndex, cardId: result.card.id, reasoning: result.reasoning } });
             }
         }, 1200);
 
