@@ -173,7 +173,7 @@ export const matchReducer = (state: GameState, action: Action): GameState | null
                     currentPlayerIndex: state.dealerIndex,
                     logs: [logMsg, ...state.logs],
                     eventLog: [...state.eventLog, bidEvent],
-                    overlayMessage: 'Ordered up!',
+                    overlayMessage: logMsg,
                     overlayAcknowledged: botAcknowledgments,
                     trumpCallLogs: trumpLog ? [...state.trumpCallLogs, trumpLog] : state.trumpCallLogs
                 };
@@ -207,7 +207,7 @@ export const matchReducer = (state: GameState, action: Action): GameState | null
                 currentPlayerIndex: (state.dealerIndex + 1) % 4,
                 logs: [logMsg, ...state.logs],
                 eventLog: [...state.eventLog, bidEvent],
-                overlayMessage: 'Trump called!',
+                overlayMessage: logMsg,
                 overlayAcknowledged: botAcknowledgments,
                 trumpCallLogs: [...state.trumpCallLogs, tLog]
             };
@@ -291,7 +291,7 @@ export const matchReducer = (state: GameState, action: Action): GameState | null
                 ),
                 phase: 'playing',
                 currentPlayerIndex: (state.dealerIndex + 1) % 4,
-                overlayMessage: 'Hand ready!',
+                overlayMessage: `${state.players[playerIndex].name} discarded. Let's play!`,
                 overlayAcknowledged: botAcknowledgments,
                 trumpCallLogs: finalTrumpCallLogs
             };
