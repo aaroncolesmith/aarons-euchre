@@ -223,7 +223,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             Logger.setMetadata({
                 tableCode: state.tableCode || undefined,
                 userName: state.currentUser || undefined,
-                appVersion: '1.59'
+                appVersion: '1.60'
             });
         }
     }, [state.tableCode, state.currentUser]);
@@ -300,8 +300,8 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 return;
             }
 
-            if (!isHost) {
-                lastGameStatsSavedRef.current = state.tableCode;
+            if (!isHost && !isDaily) {
+                // Don't set lastGameStatsSavedRef here, so we can retry if we become host
                 return;
             }
 
