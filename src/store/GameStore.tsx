@@ -19,6 +19,18 @@ const INITIAL_STATE: GameState = {
     currentUser: typeof window !== 'undefined' ? localStorage.getItem('euchre_current_user') : null
 };
 
+// Fallback for crypto.randomUUID
+const uuidv4 = () => {
+    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+        return crypto.randomUUID();
+    }
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+        const r = Math.random() * 16 | 0;
+        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+};
+
 // Reducer is moved to engine.ts
 const reducer = gameReducerFixed;
 
@@ -72,7 +84,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
         const actionWithId: Action = {
             ...action,
-            actionId: action.actionId || crypto.randomUUID()
+            actionId: action.actionId || uuidv4()
         };
 
         // --- OPTIMISTIC UI ---
@@ -107,7 +119,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const broadcastDispatch = async (action: Action) => {
         const actionWithId: Action = {
             ...action,
-            actionId: action.actionId || crypto.randomUUID()
+            actionId: action.actionId || uuidv4()
         };
 
         dispatch(actionWithId);
@@ -228,7 +240,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             Logger.setMetadata({
                 tableCode: state.tableCode || undefined,
                 userName: state.currentUser || undefined,
-                appVersion: '1.63'
+                appVersion: '1.64'
             });
         }
     }, [state.tableCode, state.currentUser]);
