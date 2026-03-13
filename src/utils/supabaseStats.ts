@@ -512,6 +512,11 @@ export async function syncUnsyncedDailies(playerName: string): Promise<void> {
                 console.log(`[SYNC] Found unsynced local daily for ${dateString}. Pushing...`);
                 const hero = game.players.find((p: any) => p.name === playerName);
                 if (hero) {
+                    const heroIndex = game.players.findIndex((p: any) => p.name === playerName);
+                    const isTeam1 = heroIndex === 0 || heroIndex === 2;
+                    const isWinner = isTeam1 ? game.scores.team1 >= 10 : game.scores.team2 >= 10;
+
+                    // 1. Push to Daily Leaderboard
                     await submitDailyScore({
                         date_string: dateString,
                         player_name: hero.name!,
@@ -521,6 +526,32 @@ export async function syncUnsyncedDailies(playerName: string): Promise<void> {
                         opp_points: game.scores.team2,
                         opp_tricks: (game.handsPlayed * 5) - (hero.stats.tricksWonTeam || 0)
                     });
+
+                    // 2. Push to Aggregate Player Stats
+                    const currentCloud = await getPlayersStats([playerName]);
+                    const base = currentCloud[playerName] || getEmptyStats();
+                    
+                    const updatedStats: PlayerStats = {
+                        gamesPlayed: (base.gamesPlayed || 0) + 1,
+                        gamesWon: isWinner ? (base.gamesWon || 0) + 1 : (base.gamesWon || 0),
+                        handsPlayed: (base.handsPlayed || 0) + hero.stats.handsPlayed,
+                        handsWon: (base.handsWon || 0) + hero.stats.handsWon,
+                        tricksPlayed: (base.tricksPlayed || 0) + hero.stats.tricksPlayed,
+                        tricksTaken: (base.tricksTaken || 0) + hero.stats.tricksTaken,
+                        tricksWonTeam: (base.tricksWonTeam || 0) + hero.stats.tricksWonTeam,
+                        callsMade: (base.callsMade || 0) + hero.stats.callsMade,
+                        callsWon: (base.callsWon || 0) + hero.stats.callsWon,
+                        lonersAttempted: (base.lonersAttempted || 0) + hero.stats.lonersAttempted,
+                        lonersWon: (base.lonersWon || 0) + hero.stats.lonersWon,
+                        pointsScored: (base.pointsScored || 0) + hero.stats.pointsScored,
+                        euchresMade: (base.euchresMade || 0) + hero.stats.euchresMade,
+                        euchred: (base.euchred || 0) + hero.stats.euchred,
+                        sweeps: (base.sweeps || 0) + hero.stats.sweeps,
+                        swept: (base.swept || 0) + hero.stats.swept,
+                    };
+
+                    await savePlayerStats(playerName, updatedStats);
+                    console.log(`[SYNC] Successfully updated aggregate stats for ${playerName}`);
                 }
             }
         }

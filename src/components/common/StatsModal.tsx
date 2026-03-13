@@ -5,6 +5,7 @@ import { PlayerStats } from '../../types/game';
 import { getAllPlayerStats } from '../../utils/supabaseStats';
 import { TrumpCallsTable } from '../Stats/TrumpCallsTable';
 import { DailyLeaderboard } from './DailyLeaderboard';
+import { LeagueTable } from '../Stats/LeagueTable';
 
 export const StatsModal = ({
     isOpen,
@@ -123,6 +124,10 @@ export const StatsModal = ({
                                                 </div>
                                             ))}
                                         </div>
+                                    )}
+                                    
+                                    {activeTab === 'league' && (
+                                        <LeagueTable allStats={allStats} />
                                     )}
 
                                     {activeTab === 'trump_analytics' && (
