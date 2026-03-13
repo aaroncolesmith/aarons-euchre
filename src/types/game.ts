@@ -30,6 +30,7 @@ export type Action = (
     | { type: 'PLAY_AGAIN' }
     | { type: 'FORCE_PHASE'; payload: { phase: GameState['phase'] } }
     | { type: 'FORCE_NEXT_PLAYER'; payload: { nextPlayerIndex: number } }
+    | { type: 'SET_TAB'; payload: { tab: 'home' | 'stats' | 'game' } }
 ) & {
     version?: number;
     actionId?: string;
@@ -151,4 +152,5 @@ export interface GameState {
     isDailyChallenge?: boolean; // Flag for Hand of the Day mode
     stateVersion: number; // Current version of the game state
     processedActionIds: string[]; // List of action IDs already processed to ensure idempotency
+    activeTab: 'home' | 'stats' | 'game';
 }

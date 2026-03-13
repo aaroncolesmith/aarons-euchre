@@ -93,5 +93,6 @@ export const INITIAL_STATE_FUNC = (): GameState => ({
     isBotThinking: false,
     lastActive: Date.now(),
     stateVersion: 0,
-    processedActionIds: []
+    processedActionIds: [],
+    activeTab: 'home'
 });

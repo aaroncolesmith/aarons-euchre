@@ -1,15 +1,11 @@
-import { useState } from 'react';
 import { useGame } from '../../store/GameStore';
 import { PlayerSeat } from '../common/PlayerSeat';
-import { StatsModal } from '../common/StatsModal';
 
 export const LobbyView = () => {
     const { state, dispatch } = useGame();
-    const [isStatsOpen, setIsStatsOpen] = useState(false);
 
     return (
         <div className="flex-1 bg-paper rounded-[2rem] md:rounded-[3rem] border-4 border-brand shadow-sketch-brand relative flex flex-col w-full h-full overflow-hidden">
-            <StatsModal isOpen={isStatsOpen} onClose={() => setIsStatsOpen(false)} />
 
             <div className="shrink-0 flex justify-between items-start p-5 md:p-8 bg-paper border-b-2 border-brand-dim/50 z-30">
                 <div className="flex flex-col">
@@ -26,7 +22,7 @@ export const LobbyView = () => {
                 <div className="flex flex-col items-end gap-2">
                     <div className="flex gap-2">
                         <button
-                            onClick={() => setIsStatsOpen(true)}
+                            onClick={() => dispatch({ type: 'SET_TAB', payload: { tab: 'stats' } })}
                             className="bg-paper hover:bg-brand/10 text-brand-dark px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border-2 border-brand transition-all shadow-[3px_3px_0px_0px_rgba(16,185,129,0.3)]"
                         >
                             STATS

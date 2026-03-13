@@ -11,7 +11,7 @@ export const systemReducer = (state: GameState, action: Action): GameState | nul
             const displayName = matchedUser
                 ? ['Aaron', 'Polina', 'Gray-Gray', 'Mimi', 'Micah', 'Cherrie', 'Peter-Playwright', 'TEST'][knownUsers.indexOf(matchedUser)]
                 : enteredName;
-            return { ...state, currentUser: displayName, phase: 'landing' };
+            return { ...state, currentUser: displayName, phase: 'landing', activeTab: 'home' };
         }
 
         case 'LOGOUT':
@@ -26,7 +26,8 @@ export const systemReducer = (state: GameState, action: Action): GameState | nul
                 ...INITIAL_STATE_FUNC(),
                 ...loaded,
                 currentUser,
-                currentViewPlayerName: isPlayerInGame ? currentUser : (loaded.currentViewPlayerName || currentUser)
+                currentViewPlayerName: isPlayerInGame ? currentUser : (loaded.currentViewPlayerName || currentUser),
+                activeTab: 'game'
             };
         }
 
@@ -81,6 +82,12 @@ export const systemReducer = (state: GameState, action: Action): GameState | nul
                 ...state,
                 phase: action.payload.phase,
                 logs: [`(System) Forced state recovery to ${action.payload.phase}`, ...state.logs]
+            };
+
+        case 'SET_TAB':
+            return {
+                ...state,
+                activeTab: action.payload.tab
             };
 
         default:

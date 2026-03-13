@@ -13,6 +13,7 @@ export const lobbyReducer = (state: GameState, action: Action): GameState | null
                 tableCode: code,
                 currentViewPlayerName: action.payload.userName,
                 phase: 'lobby',
+                activeTab: 'game',
                 logs: [`Table "${name}" created. Share code ${code} with friends.`, ...state.logs]
             };
         }
@@ -24,6 +25,7 @@ export const lobbyReducer = (state: GameState, action: Action): GameState | null
                 tableCode: action.payload.code,
                 tableName: isAlreadyLoaded ? state.tableName : 'The Royal Table',
                 phase: isAlreadyLoaded ? state.phase : 'lobby',
+                activeTab: 'game',
                 currentViewPlayerName: action.payload.userName,
                 logs: [`Joined table ${action.payload.code} as ${action.payload.userName}.`, ...state.logs]
             };
@@ -151,6 +153,7 @@ export const lobbyReducer = (state: GameState, action: Action): GameState | null
                     team1: getTeamName(userName, 'J-Bock'),
                     team2: getTeamName('Huber', 'Wooden')
                 },
+                activeTab: 'game',
                 logs: [`Welcome to the Hand of the Day for ${dateString}!`, ...state.logs]
             };
         }

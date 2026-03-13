@@ -4,7 +4,6 @@ import { useGame } from '../../store/GameStore';
 import { PlayerSeat } from '../common/PlayerSeat';
 import { CardComponent } from '../common/CardComponent';
 import { TableOverlay } from './TableOverlay';
-import { StatsModal } from '../common/StatsModal';
 import { BotAuditView } from './BotAuditView';
 import { TrumpHandModal } from './TrumpHandModal';
 import { Card } from '../../types/game';
@@ -13,16 +12,13 @@ import { getCardJitter, getPositionJitter } from '../../utils/jitter';
 
 export const TableView = ({ handleNextStep }: { handleNextStep: () => void }) => {
     const { state, dispatch } = useGame();
-    const [isStatsOpen, setIsStatsOpen] = useState(false);
     const [isBotAuditOpen, setIsBotAuditOpen] = useState(false);
     const [isTrumpHandOpen, setIsTrumpHandOpen] = useState(false);
-    const [statsInitialTab, setStatsInitialTab] = useState<'me' | 'league' | 'trump_analytics' | 'bot_audit' | 'freeze_incidents' | 'state_management' | 'commentary'>('me');
 
     const myIdx = state.players.findIndex(p => p.name === state.currentViewPlayerName);
 
     return (
         <div className="flex-1 bg-paper rounded-[2rem] md:rounded-[3rem] border-4 border-brand shadow-sketch-brand relative flex flex-col w-full h-full overflow-hidden">
-            <StatsModal isOpen={isStatsOpen} onClose={() => setIsStatsOpen(false)} initialTab={statsInitialTab} />
             <BotAuditView isOpen={isBotAuditOpen} onClose={() => setIsBotAuditOpen(false)} />
             <TrumpHandModal isOpen={isTrumpHandOpen} onClose={() => setIsTrumpHandOpen(false)} />
 
@@ -50,7 +46,7 @@ export const TableView = ({ handleNextStep }: { handleNextStep: () => void }) =>
                             BOTS
                         </button>
                         <button
-                            onClick={() => { setStatsInitialTab('me'); setIsStatsOpen(true); }}
+                            onClick={() => dispatch({ type: 'SET_TAB', payload: { tab: 'stats' } })}
                             className="bg-paper hover:bg-brand/10 text-brand-dark px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border-2 border-brand transition-all shadow-[3px_3px_0px_0px_rgba(16,185,129,0.3)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
                         >
                             STATS

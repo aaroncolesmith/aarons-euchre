@@ -228,7 +228,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             Logger.setMetadata({
                 tableCode: state.tableCode || undefined,
                 userName: state.currentUser || undefined,
-                appVersion: '1.62'
+                appVersion: '1.63'
             });
         }
     }, [state.tableCode, state.currentUser]);

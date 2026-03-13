@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useGame, getSavedGames, deleteActiveGame } from '../../store/GameStore';
-import { StatsModal } from '../common/StatsModal';
 import { supabase } from '../../lib/supabase';
 import { fetchUserCloudGames, mergeLocalAndCloudGames } from '../../utils/cloudGames';
 import { hasUserPlayedDaily } from '../../utils/supabaseStats';
@@ -10,8 +9,6 @@ export const LandingPage = () => {
     const [code, setCode] = useState('');
     const [showJoin, setShowJoin] = useState(false);
     const [_refreshKey, setRefreshKey] = useState(0);
-    const [isStatsOpen, setIsStatsOpen] = useState(false);
-    const [statsInitialTab, setStatsInitialTab] = useState<'me' | 'league' | 'daily_challenge' | 'trump_analytics' | 'bot_audit' | 'freeze_incidents' | 'state_management' | 'commentary'>('me');
     const [cloudGames, setCloudGames] = useState<any[]>([]);
     const [gameFilter, setGameFilter] = useState<'in-progress' | 'completed'>('in-progress');
     const [hasPlayedDaily, setHasPlayedDaily] = useState(false);
@@ -102,7 +99,7 @@ export const LandingPage = () => {
                     </div>
                     <div className="flex gap-2 flex-wrap justify-end">
                         <button
-                            onClick={() => { setStatsInitialTab('me'); setIsStatsOpen(true); }}
+                            onClick={() => dispatch({ type: 'SET_TAB', payload: { tab: 'stats' } })}
                             className="bg-paper hover:bg-paper-dim text-[10px] font-bold text-ink px-3 py-1.5 rounded-lg border-2 border-ink uppercase tracking-widest transition-all shadow-sketch-ink active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
                         >
                             STATS
@@ -153,7 +150,7 @@ export const LandingPage = () => {
                                 Hand of the Day
                             </div>
                             {hasPlayedDaily ? (
-                                <div onClick={(e) => { e.stopPropagation(); setStatsInitialTab('daily_challenge'); setIsStatsOpen(true); }} className="relative z-10 text-[10px] text-white bg-amber-700/50 self-center px-4 py-2 rounded-full font-black uppercase tracking-widest hover:bg-amber-700 transition-colors pointer-events-auto cursor-pointer">
+                                <div onClick={(e) => { e.stopPropagation(); dispatch({ type: 'SET_TAB', payload: { tab: 'stats' } }); }} className="relative z-10 text-[10px] text-white bg-amber-700/50 self-center px-4 py-2 rounded-full font-black uppercase tracking-widest hover:bg-amber-700 transition-colors pointer-events-auto cursor-pointer">
                                     View Leaderboard
                                 </div>
                             ) : (
@@ -276,8 +273,6 @@ export const LandingPage = () => {
                     </div>
                 )}
             </div>
-            
-            <StatsModal isOpen={isStatsOpen} onClose={() => setIsStatsOpen(false)} initialTab={statsInitialTab} />
         </div>
     );
 };

@@ -7,6 +7,9 @@ import { LobbyView } from './components/Lobby/LobbyView';
 import { TableView } from './components/Table/TableView';
 import { GameOver } from './components/GameEnd/GameOver';
 
+import { StatsView } from './components/common/StatsView';
+import { BottomNav } from './components/common/BottomNav';
+
 const GameView = () => {
     const { state, dispatch } = useGame();
 
@@ -18,12 +21,17 @@ const GameView = () => {
             dispatch({ type: 'PASS_BID', payload: { playerIndex: state.currentPlayerIndex } });
         } else if (state.phase === 'playing' || state.phase === 'discard') {
             // This would normally be handle by a bot if it were their turn
-            // For manual stepping, we might need a more specific action or just rely on actual bot logic
         }
     };
 
-    // Routing based on game phase
+    // Logic: If on login phase, always show login
     if (state.phase === 'login') return <LoginPage />;
+
+    // Handle Tab based routing
+    if (state.activeTab === 'home') return <LandingPage />;
+    if (state.activeTab === 'stats') return <StatsView />;
+
+    // Tab === 'game' (Default)
     if (state.phase === 'landing') return <LandingPage />;
 
     if (state.phase === 'game_over') {
@@ -41,7 +49,7 @@ const GameView = () => {
     // All active gameplay phases use the TableView
     return (
         <LayoutGroup>
-            <div className="w-full h-full max-w-7xl mx-auto max-h-screen flex flex-col md:flex-row px-2 py-2 gap-4 overflow-hidden bg-paper/0 font-hand">
+            <div className="w-full h-full max-w-7xl mx-auto h-[calc(100vh-80px)] flex flex-col md:flex-row px-2 py-2 gap-4 overflow-hidden bg-paper/0 font-hand pb-20">
                 <TableView handleNextStep={handleNextStep} />
             </div>
         </LayoutGroup>
@@ -97,13 +105,16 @@ function App() {
             )}
 
             <GameProvider>
-                <GameView />
+                <div className="flex flex-col h-full w-full">
+                    <GameView />
+                    <BottomNav />
+                </div>
             </GameProvider>
 
             {/* Version Footer */}
             <div className="fixed bottom-2 left-1/2 -translate-x-1/2 pointer-events-none opacity-30 z-[100]">
                 <div className="text-[10px] font-black uppercase tracking-[0.5em]">
-                    Euchre Engine V1.62
+                    Euchre Engine V1.63
                 </div>
             </div>
         </div>
