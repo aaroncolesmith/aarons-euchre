@@ -24,14 +24,16 @@ export const DailyLeaderboard = () => {
     useEffect(() => {
         const fetchScores = async () => {
             setLoading(true);
-            const data = await getDailyLeaderboard('all');
-            const dataScores = data as DailyScore[];
             
-            // Format today's scores
-            const todayScores = dataScores.filter(s => s.date_string === dateString);
-            setScores(todayScores);
+            // 1. Fetch Today's scores specifically to be bulletproof
+            const todayData = await getDailyLeaderboard(dateString);
+            setScores(todayData as DailyScore[]);
 
-            // Calculate All-Time totals
+            // 2. Fetch All for aggregates (up to limit)
+            const allData = await getDailyLeaderboard('all');
+            const dataScores = allData as DailyScore[];
+            
+            // Calculate All-Time totals from the larger set
             const playerTotals: Record<string, any> = {};
             dataScores.forEach(s => {
                 if (!playerTotals[s.player_name]) {
@@ -50,7 +52,7 @@ export const DailyLeaderboard = () => {
                 playerTotals[s.player_name].opp_points += (s.opp_points || 0);
                 playerTotals[s.player_name].team_tricks += s.team_tricks;
                 playerTotals[s.player_name].individual_tricks += s.individual_tricks;
-                playerTotals[s.player_name].opp_tricks += (s.opp_tricks || (20 - s.team_tricks)); // Fallback approximation for old data
+                playerTotals[s.player_name].opp_tricks += (s.opp_tricks || (20 - s.team_tricks));
             });
 
             const allTime = Object.values(playerTotals).sort((a: any, b: any) => {

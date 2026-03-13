@@ -453,6 +453,7 @@ export async function getDailyLeaderboard(date_string: string | 'all') {
         }
 
         const { data, error } = await query
+            .order('date_string', { ascending: false })
             .order('team_points', { ascending: false })
             .order('team_tricks', { ascending: false })
             .order('individual_tricks', { ascending: false })
