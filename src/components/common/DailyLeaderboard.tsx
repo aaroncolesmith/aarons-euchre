@@ -14,7 +14,7 @@ interface DailyScore {
     created_at: string;
 }
 
-export const DailyLeaderboard = () => {
+export const DailyLeaderboard = ({ hideHeader = false }: { hideHeader?: boolean }) => {
     const [scores, setScores] = useState<DailyScore[]>([]);
     const [allTimeScores, setAllTimeScores] = useState<any[]>([]);
     const [tab, setTab] = useState<'today' | 'all'>('today');
@@ -70,24 +70,26 @@ export const DailyLeaderboard = () => {
 
     return (
         <div className="space-y-4 font-hand">
-            <div className="text-center mb-8">
-                <h3 className="text-2xl font-black uppercase tracking-widest text-brand">Daily Challenge Stats</h3>
-                
-                <div className="flex justify-center gap-4 mt-4 text-xs font-black uppercase tracking-widest">
-                    <button 
-                        onClick={() => setTab('today')}
-                        className={`pb-1 border-b-2 transition-all ${tab === 'today' ? 'text-brand border-brand' : 'text-ink-dim border-transparent hover:text-brand-dim'}`}
-                    >
-                        Today ({dateString})
-                    </button>
-                    <button 
-                        onClick={() => setTab('all')}
-                        className={`pb-1 border-b-2 transition-all ${tab === 'all' ? 'text-brand border-brand' : 'text-ink-dim border-transparent hover:text-brand-dim'}`}
-                    >
-                        All-Time Aggregates
-                    </button>
+            {!hideHeader && (
+                <div className="text-center mb-8">
+                    <h3 className="text-2xl font-black uppercase tracking-widest text-brand">Daily Challenge Stats</h3>
+                    
+                    <div className="flex justify-center gap-4 mt-4 text-xs font-black uppercase tracking-widest">
+                        <button 
+                            onClick={() => setTab('today')}
+                            className={`pb-1 border-b-2 transition-all ${tab === 'today' ? 'text-brand border-brand' : 'text-ink-dim border-transparent hover:text-brand-dim'}`}
+                        >
+                            Today ({dateString})
+                        </button>
+                        <button 
+                            onClick={() => setTab('all')}
+                            className={`pb-1 border-b-2 transition-all ${tab === 'all' ? 'text-brand border-brand' : 'text-ink-dim border-transparent hover:text-brand-dim'}`}
+                        >
+                            All-Time Aggregates
+                        </button>
+                    </div>
                 </div>
-            </div>
+            )}
 
             {loading ? (
                 <div className="p-8 text-center text-ink-dim animate-pulse font-bold tracking-widest uppercase">Loading stats...</div>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { GameState } from '../../types/game';
+import { DailyLeaderboard } from '../common/DailyLeaderboard';
 import { GameRecapModal } from './GameRecapModal';
 
 interface GameOverProps {
@@ -55,26 +56,42 @@ export const GameOver: React.FC<GameOverProps> = ({ state, onPlayAgain, onExit }
                     </div>
 
                     <div className="flex flex-col gap-4">
-                        <div className="grid grid-cols-2 gap-4">
-                            <button
-                                onClick={() => setShowGameRecap(true)}
-                                className="bg-paper hover:bg-paper-dim text-ink font-black py-4 rounded-2xl text-lg border-4 border-ink shadow-sketch-ink transition-all active:scale-95 uppercase tracking-widest"
-                            >
-                                Recap
-                            </button>
-                            <button
-                                onClick={onExit}
-                                className="bg-paper hover:bg-red-50 text-red-500 font-black py-4 rounded-2xl text-lg border-4 border-red-500 shadow-sketch-red transition-all active:scale-95 uppercase tracking-widest"
-                            >
-                                Exit
-                            </button>
-                        </div>
-                        <button
-                            onClick={onPlayAgain}
-                            className="w-full bg-brand hover:bg-brand-dim text-white font-black py-6 rounded-2xl text-2xl shadow-sketch-brand transition-all active:scale-95 uppercase tracking-[0.2em] flex items-center justify-center gap-3"
-                        >
-                            <span className="text-3xl">♠️</span> PLAY AGAIN <span className="text-3xl">♥️</span>
-                        </button>
+                        {state.isDailyChallenge ? (
+                            <div className="space-y-6">
+                                <DailyLeaderboard hideHeader={true} />
+                                <div className="flex justify-center pt-4">
+                                    <button
+                                        onClick={onExit}
+                                        className="bg-paper hover:bg-red-50 text-red-500 font-black py-4 px-12 rounded-2xl text-lg border-4 border-red-500 shadow-sketch-red transition-all active:scale-95 uppercase tracking-widest"
+                                    >
+                                        Exit
+                                    </button>
+                                </div>
+                            </div>
+                        ) : (
+                            <>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <button
+                                        onClick={() => setShowGameRecap(true)}
+                                        className="bg-paper hover:bg-paper-dim text-ink font-black py-4 rounded-2xl text-lg border-4 border-ink shadow-sketch-ink transition-all active:scale-95 uppercase tracking-widest"
+                                    >
+                                        Recap
+                                    </button>
+                                    <button
+                                        onClick={onExit}
+                                        className="bg-paper hover:bg-red-50 text-red-500 font-black py-4 rounded-2xl text-lg border-4 border-red-500 shadow-sketch-red transition-all active:scale-95 uppercase tracking-widest"
+                                    >
+                                        Exit
+                                    </button>
+                                </div>
+                                <button
+                                    onClick={onPlayAgain}
+                                    className="w-full bg-brand hover:bg-brand-dim text-white font-black py-6 rounded-2xl text-2xl shadow-sketch-brand transition-all active:scale-95 uppercase tracking-[0.2em] flex items-center justify-center gap-3"
+                                >
+                                    <span className="text-3xl">♠️</span> PLAY AGAIN <span className="text-3xl">♥️</span>
+                                </button>
+                            </>
+                        )}
                     </div>
                 </div>
             </motion.div>
