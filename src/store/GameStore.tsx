@@ -3,7 +3,7 @@ import { GameState, Action, PlayerStats } from '../types/game';
 import { supabase } from '../lib/supabase';
 import { createDeck, dealHands, shuffleDeck } from '../utils/deck';
 import { shouldCallTrump, shouldGoAlone, getBestBid, getBotMove, getCardValue } from '../utils/rules';
-import { saveMultiplePlayerStats, getAllPlayerStats, getPlayersStats, mergeAllStats, submitDailyScore, LOCAL_STORAGE_KEY } from '../utils/supabaseStats';
+import { saveMultiplePlayerStats, getAllPlayerStats, getPlayersStats, mergeAllStats, submitDailyScore, syncUnsyncedDailies, LOCAL_STORAGE_KEY } from '../utils/supabaseStats';
 import { useHostElection } from '../utils/presence';
 import { createDailyRNG } from '../utils/rng';
 import { detectFreeze, applyRecovery, createHeartbeatSnapshot, logFreezeToCloud, HeartbeatState } from '../utils/heartbeat';
@@ -177,6 +177,11 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             const mergedStats = mergeAllStats(localStats, cloudStats);
             localStorage.setItem('euchre_global_stats_v4', JSON.stringify(mergedStats));
             dispatch({ type: 'LOAD_GLOBAL_STATS', payload: mergedStats });
+
+            // Self-healing: Sync any completed daily challenges that didn't make it to the cloud
+            if (savedUser) {
+                await syncUnsyncedDailies(savedUser);
+            }
         };
         init();
     }, []);
@@ -223,7 +228,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             Logger.setMetadata({
                 tableCode: state.tableCode || undefined,
                 userName: state.currentUser || undefined,
-                appVersion: '1.60'
+                appVersion: '1.61'
             });
         }
     }, [state.tableCode, state.currentUser]);

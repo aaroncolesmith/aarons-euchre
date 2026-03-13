@@ -487,3 +487,44 @@ export async function hasUserPlayedDaily(playerName: string, dateString: string)
         return false;
     }
 }
+
+/**
+ * Self-healing: Look for any local DAILY games that are finished but missing from Cloud
+ */
+export async function syncUnsyncedDailies(playerName: string): Promise<void> {
+    try {
+        const saved = localStorage.getItem('euchre_active_games');
+        if (!saved) return;
+        
+        const gamesJson = JSON.parse(saved);
+        const dailyGames = Object.values(gamesJson).filter((g: any) => 
+            g.tableCode?.startsWith('DAILY-') && 
+            g.phase === 'game_over' &&
+            g.players.some((p: any) => p.name === playerName)
+        );
+
+        for (const game of dailyGames as any[]) {
+            const dateString = game.tableCode!.split('-').slice(1, 4).join('-');
+            
+            // Check if Cloud has it
+            const exists = await hasUserPlayedDaily(playerName, dateString);
+            if (!exists) {
+                console.log(`[SYNC] Found unsynced local daily for ${dateString}. Pushing...`);
+                const hero = game.players.find((p: any) => p.name === playerName);
+                if (hero) {
+                    await submitDailyScore({
+                        date_string: dateString,
+                        player_name: hero.name!,
+                        team_points: game.scores.team1,
+                        team_tricks: hero.stats.tricksWonTeam || 0,
+                        individual_tricks: hero.stats.tricksTaken || 0,
+                        opp_points: game.scores.team2,
+                        opp_tricks: (game.handsPlayed * 5) - (hero.stats.tricksWonTeam || 0)
+                    });
+                }
+            }
+        }
+    } catch (err) {
+        console.error('[SYNC] Failed to synchronize local dailies:', err);
+    }
+}
