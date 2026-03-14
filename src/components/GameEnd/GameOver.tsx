@@ -16,17 +16,15 @@ export const GameOver: React.FC<GameOverProps> = ({ state, onPlayAgain, onExit }
     const isTeam1Winner = state.scores.team1 >= 10;
 
     return (
-        <div className="flex flex-col items-center justify-center h-full w-full max-w-2xl mx-auto p-8 animate-in fade-in zoom-in duration-700">
-            <motion.div
-                initial={{ scale: 0, rotate: -10 }}
-                animate={{ scale: 1, rotate: 0 }}
-                className="w-full bg-paper p-10 md:p-16 rounded-[3rem] border-4 border-brand shadow-sketch-brand-strong relative overflow-hidden"
-            >
-                <div className="absolute inset-0 bg-brand/5 pointer-events-none" />
-
-                <div className="relative z-10 space-y-8">
-                    <h1 className="text-6xl md:text-7xl font-black text-brand-dark text-center leading-none italic uppercase transform -rotate-2">
-                        GAME OVER!
+        <div className="w-full h-full overflow-y-auto custom-scrollbar pb-24 animate-in fade-in duration-700 font-hand">
+            <div className="max-w-xl mx-auto px-4 py-8 space-y-10">
+                <motion.div
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    className="space-y-8"
+                >
+                    <h1 className="text-5xl md:text-6xl font-black text-brand-dark text-center leading-none italic uppercase tracking-tight">
+                        GAME OVER
                     </h1>
 
                     {!state.isDailyChallenge && (
@@ -40,38 +38,43 @@ export const GameOver: React.FC<GameOverProps> = ({ state, onPlayAgain, onExit }
                         </div>
                     )}
 
-                    <div className="bg-paper-dim rounded-2xl p-6 border-2 border-brand/20 shadow-inner">
+                    <div className="bg-paper border-4 border-brand/20 rounded-[2rem] p-8 shadow-sketch-brand/10">
                         <div className="grid grid-cols-2 gap-4 text-center">
                             <div>
-                                <div className="text-sm text-ink-dim font-black uppercase tracking-wider mb-2">{state.teamNames.team1}</div>
-                                <div className={`text-6xl font-black font-hand ${isTeam1Winner ? 'text-brand' : 'text-ink-dim'}`}>
+                                <div className="text-[10px] text-ink-dim font-black uppercase tracking-[0.2em] mb-3">{state.teamNames.team1}</div>
+                                <div className={`text-7xl font-black font-hand ${isTeam1Winner ? 'text-brand' : 'text-ink-dim/40'}`}>
                                     {state.scores.team1}
                                 </div>
                             </div>
-                            <div>
-                                <div className="text-sm text-ink-dim font-black uppercase tracking-wider mb-2">{state.teamNames.team2}</div>
-                                <div className={`text-6xl font-black font-hand ${!isTeam1Winner ? 'text-brand' : 'text-ink-dim'}`}>
+                            <div className="border-l-2 border-brand/10">
+                                <div className="text-[10px] text-ink-dim font-black uppercase tracking-[0.2em] mb-3">{state.teamNames.team2}</div>
+                                <div className={`text-7xl font-black font-hand ${!isTeam1Winner ? 'text-brand' : 'text-ink-dim/40'}`}>
                                     {state.scores.team2}
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div className="flex flex-col gap-4">
+                    <div className="space-y-8">
                         {state.isDailyChallenge ? (
-                            <div className="space-y-6">
-                                <DailyLeaderboard hideHeader={true} />
-                                <div className="flex justify-center pt-4">
+                            <div className="space-y-10">
+                                <div className="pt-4 border-t-2 border-brand/10">
+                                    <h2 className="text-3xl md:text-4xl font-black text-brand-dim text-center uppercase tracking-tight mb-2">
+                                        DAILY CHALLENGE STATS
+                                    </h2>
+                                    <DailyLeaderboard hideHeader={true} />
+                                </div>
+                                <div className="flex justify-center pt-8">
                                     <button
                                         onClick={onExit}
-                                        className="bg-paper hover:bg-red-50 text-red-500 font-black py-4 px-12 rounded-2xl text-lg border-4 border-red-500 shadow-sketch-red transition-all active:scale-95 uppercase tracking-widest"
+                                        className="bg-white hover:bg-red-50 text-red-500 font-black py-4 px-16 rounded-2xl text-xl border-4 border-red-500 shadow-sketch-red transition-all active:scale-95 uppercase tracking-widest"
                                     >
                                         Exit
                                     </button>
                                 </div>
                             </div>
                         ) : (
-                            <>
+                            <div className="flex flex-col gap-6 pt-4">
                                 <div className="grid grid-cols-2 gap-4">
                                     <button
                                         onClick={() => setShowGameRecap(true)}
@@ -92,11 +95,11 @@ export const GameOver: React.FC<GameOverProps> = ({ state, onPlayAgain, onExit }
                                 >
                                     <span className="text-3xl">♠️</span> PLAY AGAIN <span className="text-3xl">♥️</span>
                                 </button>
-                            </>
+                            </div>
                         )}
                     </div>
-                </div>
-            </motion.div>
+                </motion.div>
+            </div>
             <GameRecapModal isOpen={showGameRecap} onClose={() => setShowGameRecap(false)} gameState={state} />
         </div>
     );
