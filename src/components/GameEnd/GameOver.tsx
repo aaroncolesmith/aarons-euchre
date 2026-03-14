@@ -29,14 +29,16 @@ export const GameOver: React.FC<GameOverProps> = ({ state, onPlayAgain, onExit }
                         GAME OVER!
                     </h1>
 
-                    <div className="text-center space-y-2">
-                        <div className="text-2xl md:text-3xl font-black text-brand-dim uppercase tracking-wide">
-                            🏆 {winner} Wins! 🏆
+                    {!state.isDailyChallenge && (
+                        <div className="text-center space-y-2">
+                            <div className="text-2xl md:text-3xl font-black text-brand-dim uppercase tracking-wide">
+                                🏆 {winner} Wins! 🏆
+                            </div>
+                            <div className="text-lg text-ink-dim font-bold">
+                                Final Score: {state.scores.team1} - {state.scores.team2}
+                            </div>
                         </div>
-                        <div className="text-lg text-ink-dim font-bold">
-                            Final Score: {state.scores.team1} - {state.scores.team2}
-                        </div>
-                    </div>
+                    )}
 
                     <div className="bg-paper-dim rounded-2xl p-6 border-2 border-brand/20 shadow-inner">
                         <div className="grid grid-cols-2 gap-4 text-center">
