@@ -2,6 +2,8 @@ import { supabase } from '../lib/supabase.ts';
 import { PlayerStats } from '../types/game.ts';
 
 export const LOCAL_STORAGE_KEY = 'euchre_global_stats_v4';
+const LEADERBOARD_CACHE_KEY = 'euchre_leaderboard_cache_v1';
+const LEADERBOARD_CACHE_TTL_MS = 5 * 60 * 1000;
 
 // Convert between camelCase (app) and snake_case (database)
 function toSnakeCase(stats: PlayerStats) {
@@ -142,6 +144,43 @@ export async function getAllPlayerStats(): Promise<Record<string, PlayerStats>> 
         return stats;
     } catch (err) {
         console.error('[SUPABASE STATS] Exception fetching stats:', err);
+        return {};
+    }
+}
+
+/**
+ * Get leaderboard stats with caching and limit
+ */
+export async function getLeaderboardStats(limit: number = 50): Promise<Record<string, PlayerStats>> {
+    try {
+        const cachedRaw = localStorage.getItem(LEADERBOARD_CACHE_KEY);
+        if (cachedRaw) {
+            const cached = JSON.parse(cachedRaw);
+            if (cached?.ts && cached?.data && (Date.now() - cached.ts) < LEADERBOARD_CACHE_TTL_MS) {
+                return cached.data as Record<string, PlayerStats>;
+            }
+        }
+
+        const { data, error } = await supabase
+            .from('player_stats')
+            .select('*')
+            .order('hands_played', { ascending: false })
+            .limit(limit);
+
+        if (error) {
+            console.error('[SUPABASE STATS] Error fetching leaderboard stats:', error);
+            return {};
+        }
+
+        const stats: Record<string, PlayerStats> = {};
+        data?.forEach((row: any) => {
+            stats[row.player_name] = fromSnakeCase(row);
+        });
+
+        localStorage.setItem(LEADERBOARD_CACHE_KEY, JSON.stringify({ ts: Date.now(), data: stats }));
+        return stats;
+    } catch (err) {
+        console.error('[SUPABASE STATS] Exception fetching leaderboard stats:', err);
         return {};
     }
 }

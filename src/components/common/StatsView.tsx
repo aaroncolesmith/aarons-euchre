@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useGame } from '../../store/GameStore';
 import { PlayerStats } from '../../types/game';
-import { getAllPlayerStats, mergeAllStats, LOCAL_STORAGE_KEY, refreshPlayerStatsFromEvents } from '../../utils/supabaseStats';
+import { getLeaderboardStats, getPlayersStats, mergeAllStats, LOCAL_STORAGE_KEY, refreshPlayerStatsFromEvents } from '../../utils/supabaseStats';
 import { TrumpCallsTable } from '../Stats/TrumpCallsTable';
 import { DailyLeaderboard } from './DailyLeaderboard';
 import { LeagueTable } from '../Stats/LeagueTable';
@@ -21,9 +21,13 @@ export const StatsView = ({
         const localRaw = localStorage.getItem(LOCAL_STORAGE_KEY);
         const localStats = localRaw ? JSON.parse(localRaw) : {};
 
-        getAllPlayerStats().then(stats => {
-            const merged = mergeAllStats(localStats, stats);
-            setAllStats(merged);
+        Promise.all([
+            getLeaderboardStats(50),
+            state.currentViewPlayerName ? getPlayersStats([state.currentViewPlayerName]) : Promise.resolve({})
+        ]).then(([leaderboard, myCloud]) => {
+            const merged = mergeAllStats(localStats, leaderboard);
+            const mergedWithMe = mergeAllStats(merged, myCloud);
+            setAllStats(mergedWithMe);
             setIsLoading(false);
         }).catch(err => {
             console.error('[STATS VIEW] Failed to load stats:', err);
@@ -41,8 +45,12 @@ export const StatsView = ({
         }
         const localRaw = localStorage.getItem(LOCAL_STORAGE_KEY);
         const localStats = localRaw ? JSON.parse(localRaw) : {};
-        const stats = await getAllPlayerStats();
-        setAllStats(mergeAllStats(localStats, stats));
+        const [leaderboard, myCloud] = await Promise.all([
+            getLeaderboardStats(50),
+            state.currentViewPlayerName ? getPlayersStats([state.currentViewPlayerName]) : Promise.resolve({})
+        ]);
+        const merged = mergeAllStats(localStats, leaderboard);
+        setAllStats(mergeAllStats(merged, myCloud));
         setIsLoading(false);
     };
 

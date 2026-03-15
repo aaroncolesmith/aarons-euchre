@@ -76,7 +76,7 @@ The stats system is the primary retention engine. It must be:
    - Store stats by `user_id`, keep display name separately.
 6. **Bounded server state** (Completed)
    - Cap or trim `eventLog`, `logs`, `history`, `trumpCallLogs` before persistence.
-7. **Leaderboard pagination & caching**
+7. **Leaderboard pagination & caching** (Completed)
    - Provide top-N endpoints with pagination and caching.
 
 ### Phase 2 – Strategic Innovation (6–12 weeks)
