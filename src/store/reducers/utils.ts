@@ -58,6 +58,7 @@ export const getEmptyStats = (): PlayerStats => ({
 export const createEmptyPlayer = (index: number): Player => ({
     id: `player-${index}`,
     name: null,
+    userId: null,
     isComputer: false,
     hand: [],
     stats: getEmptyStats()
@@ -69,6 +70,7 @@ export const INITIAL_STATE_FUNC = (): GameState => ({
     tableCode: null,
     currentViewPlayerName: null,
     currentUser: null,
+    currentUserId: null,
     players: Array(4).fill(null).map((_, i) => createEmptyPlayer(i)),
     currentPlayerIndex: -1,
     dealerIndex: -1,

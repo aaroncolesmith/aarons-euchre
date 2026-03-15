@@ -1,5 +1,6 @@
 import { GameState, Action } from '../../types/game.ts';
 import { INITIAL_STATE_FUNC } from './utils.ts';
+import { getStableUserId } from '../../utils/identity.ts';
 
 export const systemReducer = (state: GameState, action: Action): GameState | null => {
     switch (action.type) {
@@ -11,7 +12,13 @@ export const systemReducer = (state: GameState, action: Action): GameState | nul
             const displayName = matchedUser
                 ? ['Aaron', 'Polina', 'Gray-Gray', 'Mimi', 'Micah', 'Cherrie', 'Peter-Playwright', 'TEST'][knownUsers.indexOf(matchedUser)]
                 : enteredName;
-            return { ...state, currentUser: displayName, phase: 'landing', activeTab: 'home' };
+            return { 
+                ...state, 
+                currentUser: displayName, 
+                currentUserId: getStableUserId(displayName, false),
+                phase: 'landing', 
+                activeTab: 'home' 
+            };
         }
 
         case 'LOGOUT':
@@ -26,6 +33,7 @@ export const systemReducer = (state: GameState, action: Action): GameState | nul
                 ...INITIAL_STATE_FUNC(),
                 ...loaded,
                 currentUser,
+                currentUserId: state.currentUserId || getStableUserId(currentUser, false),
                 currentViewPlayerName: isPlayerInGame ? currentUser : (loaded.currentViewPlayerName || currentUser),
                 activeTab: 'game'
             };
@@ -52,6 +60,7 @@ export const systemReducer = (state: GameState, action: Action): GameState | nul
                 tableName,
                 players,
                 currentUser: state.currentUser,
+                currentUserId: state.currentUserId,
                 currentViewPlayerName: state.currentViewPlayerName,
                 phase: 'lobby',
                 logs: [`Game reset. Starting a new match at ${tableName}.`, ...state.logs]

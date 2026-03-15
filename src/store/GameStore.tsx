@@ -8,6 +8,7 @@ import { useHostElection } from '../utils/presence';
 import { createDailyRNG } from '../utils/rng';
 import { detectFreeze, applyRecovery, createHeartbeatSnapshot, logFreezeToCloud, HeartbeatState } from '../utils/heartbeat';
 import Logger from '../utils/logger';
+import { getStableUserId } from '../utils/identity';
 
 // Reducers
 import { gameReducerFixed, INITIAL_STATE as ENGINE_INITIAL_STATE } from './engine';
@@ -16,7 +17,10 @@ import { fetchPlayEvents } from '../utils/eventLogger';
 
 const INITIAL_STATE: GameState = {
     ...ENGINE_INITIAL_STATE,
-    currentUser: typeof window !== 'undefined' ? localStorage.getItem('euchre_current_user') : null
+    currentUser: typeof window !== 'undefined' ? localStorage.getItem('euchre_current_user') : null,
+    currentUserId: typeof window !== 'undefined'
+        ? getStableUserId(localStorage.getItem('euchre_current_user'), false)
+        : null
 };
 
 // Fallback for crypto.randomUUID

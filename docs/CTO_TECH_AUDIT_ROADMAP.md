@@ -71,7 +71,7 @@ The stats system is the primary retention engine. It must be:
 4. **Single authoritative stats pipeline** (Completed)
    - Disable direct client event logging for standard games.
    - Use server-generated `EVENT:hand_result` only.
-5. **Stable user identity**
+5. **Stable user identity** (In Progress)
    - Introduce `user_id` (Supabase Auth or internal UUID).
    - Store stats by `user_id`, keep display name separately.
 6. **Bounded server state** (Completed)

@@ -52,6 +52,7 @@ export interface Card {
 export interface Player {
     id: string;
     name: string | null; // Null if seat is empty
+    userId?: string | null;
     isComputer: boolean;
     hand: Card[];
     stats: PlayerStats;
@@ -100,7 +101,7 @@ export type GameEvent =
     | { 
         type: 'hand_result', 
         handResult: HandResult, 
-        participantStats?: { name: string | null, seat: number, stats: PlayerStats }[],
+        participantStats?: { name: string | null, seat: number, userId?: string | null, stats: PlayerStats }[],
         timestamp: number 
       }
     | { type: 'game_over'; scores: { team1: number; team2: number }; winner: string; timestamp: number };
@@ -125,6 +126,7 @@ export interface GameState {
     tableCode: string | null;
     currentViewPlayerName: string | null;
     currentUser: string | null;
+    currentUserId: string | null;
     eventLog: GameEvent[]; // Normalized event history
     trumpCallLogs: TrumpCallLog[]; // Trump calling analytics
     players: Player[];

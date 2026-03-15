@@ -89,16 +89,17 @@ export const scoringReducer = (state: GameState, action: Action): GameState | nu
                 biddingRound: 1,
                 upcard: null,
                 logs: [isGameOver ? 'GAME OVER!' : `Hand finished. Next deal in 4 seconds... Score: ${newScores.team1} - ${newScores.team2}`, ...state.logs],
-                eventLog: [...state.eventLog, {
-                    type: 'hand_result',
-                    handResult,
-                    participantStats: updatedPlayers.map(p => ({
-                        name: p.name,
-                        seat: state.players.findIndex(pl => pl.id === p.id),
-                        stats: p.stats
-                    })),
-                    timestamp: Date.now()
-                }]
+                    eventLog: [...state.eventLog, {
+                        type: 'hand_result',
+                        handResult,
+                        participantStats: updatedPlayers.map(p => ({
+                            name: p.name,
+                            seat: state.players.findIndex(pl => pl.id === p.id),
+                            userId: p.userId || null,
+                            stats: p.stats
+                        })),
+                        timestamp: Date.now()
+                    }]
             };
         }
 

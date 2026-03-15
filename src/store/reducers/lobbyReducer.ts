@@ -1,5 +1,6 @@
 import { GameState, Action } from '../../types/game.ts';
 import { generateTableCode, generateTableName, createEmptyPlayer, getEmptyStats, BOT_PERSONALITIES, BOT_NAMES_POOL, getTeamName } from './utils.ts';
+import { getStableUserId } from '../../utils/identity.ts';
 
 export const lobbyReducer = (state: GameState, action: Action): GameState | null => {
     switch (action.type) {
@@ -43,6 +44,7 @@ export const lobbyReducer = (state: GameState, action: Action): GameState | null
                 i === seatIndex ? {
                     ...p,
                     name,
+                    userId: getStableUserId(name, false),
                     isComputer: false,
                     stats: getEmptyStats(),
                     personality: BOT_PERSONALITIES[name]
@@ -62,6 +64,7 @@ export const lobbyReducer = (state: GameState, action: Action): GameState | null
                 players: state.players.map((p, i) => i === action.payload.seatIndex ? {
                     ...p,
                     name: botName,
+                    userId: getStableUserId(botName, true),
                     isComputer: true,
                     stats: getEmptyStats(),
                     personality: BOT_PERSONALITIES[botName]
@@ -82,6 +85,7 @@ export const lobbyReducer = (state: GameState, action: Action): GameState | null
                         return {
                             ...p,
                             name: botName,
+                            userId: getStableUserId(botName, true),
                             isComputer: true,
                             stats: getEmptyStats()
                         };
@@ -126,12 +130,14 @@ export const lobbyReducer = (state: GameState, action: Action): GameState | null
                 {
                     ...createEmptyPlayer(0),
                     name: userName,
+                    userId: getStableUserId(userName, false),
                     isComputer: false,
                     stats: getEmptyStats()
                 },
                 ...botNames.map((botName, i) => ({
                     ...createEmptyPlayer(i + 1),
                     name: botName,
+                    userId: getStableUserId(botName, true),
                     isComputer: true,
                     stats: getEmptyStats(),
                     personality: BOT_PERSONALITIES[botName]
