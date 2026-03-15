@@ -50,6 +50,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const lastBotDecisionRef = useRef<string | null>(null);
     const lastGameStatsSavedRef = useRef<string | null>(null);
     const lastHeartbeatRef = useRef<HeartbeatState | null>(null);
+    const bootstrappedTablesRef = useRef<Set<string>>(new Set());
     const { isHost, onlinePlayers } = useHostElection(state.tableCode, state.currentUser);
 
     // Enhanced dispatch that calls the authoritative server
@@ -96,8 +97,17 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
         try {
             Logger.debug(`[SERVER AUTH] Sending intent: ${actionWithId.type} (${actionWithId.actionId})`);
+            const shouldBootstrap =
+                !!state.tableCode &&
+                !state.tableCode.startsWith('DAILY-') &&
+                !bootstrappedTablesRef.current.has(state.tableCode);
+
             const { error } = await supabase.functions.invoke('process-action', {
-                body: { action: actionWithId, tableCode: state.tableCode }
+                body: {
+                    action: actionWithId,
+                    tableCode: state.tableCode,
+                    bootstrapState: shouldBootstrap ? state : undefined
+                }
             });
 
             if (error) {
@@ -106,6 +116,8 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 if (['CREATE_TABLE', 'JOIN_TABLE'].includes(action.type)) {
                     broadcastDispatch(actionWithId);
                 }
+            } else if (shouldBootstrap && state.tableCode) {
+                bootstrappedTablesRef.current.add(state.tableCode);
             }
         } catch (err) {
             Logger.error('[SERVER AUTH] Error:', err);
@@ -240,7 +252,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             Logger.setMetadata({
                 tableCode: state.tableCode || undefined,
                 userName: state.currentUser || undefined,
-                appVersion: '1.67'
+                appVersion: '1.68'
             });
         }
     }, [state.tableCode, state.currentUser]);

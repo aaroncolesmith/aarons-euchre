@@ -41,7 +41,7 @@ class Logger {
                 context: context ? JSON.stringify(context) : null,
                 user_name: this.metadata.userName,
                 table_code: this.metadata.tableCode,
-                app_version: this.metadata.appVersion || '1.54',
+                app_version: this.metadata.appVersion || '1.68',
                 environment: this.metadata.environment
             });
         } catch (err) {

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useGame } from '../../store/GameStore';
 import { PlayerStats } from '../../types/game';
-import { getAllPlayerStats } from '../../utils/supabaseStats';
+import { getAllPlayerStats, mergeAllStats, LOCAL_STORAGE_KEY, refreshPlayerStatsFromEvents } from '../../utils/supabaseStats';
 import { TrumpCallsTable } from '../Stats/TrumpCallsTable';
 import { DailyLeaderboard } from './DailyLeaderboard';
 import { LeagueTable } from '../Stats/LeagueTable';
@@ -18,14 +18,33 @@ export const StatsView = ({
 
     useEffect(() => {
         setIsLoading(true);
+        const localRaw = localStorage.getItem(LOCAL_STORAGE_KEY);
+        const localStats = localRaw ? JSON.parse(localRaw) : {};
+
         getAllPlayerStats().then(stats => {
-            setAllStats(stats);
+            const merged = mergeAllStats(localStats, stats);
+            setAllStats(merged);
             setIsLoading(false);
         }).catch(err => {
             console.error('[STATS VIEW] Failed to load stats:', err);
+            setAllStats(localStats);
             setIsLoading(false);
         });
     }, []);
+
+    const isAdmin = (state.currentUser || '').toLowerCase() === 'aaron';
+    const handleRebuildStats = async () => {
+        setIsLoading(true);
+        const ok = await refreshPlayerStatsFromEvents();
+        if (!ok) {
+            console.error('[STATS VIEW] Failed to rebuild stats from events.');
+        }
+        const localRaw = localStorage.getItem(LOCAL_STORAGE_KEY);
+        const localStats = localRaw ? JSON.parse(localRaw) : {};
+        const stats = await getAllPlayerStats();
+        setAllStats(mergeAllStats(localStats, stats));
+        setIsLoading(false);
+    };
 
     const myStats = allStats[state.currentViewPlayerName!] || {
         gamesPlayed: 0,
@@ -51,9 +70,19 @@ export const StatsView = ({
             {/* Fixed Top Section: Header + Tabs */}
             <div className="flex-none bg-paper z-30 border-b-4 border-ink">
                 {/* Header */}
-                <div className="p-6 md:p-8 bg-brand/5 space-y-1">
+                <div className="p-6 md:p-8 bg-brand/5 space-y-2">
                     <h2 className="text-3xl md:text-4xl font-black italic uppercase tracking-tighter">Match Analytics</h2>
-                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-brand-dim">Persistence engine v4.0 (Active)</p>
+                    <div className="flex items-center gap-3">
+                        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-brand-dim">Persistence engine v4.0 (Active)</p>
+                        {isAdmin && (
+                            <button
+                                onClick={handleRebuildStats}
+                                className="text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full border-2 border-brand text-brand hover:bg-brand/10 transition-all"
+                            >
+                                Rebuild Stats
+                            </button>
+                        )}
+                    </div>
                 </div>
 
                 {/* Tabs Navigation (Sticky/Fixed in flex-col) */}

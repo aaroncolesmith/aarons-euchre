@@ -19,7 +19,7 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!; 
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const { action, tableCode } = await req.json();
+    const { action, tableCode, bootstrapState } = await req.json();
 
     if (!tableCode || !action) {
       throw new Error("Missing tableCode or action");
@@ -29,7 +29,7 @@ serve(async (req) => {
     Logger.setMetadata({
         tableCode,
         environment: 'server',
-        appVersion: '1.54'
+        appVersion: '1.68'
     });
 
     // 1. Fetch current FULL state from games_auth (Source of Truth)
@@ -48,8 +48,12 @@ serve(async (req) => {
         .eq("code", tableCode)
         .single();
       
-      if (gameError || !game) throw new Error(`Game ${tableCode} not found`);
-      currentState = game.state;
+      if (gameError || !game) {
+        if (!bootstrapState) throw new Error(`Game ${tableCode} not found`);
+        currentState = bootstrapState;
+      } else {
+        currentState = bootstrapState || game.state;
+      }
     } else {
       currentState = authGame.full_state;
     }
@@ -122,8 +126,11 @@ serve(async (req) => {
     const sanitizedSnapshot = sanitizeState(nextState);
     const { error: updateError } = await supabase
       .from("games")
-      .update({ state: sanitizedSnapshot })
-      .eq("code", tableCode);
+      .upsert({ 
+        code: tableCode,
+        state: sanitizedSnapshot,
+        updated_at: new Date().toISOString()
+      }, { onConflict: "code" });
     if (updateError) throw updateError;
 
     // 6. Authoritative Broadcast

@@ -489,6 +489,23 @@ export async function hasUserPlayedDaily(playerName: string, dateString: string)
 }
 
 /**
+ * Rebuild aggregate player stats from event stream
+ */
+export async function refreshPlayerStatsFromEvents(): Promise<boolean> {
+    try {
+        const { error } = await supabase.rpc('refresh_player_stats_from_events');
+        if (error) {
+            console.error('[SUPABASE STATS] Error rebuilding stats from events:', error);
+            return false;
+        }
+        return true;
+    } catch (err) {
+        console.error('[SUPABASE STATS] Exception rebuilding stats from events:', err);
+        return false;
+    }
+}
+
+/**
  * Self-healing: Look for any local DAILY games that are finished but missing from Cloud
  */
 export async function syncUnsyncedDailies(playerName: string): Promise<void> {
