@@ -29,7 +29,7 @@ serve(async (req) => {
     Logger.setMetadata({
         tableCode,
         environment: 'server',
-        appVersion: '1.68'
+        appVersion: '1.69'
     });
 
     // 1. Fetch current FULL state from games_auth (Source of Truth)
