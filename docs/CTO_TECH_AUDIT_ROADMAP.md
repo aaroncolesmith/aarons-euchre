@@ -68,7 +68,7 @@ The stats system is the primary retention engine. It must be:
    - Outcome: recoverability and trust.
 
 ### Phase 1 – Architectural Enhancements (2–6 weeks)
-4. **Single authoritative stats pipeline**
+4. **Single authoritative stats pipeline** (Completed)
    - Disable direct client event logging for standard games.
    - Use server-generated `EVENT:hand_result` only.
 5. **Stable user identity**

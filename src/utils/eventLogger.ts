@@ -19,6 +19,10 @@ let isFlushing = false;
 let flushIntervalId: any = null;
 const FLUSH_INTERVAL_MS = 3000;
 
+function shouldLogEvent(gameCode?: string) {
+    return !!gameCode && gameCode.startsWith('DAILY-');
+}
+
 /**
  * Initializes the background flush interval if not already running.
  */
@@ -74,6 +78,7 @@ export async function flushPlayEvents(): Promise<void> {
  * This prevents UI micro-stutters during intense bot play.
  */
 export async function logPlayEvent(event: PlayEvent): Promise<boolean> {
+    if (!shouldLogEvent(event.gameCode)) return true;
     eventQueue.push(event);
     initFlushInterval();
     return true; // Return immediately to unblock main thread
@@ -83,7 +88,9 @@ export async function logPlayEvent(event: PlayEvent): Promise<boolean> {
  * Queues multiple events at once to be batched and logged asynchronously.
  */
 export async function logPlayEvents(events: PlayEvent[]): Promise<boolean> {
-    eventQueue.push(...events);
+    const filtered = events.filter(e => shouldLogEvent(e.gameCode));
+    if (filtered.length === 0) return true;
+    eventQueue.push(...filtered);
     initFlushInterval();
     return true; // Return immediately to unblock main thread
 }
