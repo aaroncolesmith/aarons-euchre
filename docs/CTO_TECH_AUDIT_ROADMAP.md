@@ -74,7 +74,7 @@ The stats system is the primary retention engine. It must be:
 5. **Stable user identity**
    - Introduce `user_id` (Supabase Auth or internal UUID).
    - Store stats by `user_id`, keep display name separately.
-6. **Bounded server state**
+6. **Bounded server state** (Completed)
    - Cap or trim `eventLog`, `logs`, `history`, `trumpCallLogs` before persistence.
 7. **Leaderboard pagination & caching**
    - Provide top-N endpoints with pagination and caching.

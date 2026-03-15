@@ -112,18 +112,25 @@ serve(async (req) => {
       if (refreshError) Logger.error("[SERVER] Stats refresh error:", refreshError);
     }
 
-    // 4. Update FULL State (Private)
+    // 4. Update FULL State (Private) with bounded logs
+    const cappedState = {
+      ...nextState,
+      logs: Array.isArray(nextState.logs) ? nextState.logs.slice(0, 200) : nextState.logs,
+      eventLog: Array.isArray(nextState.eventLog) ? nextState.eventLog.slice(-200) : nextState.eventLog,
+      trumpCallLogs: Array.isArray(nextState.trumpCallLogs) ? nextState.trumpCallLogs.slice(-200) : nextState.trumpCallLogs
+    };
+
     const { error: authUpdateError } = await supabase
       .from("games_auth")
       .upsert({ 
         game_code: tableCode, 
-        full_state: nextState,
+        full_state: cappedState,
         updated_at: new Date().toISOString()
       });
     if (authUpdateError) throw authUpdateError;
 
     // 5. Update MINIMAL Snapshot (Public & Broadcast)
-    const sanitizedSnapshot = sanitizeState(nextState);
+    const sanitizedSnapshot = sanitizeState(cappedState);
     const { error: updateError } = await supabase
       .from("games")
       .upsert({ 
