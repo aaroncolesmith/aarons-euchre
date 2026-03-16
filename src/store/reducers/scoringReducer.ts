@@ -1,4 +1,4 @@
-import { GameState, Action, HandResult } from '../../types/game.ts';
+import { GameState, Action, HandResult, GameEvent } from '../../types/game.ts';
 
 export const scoringReducer = (state: GameState, action: Action): GameState | null => {
     switch (action.type) {
@@ -73,7 +73,7 @@ export const scoringReducer = (state: GameState, action: Action): GameState | nu
                 };
             });
 
-            const eventLog = [...state.eventLog, {
+            const handEvent: GameEvent = {
                 type: 'hand_result',
                 handResult,
                 participantStats: updatedPlayers.map(p => ({
@@ -83,7 +83,9 @@ export const scoringReducer = (state: GameState, action: Action): GameState | nu
                     stats: p.stats
                 })),
                 timestamp: Date.now()
-            }];
+            };
+
+            const eventLog: GameEvent[] = [...state.eventLog, handEvent];
 
             if (isGameOver) {
                 const winnerTeam = isWinnerT1 ? 1 : 2;
@@ -93,14 +95,15 @@ export const scoringReducer = (state: GameState, action: Action): GameState | nu
                     .map(p => p.name)
                     .filter((name): name is string => !!name);
 
-                eventLog.push({
+                const gameOverEvent: GameEvent = {
                     type: 'game_over',
                     scores: newScores,
                     winner: winnerName,
                     winnerTeam,
                     winnerPlayers,
                     timestamp: Date.now()
-                });
+                };
+                eventLog.push(gameOverEvent);
             }
 
             return {
