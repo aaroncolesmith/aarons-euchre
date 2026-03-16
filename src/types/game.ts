@@ -104,7 +104,14 @@ export type GameEvent =
         participantStats?: { name: string | null, seat: number, userId?: string | null, stats: PlayerStats }[],
         timestamp: number 
       }
-    | { type: 'game_over'; scores: { team1: number; team2: number }; winner: string; timestamp: number };
+    | { 
+        type: 'game_over'; 
+        scores: { team1: number; team2: number }; 
+        winner: string; 
+        winnerTeam?: 1 | 2;
+        winnerPlayers?: string[];
+        timestamp: number 
+      };
 
 export interface TrumpCallLog {
     whoCalled: string;

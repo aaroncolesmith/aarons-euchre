@@ -73,6 +73,36 @@ export const scoringReducer = (state: GameState, action: Action): GameState | nu
                 };
             });
 
+            const eventLog = [...state.eventLog, {
+                type: 'hand_result',
+                handResult,
+                participantStats: updatedPlayers.map(p => ({
+                    name: p.name,
+                    seat: state.players.findIndex(pl => pl.id === p.id),
+                    userId: p.userId || null,
+                    stats: p.stats
+                })),
+                timestamp: Date.now()
+            }];
+
+            if (isGameOver) {
+                const winnerTeam = isWinnerT1 ? 1 : 2;
+                const winnerName = winnerTeam === 1 ? state.teamNames.team1 : state.teamNames.team2;
+                const winnerPlayers = state.players
+                    .filter((_, idx) => (winnerTeam === 1 ? (idx === 0 || idx === 2) : (idx === 1 || idx === 3)))
+                    .map(p => p.name)
+                    .filter((name): name is string => !!name);
+
+                eventLog.push({
+                    type: 'game_over',
+                    scores: newScores,
+                    winner: winnerName,
+                    winnerTeam,
+                    winnerPlayers,
+                    timestamp: Date.now()
+                });
+            }
+
             return {
                 ...state,
                 players: updatedPlayers,
@@ -89,17 +119,7 @@ export const scoringReducer = (state: GameState, action: Action): GameState | nu
                 biddingRound: 1,
                 upcard: null,
                 logs: [isGameOver ? 'GAME OVER!' : `Hand finished. Next deal in 4 seconds... Score: ${newScores.team1} - ${newScores.team2}`, ...state.logs],
-                    eventLog: [...state.eventLog, {
-                        type: 'hand_result',
-                        handResult,
-                        participantStats: updatedPlayers.map(p => ({
-                            name: p.name,
-                            seat: state.players.findIndex(pl => pl.id === p.id),
-                            userId: p.userId || null,
-                            stats: p.stats
-                        })),
-                        timestamp: Date.now()
-                    }]
+                eventLog
             };
         }
 

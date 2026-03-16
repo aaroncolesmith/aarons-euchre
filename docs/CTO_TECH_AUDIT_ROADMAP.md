@@ -69,8 +69,9 @@ The stats system is the primary retention engine. It must be:
 
 ### Phase 1 – Architectural Enhancements (2–6 weeks)
 4. **Single authoritative stats pipeline** (Completed)
-   - Disable direct client event logging for standard games.
-   - Use server-generated `EVENT:hand_result` only.
+    - Disable direct client event logging for standard games.
+    - Use server-generated `EVENT:hand_result` only.
+    - Emit `EVENT:game_over` to derive `gamesPlayed`/`gamesWon` from the event stream.
 5. **Stable user identity** (Completed)
    - Introduce `user_id` (Supabase Auth or internal UUID).
    - Store stats by `user_id`, keep display name separately.
