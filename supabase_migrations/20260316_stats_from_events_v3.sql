@@ -32,12 +32,57 @@ SELECT
 FROM raw_stats;
 
 -- 2. Game winners extracted from game_over events
+--    Fallback: derive winners from the final hand_result if game_over is missing.
 CREATE OR REPLACE VIEW game_winners AS
-SELECT
-    game_code,
-    jsonb_array_elements_text(action_payload->'winnerPlayers') as player_name
-FROM play_events
-WHERE action_type = 'EVENT:game_over';
+WITH has_game_over AS (
+    SELECT DISTINCT game_code
+    FROM play_events
+    WHERE action_type = 'EVENT:game_over'
+),
+game_over_winners AS (
+    SELECT
+        game_code,
+        jsonb_array_elements_text(action_payload->'winnerPlayers') as player_name
+    FROM play_events
+    WHERE action_type = 'EVENT:game_over'
+),
+last_hand_results AS (
+    SELECT DISTINCT ON (game_code)
+        game_code,
+        action_payload
+    FROM play_events
+    WHERE action_type = 'EVENT:hand_result'
+    ORDER BY game_code, hand_number DESC, state_version DESC
+),
+winner_team AS (
+    SELECT
+        game_code,
+        CASE
+            WHEN (action_payload->'handResult'->'scoresAtEnd'->>'team1')::int >=
+                 (action_payload->'handResult'->'scoresAtEnd'->>'team2')::int
+            THEN 1 ELSE 2
+        END AS winner_team,
+        action_payload
+    FROM last_hand_results
+),
+legacy_game_winners AS (
+    SELECT
+        wt.game_code,
+        p_stat->>'name' as player_name
+    FROM winner_team wt,
+         LATERAL jsonb_array_elements(wt.action_payload->'participantStats') as p_stat
+    WHERE p_stat->>'name' IS NOT NULL
+      AND (
+          (wt.winner_team = 1 AND (p_stat->>'seat')::int IN (0, 2)) OR
+          (wt.winner_team = 2 AND (p_stat->>'seat')::int IN (1, 3))
+      )
+)
+SELECT game_code, player_name
+FROM game_over_winners
+UNION ALL
+SELECT game_code, player_name
+FROM legacy_game_winners
+WHERE game_code NOT IN (SELECT game_code FROM has_game_over);
 
 -- 3. Final Aggregated Stats View
 -- Games played = count of distinct games per player
