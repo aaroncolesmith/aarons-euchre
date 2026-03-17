@@ -90,9 +90,12 @@ export const LandingPage = () => {
             <div className="w-full mb-8">
                 <div className="flex justify-between items-center mb-2">
                     <div>
-                        <h1 className="text-6xl font-black text-ink tracking-wide uppercase italic">
-                            EUCHRE
-                        </h1>
+                        <div className="flex items-baseline gap-2">
+                            <h1 className="text-6xl font-black text-ink tracking-wide uppercase italic">
+                                EUCHRE
+                            </h1>
+                            <span className="text-[10px] font-black text-brand-dim uppercase tracking-widest opacity-50">v1.72</span>
+                        </div>
                         <p className="text-xs font-bold text-brand tracking-[0.2em] mt-1 ml-1 uppercase">
                             Hello, {state.currentUser}
                         </p>
