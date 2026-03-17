@@ -123,6 +123,9 @@ export const matchReducer = (state: GameState, action: Action): GameState | null
                         ...p,
                         hand: updatedHand,
                         lastDecision: action.payload.reasoning,
+                        decisionHistory: action.payload.reasoning 
+                            ? [...(p.decisionHistory || []), { timestamp: Date.now(), decision: action.payload.reasoning }].slice(-5)
+                            : p.decisionHistory,
                         stats: {
                             ...p.stats,
                             callsMade: p.stats.callsMade + 1,
@@ -244,7 +247,13 @@ export const matchReducer = (state: GameState, action: Action): GameState | null
             }
             return {
                 ...state,
-                players: state.players.map((p, i) => i === state.currentPlayerIndex ? { ...p, lastDecision: action.payload.reasoning } : p),
+                players: state.players.map((p, i) => i === state.currentPlayerIndex ? { 
+                    ...p, 
+                    lastDecision: action.payload.reasoning,
+                    decisionHistory: action.payload.reasoning 
+                        ? [...(p.decisionHistory || []), { timestamp: Date.now(), decision: action.payload.reasoning }].slice(-5)
+                        : p.decisionHistory
+                } : p),
                 currentPlayerIndex: nextPlayer,
                 eventLog: [...state.eventLog, passEvent]
             };
@@ -287,7 +296,14 @@ export const matchReducer = (state: GameState, action: Action): GameState | null
             return {
                 ...state,
                 players: state.players.map((p, i) =>
-                    i === playerIndex ? { ...p, hand: newHand, lastDecision: action.payload.reasoning } : p
+                    i === playerIndex ? { 
+                        ...p, 
+                        hand: newHand, 
+                        lastDecision: action.payload.reasoning,
+                        decisionHistory: action.payload.reasoning 
+                            ? [...(p.decisionHistory || []), { timestamp: Date.now(), decision: action.payload.reasoning }].slice(-5)
+                            : p.decisionHistory
+                    } : p
                 ),
                 phase: 'playing',
                 currentPlayerIndex: (state.dealerIndex + 1) % 4,
@@ -316,7 +332,14 @@ export const matchReducer = (state: GameState, action: Action): GameState | null
 
             const newTrick = [...state.currentTrick, { playerId: player.id, playerIndex, card }];
             const newPlayers = state.players.map((p, i) =>
-                i === playerIndex ? { ...p, hand: p.hand.filter(c => c.id !== cardId) } : p
+                i === playerIndex ? { 
+                    ...p, 
+                    hand: p.hand.filter(c => c.id !== cardId),
+                    lastDecision: action.payload.reasoning,
+                    decisionHistory: action.payload.reasoning 
+                        ? [...(p.decisionHistory || []), { timestamp: Date.now(), decision: action.payload.reasoning }].slice(-5)
+                        : p.decisionHistory
+                } : p
             );
 
             const trickNum = Math.floor((20 - state.players.reduce((sum, p) => sum + p.hand.length, 0)) / (state.isLoner ? 3 : 4));

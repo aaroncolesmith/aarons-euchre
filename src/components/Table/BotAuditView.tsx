@@ -40,11 +40,32 @@ export const BotAuditView = ({ isOpen, onClose, inline = false }: { isOpen?: boo
                                 </div>
                             </div>
 
-                            <div className="bg-slate-50 border-2 border-slate-100 rounded-2xl p-4 transition-all hover:border-amber-400/50">
-                                <div className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Last Reasoning Output</div>
-                                <div className="text-sm font-hand font-black text-slate-600 leading-relaxed italic">
-                                    "{bot.lastDecision || 'Awaiting input sequence...'}"
-                                </div>
+                            <div className="space-y-3">
+                                <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">Recent Reasoning Logs</div>
+                                
+                                {(!bot.decisionHistory || bot.decisionHistory.length === 0) ? (
+                                    <div className="bg-slate-50 border-2 border-slate-100 rounded-2xl p-4 transition-all italic text-sm text-slate-400">
+                                        " {bot.lastDecision || 'Awaiting input sequence...'} "
+                                    </div>
+                                ) : (
+                                    <div className="space-y-3">
+                                        {[...(bot.decisionHistory || [])].reverse().map((entry, idx) => (
+                                            <div key={idx} className={`bg-slate-50 border-2 border-slate-100 rounded-2xl p-4 transition-all hover:border-amber-400/30 ${idx === 0 ? 'bg-amber-50/50 border-amber-100' : ''}`}>
+                                                <div className="flex justify-between items-center mb-2">
+                                                    <div className="text-[9px] font-black uppercase tracking-widest text-slate-400">
+                                                        {idx === 0 ? 'Latest decision' : `Decision -${idx}`}
+                                                    </div>
+                                                    <div className="text-[9px] font-black uppercase tracking-widest text-slate-300">
+                                                        {new Date(entry.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                                                    </div>
+                                                </div>
+                                                <div className="text-sm font-hand font-black text-slate-600 leading-relaxed italic">
+                                                    "{entry.decision}"
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         </div>
                     ))

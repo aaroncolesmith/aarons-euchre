@@ -58,6 +58,7 @@ export interface Player {
     stats: PlayerStats;
     personality?: BotPersonality;
     lastDecision?: string; // For bot auditing
+    decisionHistory?: { timestamp: number; decision: string }[];
 }
 
 export interface PlayerStats {
