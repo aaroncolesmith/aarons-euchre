@@ -5,6 +5,10 @@ export const LOCAL_STORAGE_KEY = 'euchre_global_stats_v4';
 const LEADERBOARD_CACHE_KEY = 'euchre_leaderboard_cache_v1';
 const LEADERBOARD_CACHE_TTL_MS = 5 * 60 * 1000;
 
+export function clearLeaderboardStatsCache(): void {
+    localStorage.removeItem(LEADERBOARD_CACHE_KEY);
+}
+
 // Convert between camelCase (app) and snake_case (database)
 function toSnakeCase(stats: PlayerStats) {
     return {
@@ -151,9 +155,9 @@ export async function getAllPlayerStats(): Promise<Record<string, PlayerStats>> 
 /**
  * Get leaderboard stats with caching and limit
  */
-export async function getLeaderboardStats(limit: number = 50): Promise<Record<string, PlayerStats>> {
+export async function getLeaderboardStats(limit: number = 50, forceRefresh: boolean = false): Promise<Record<string, PlayerStats>> {
     try {
-        const cachedRaw = localStorage.getItem(LEADERBOARD_CACHE_KEY);
+        const cachedRaw = !forceRefresh ? localStorage.getItem(LEADERBOARD_CACHE_KEY) : null;
         if (cachedRaw) {
             const cached = JSON.parse(cachedRaw);
             if (cached?.ts && cached?.data && (Date.now() - cached.ts) < LEADERBOARD_CACHE_TTL_MS) {

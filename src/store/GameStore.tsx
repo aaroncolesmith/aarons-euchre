@@ -3,7 +3,7 @@ import { GameState, Action, PlayerStats } from '../types/game';
 import { supabase } from '../lib/supabase';
 import { createDeck, dealHands, shuffleDeck } from '../utils/deck';
 import { shouldCallTrump, shouldGoAlone, getBestBid, getBotMove, getCardValue } from '../utils/rules';
-import { saveMultiplePlayerStats, getAllPlayerStats, getPlayersStats, mergeAllStats, submitDailyScore, syncUnsyncedDailies, LOCAL_STORAGE_KEY } from '../utils/supabaseStats';
+import { saveMultiplePlayerStats, getAllPlayerStats, getPlayersStats, mergeAllStats, submitDailyScore, syncUnsyncedDailies, LOCAL_STORAGE_KEY, clearLeaderboardStatsCache, refreshPlayerStatsFromEvents } from '../utils/supabaseStats';
 import { useHostElection } from '../utils/presence';
 import { createDailyRNG } from '../utils/rng';
 import { detectFreeze, applyRecovery, createHeartbeatSnapshot, logFreezeToCloud, HeartbeatState } from '../utils/heartbeat';
@@ -325,11 +325,31 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     useEffect(() => {
         if (state.phase === 'game_over' && state.tableCode && lastGameStatsSavedRef.current !== state.tableCode) {
             const isDaily = state.tableCode.startsWith('DAILY-');
+            const involvedPlayerNames = state.players.map(p => p.name).filter((n): n is string => !!n);
             
             // Skip manual stats saving for regular games (Server does this via Event Stream mapping)
             if (!isDaily) {
-                Logger.info(`[STATS] Server will derive stats for ${state.tableCode}. Skipping client-side write.`);
-                lastGameStatsSavedRef.current = state.tableCode;
+                const refreshRegularStats = async () => {
+                    Logger.info(`[STATS] Forcing post-game stats refresh for ${state.tableCode}.`);
+
+                    try {
+                        await refreshPlayerStatsFromEvents();
+                        clearLeaderboardStatsCache();
+
+                        const cloudStats = await getPlayersStats(involvedPlayerNames);
+                        const localStats = getGlobalStats();
+                        const mergedStats = mergeAllStats(localStats, cloudStats);
+
+                        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(mergedStats));
+                        dispatch({ type: 'LOAD_GLOBAL_STATS', payload: mergedStats });
+                    } catch (err) {
+                        Logger.error('[STATS] Regular post-game refresh failed', err);
+                    }
+
+                    lastGameStatsSavedRef.current = state.tableCode;
+                };
+
+                refreshRegularStats();
                 return;
             }
 
@@ -357,7 +377,6 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
                 // IMPORTANT: Fetch current stats from cloud before incrementing
                 // This prevents cross-device overwrites.
-                const involvedPlayerNames = state.players.map(p => p.name).filter((n): n is string => !!n);
                 const cloudStats = await getPlayersStats(involvedPlayerNames);
                 const localStats = getGlobalStats();
 

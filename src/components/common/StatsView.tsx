@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useGame } from '../../store/GameStore';
 import { PlayerStats } from '../../types/game';
-import { getLeaderboardStats, getPlayersStats, mergeAllStats, LOCAL_STORAGE_KEY, refreshPlayerStatsFromEvents } from '../../utils/supabaseStats';
+import { clearLeaderboardStatsCache, getLeaderboardStats, getPlayersStats, mergeAllStats, LOCAL_STORAGE_KEY, refreshPlayerStatsFromEvents } from '../../utils/supabaseStats';
 import { getFreezeStats } from '../../utils/cloudFreezeLogger';
 import { TrumpCallsTable } from '../Stats/TrumpCallsTable';
 import { DailyLeaderboard } from './DailyLeaderboard';
@@ -18,25 +18,40 @@ export const StatsView = ({
     const [activeTab, setActiveTab] = useState(initialTab);
     const [isLoading, setIsLoading] = useState(false);
 
-    useEffect(() => {
+    const loadStats = async (forceRefresh: boolean = false) => {
         setIsLoading(true);
         const localRaw = localStorage.getItem(LOCAL_STORAGE_KEY);
         const localStats = localRaw ? JSON.parse(localRaw) : {};
 
-        Promise.all([
-            getLeaderboardStats(50),
-            state.currentViewPlayerName ? getPlayersStats([state.currentViewPlayerName]) : Promise.resolve({})
-        ]).then(([leaderboard, myCloud]) => {
+        try {
+            if (forceRefresh) {
+                clearLeaderboardStatsCache();
+            }
+
+            const [leaderboard, myCloud] = await Promise.all([
+                getLeaderboardStats(50, forceRefresh),
+                state.currentViewPlayerName ? getPlayersStats([state.currentViewPlayerName]) : Promise.resolve({})
+            ]);
             const merged = mergeAllStats(localStats, leaderboard);
             const mergedWithMe = mergeAllStats(merged, myCloud);
             setAllStats(mergedWithMe);
-            setIsLoading(false);
-        }).catch(err => {
+        } catch (err) {
             console.error('[STATS VIEW] Failed to load stats:', err);
             setAllStats(localStats);
+        } finally {
             setIsLoading(false);
-        });
+        }
+    };
+
+    useEffect(() => {
+        loadStats(false);
     }, []);
+
+    useEffect(() => {
+        if (state.phase === 'game_over') {
+            loadStats(true);
+        }
+    }, [state.phase, state.currentViewPlayerName]);
 
     const isAdmin = (state.currentUser || '').toLowerCase() === 'aaron';
     const handleRebuildStats = async () => {
@@ -45,15 +60,7 @@ export const StatsView = ({
         if (!ok) {
             console.error('[STATS VIEW] Failed to rebuild stats from events.');
         }
-        const localRaw = localStorage.getItem(LOCAL_STORAGE_KEY);
-        const localStats = localRaw ? JSON.parse(localRaw) : {};
-        const [leaderboard, myCloud] = await Promise.all([
-            getLeaderboardStats(50),
-            state.currentViewPlayerName ? getPlayersStats([state.currentViewPlayerName]) : Promise.resolve({})
-        ]);
-        const merged = mergeAllStats(localStats, leaderboard);
-        setAllStats(mergeAllStats(merged, myCloud));
-        setIsLoading(false);
+        await loadStats(true);
     };
 
     const myStats = allStats[state.currentViewPlayerName!] || {
