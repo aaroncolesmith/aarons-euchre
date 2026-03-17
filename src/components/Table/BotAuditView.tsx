@@ -20,56 +20,80 @@ export const BotAuditView = ({ isOpen, onClose, inline = false }: { isOpen?: boo
             </div>
 
             <div className={`${inline ? 'p-8 space-y-6 bg-paper' : 'flex-1 overflow-y-auto p-8 space-y-6'}`}>
-                {state.players.filter((p: Player) => p.isComputer && p.name).length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-12 text-center space-y-4">
-                        <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 text-2xl border-2 border-slate-200">?</div>
-                        <div className="space-y-1">
-                            <div className="text-lg font-black uppercase tracking-tight text-slate-400">No Active Bots</div>
-                            <p className="text-[10px] font-black uppercase tracking-widest text-slate-300">Start a match with computers to see live telemetry</p>
-                        </div>
-                    </div>
-                ) : (
-                    state.players.filter((p: Player) => p.isComputer && p.name).map((bot: Player, i: number) => (
-                        <div key={bot.id} className="space-y-2 group">
-                            <div className="flex items-center justify-between">
-                                <div className="text-lg font-black uppercase tracking-tight text-slate-900 group-hover:text-amber-500 transition-all">
-                                    [{i + 1}] {bot.name}
-                                </div>
-                                <div className="text-[9px] font-black uppercase tracking-widest text-slate-400 bg-slate-100 px-2 py-1 rounded-md">
-                                    {bot.personality?.archetype || 'Neural Core'}
+                {(() => {
+                    const activeBots = state.players.filter((p: Player) => p.isComputer && p.name);
+                    
+                    if (activeBots.length === 0) {
+                        return (
+                            <div className="flex flex-col items-center justify-center py-12 text-center space-y-4">
+                                <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 text-2xl border-2 border-slate-200">?</div>
+                                <div className="space-y-1">
+                                    <div className="text-lg font-black uppercase tracking-tight text-slate-400">No Active Bots</div>
+                                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-300">Start a match with computers to see live telemetry</p>
                                 </div>
                             </div>
+                        );
+                    }
 
-                            <div className="space-y-3">
-                                <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">Recent Reasoning Logs</div>
-                                
-                                {(!bot.decisionHistory || bot.decisionHistory.length === 0) ? (
-                                    <div className="bg-slate-50 border-2 border-slate-100 rounded-2xl p-4 transition-all italic text-sm text-slate-400">
-                                        " {bot.lastDecision || 'Awaiting input sequence...'} "
+                    const allDecisions = activeBots
+                        .flatMap((bot: Player) => 
+                            (bot.decisionHistory || []).map(entry => ({
+                                ...entry,
+                                botName: bot.name,
+                                botArchetype: bot.personality?.archetype || 'Neural Core'
+                            }))
+                        )
+                        .sort((a, b) => b.timestamp - a.timestamp);
+
+                    if (allDecisions.length === 0) {
+                        return ( activeBots.map((bot, i) => (
+                            <div key={bot.id} className="bg-slate-50 border-2 border-slate-100 rounded-2xl p-4 transition-all">
+                                <div className="flex justify-between items-center mb-2">
+                                    <div className="text-[10px] font-black uppercase tracking-widest text-slate-900">
+                                        [{i + 1}] {bot.name}
                                     </div>
-                                ) : (
-                                    <div className="space-y-3">
-                                        {[...(bot.decisionHistory || [])].reverse().map((entry, idx) => (
-                                            <div key={idx} className={`bg-slate-50 border-2 border-slate-100 rounded-2xl p-4 transition-all hover:border-amber-400/30 ${idx === 0 ? 'bg-amber-50/50 border-amber-100' : ''}`}>
-                                                <div className="flex justify-between items-center mb-2">
-                                                    <div className="text-[9px] font-black uppercase tracking-widest text-slate-400">
-                                                        {idx === 0 ? 'Latest decision' : `Decision -${idx}`}
-                                                    </div>
-                                                    <div className="text-[9px] font-black uppercase tracking-widest text-slate-300">
-                                                        {new Date(entry.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-                                                    </div>
-                                                </div>
-                                                <div className="text-sm font-hand font-black text-slate-600 leading-relaxed italic">
-                                                    "{entry.decision}"
-                                                </div>
-                                            </div>
-                                        ))}
+                                    <div className="text-[9px] font-black uppercase tracking-widest text-slate-400 bg-white px-2 py-1 rounded-md border border-slate-100">
+                                        {bot.personality?.archetype || 'Neural Core'}
                                     </div>
-                                )}
+                                </div>
+                                <div className="text-sm font-hand font-black text-slate-400 italic">
+                                    " {bot.lastDecision || 'Awaiting input sequence...'} "
+                                </div>
                             </div>
+                        )));
+                    }
+
+                    return (
+                        <div className="space-y-4">
+                            <div className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-6 border-b-2 border-slate-100 pb-2">Central Decision Timeline</div>
+                            {allDecisions.map((entry, idx) => (
+                                <div 
+                                    key={`${entry.botName}-${entry.timestamp}-${idx}`} 
+                                    className={`relative bg-paper border-2 border-slate-900/10 p-5 rounded-3xl shadow-sm hover:shadow-md transition-all ${idx === 0 ? 'border-amber-400 ring-4 ring-amber-400/10' : ''}`}
+                                >
+                                    <div className="flex justify-between items-start mb-3">
+                                        <div className="space-y-1">
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-2 h-2 rounded-full bg-amber-500" />
+                                                <span className="text-sm font-black uppercase tracking-tight text-slate-900">{entry.botName}</span>
+                                            </div>
+                                            <div className="text-[9px] font-black uppercase tracking-widest text-slate-400">
+                                                {entry.botArchetype}
+                                            </div>
+                                        </div>
+                                        <div className="text-[10px] font-black text-slate-400 bg-slate-50 px-3 py-1 rounded-full border border-slate-100">
+                                            {new Date(entry.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                                        </div>
+                                    </div>
+                                    
+                                    <div className={`p-4 rounded-2xl font-hand font-black text-slate-700 italic border-l-4 ${idx === 0 ? 'bg-amber-50 border-amber-400 text-amber-900' : 'bg-slate-50 border-slate-200'}`}>
+                                        "{entry.decision}"
+                                    </div>
+                                </div>
+                            ))}
                         </div>
-                    ))
-                )}
+                    );
+                })()}
             </div>
 
             <div className={`p-8 border-t-2 border-slate-100 bg-slate-50/50 ${inline ? 'rounded-b-[3rem]' : ''}`}>

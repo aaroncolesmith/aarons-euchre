@@ -94,7 +94,7 @@ export const LandingPage = () => {
                             <h1 className="text-6xl font-black text-ink tracking-wide uppercase italic">
                                 EUCHRE
                             </h1>
-                            <span className="text-[10px] font-black text-brand-dim uppercase tracking-widest opacity-50">v1.73</span>
+                            <span className="text-[10px] font-black text-brand-dim uppercase tracking-widest opacity-50">v1.74</span>
                         </div>
                         <p className="text-xs font-bold text-brand tracking-[0.2em] mt-1 ml-1 uppercase">
                             Hello, {state.currentUser}
