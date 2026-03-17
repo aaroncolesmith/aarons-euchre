@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGame } from '../../store/GameStore';
 import { Player } from '../../types/game';
+import { BOT_PERSONALITIES } from '../../store/reducers/utils';
 
 export const BotAuditView = ({ isOpen, onClose, inline = false }: { isOpen?: boolean; onClose?: () => void; inline?: boolean }) => {
     const { state } = useGame();
@@ -40,7 +41,9 @@ export const BotAuditView = ({ isOpen, onClose, inline = false }: { isOpen?: boo
                             (bot.decisionHistory || []).map(entry => ({
                                 ...entry,
                                 botName: bot.name,
-                                botArchetype: bot.personality?.archetype || 'Neural Core'
+                                botArchetype: bot.personality?.archetype || 
+                                              (bot.name ? BOT_PERSONALITIES[bot.name]?.archetype : null) || 
+                                              'Neural Core'
                             }))
                         )
                         .sort((a, b) => b.timestamp - a.timestamp);
@@ -53,7 +56,9 @@ export const BotAuditView = ({ isOpen, onClose, inline = false }: { isOpen?: boo
                                         [{i + 1}] {bot.name}
                                     </div>
                                     <div className="text-[9px] font-black uppercase tracking-widest text-slate-400 bg-white px-2 py-1 rounded-md border border-slate-100">
-                                        {bot.personality?.archetype || 'Neural Core'}
+                                        {bot.personality?.archetype || 
+                                         (bot.name ? BOT_PERSONALITIES[bot.name]?.archetype : null) || 
+                                         'Neural Core'}
                                     </div>
                                 </div>
                                 <div className="text-sm font-hand font-black text-slate-400 italic">

@@ -87,7 +87,8 @@ export const lobbyReducer = (state: GameState, action: Action): GameState | null
                             name: botName,
                             userId: getStableUserId(botName, true),
                             isComputer: true,
-                            stats: getEmptyStats()
+                            stats: getEmptyStats(),
+                            personality: BOT_PERSONALITIES[botName]
                         };
                     }
                     return p;
