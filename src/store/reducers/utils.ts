@@ -1,6 +1,6 @@
 import { GameState, Player, PlayerStats, Card, Suit } from '../../types/game.ts';
 
-export { generateTableCode, generateTableName } from '../../utils/gameUtils.ts';
+export { generateTableCode, generateTableName, shuffleArray } from '../../utils/gameUtils.ts';
 export { shuffleDeck, createDeck, dealHands } from '../../utils/deck.ts';
 export { sortHand, determineWinner, getEffectiveSuit, isValidPlay } from '../../utils/rules.ts';
 export { logPlayEvent } from '../../utils/eventLogger.ts';

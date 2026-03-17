@@ -1,5 +1,5 @@
 import { GameState, Action } from '../../types/game.ts';
-import { generateTableCode, generateTableName, createEmptyPlayer, getEmptyStats, BOT_PERSONALITIES, BOT_NAMES_POOL, getTeamName } from './utils.ts';
+import { generateTableCode, generateTableName, createEmptyPlayer, getEmptyStats, BOT_PERSONALITIES, BOT_NAMES_POOL, getTeamName, shuffleArray } from './utils.ts';
 import { getStableUserId } from '../../utils/identity.ts';
 
 export const lobbyReducer = (state: GameState, action: Action): GameState | null => {
@@ -74,7 +74,7 @@ export const lobbyReducer = (state: GameState, action: Action): GameState | null
 
         case 'AUTOFILL_BOTS': {
             const usedBotNames = state.players.filter(p => p.isComputer && p.name).map(p => p.name);
-            const availableBots = BOT_NAMES_POOL.filter(name => !usedBotNames.includes(name));
+            const availableBots = shuffleArray(BOT_NAMES_POOL.filter(name => !usedBotNames.includes(name)));
 
             let botIndex = 0;
             return {
