@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react';
 import { useGame } from '../../store/GameStore';
 import { PlayerStats } from '../../types/game';
 import { getLeaderboardStats, getPlayersStats, mergeAllStats, LOCAL_STORAGE_KEY, refreshPlayerStatsFromEvents } from '../../utils/supabaseStats';
+import { getFreezeStats } from '../../utils/cloudFreezeLogger';
 import { TrumpCallsTable } from '../Stats/TrumpCallsTable';
 import { DailyLeaderboard } from './DailyLeaderboard';
 import { LeagueTable } from '../Stats/LeagueTable';
+import { BotAuditView } from '../Table/BotAuditView';
 
 export const StatsView = ({
     initialTab = 'me'
@@ -147,12 +149,81 @@ export const StatsView = ({
                         {activeTab === 'daily_challenge' && (
                             <DailyLeaderboard />
                         )}
+
+                        {activeTab === 'bot_audit' && (
+                            <BotAuditView inline />
+                        )}
+
+                        {activeTab === 'freeze_incidents' && (
+                            <FreezeIncidentsList />
+                        )}
+
+                        {activeTab === 'state_management' && (
+                            <div className="space-y-4">
+                                <div className="p-6 bg-slate-900 rounded-3xl border-4 border-slate-800 font-mono text-[10px] text-emerald-400 overflow-x-auto overflow-y-auto max-h-[600px]">
+                                    <pre>{JSON.stringify(state, (key, value) => ['eventLog', 'history', 'logs'].includes(key) ? undefined : value, 2)}</pre>
+                                </div>
+                                <div className="text-center p-4 bg-amber-50 rounded-2xl border-2 border-amber-200">
+                                    <p className="text-[10px] font-black uppercase tracking-widest text-amber-600 italic">Caution: Live Engine State. Sensitive logs and history are hidden for performance.</p>
+                                </div>
+                            </div>
+                        )}
+
+                        {activeTab === 'commentary' && (
+                            <div className="flex flex-col items-center justify-center py-20 text-center space-y-4">
+                                <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 text-2xl border-2 border-slate-200 italic font-hand">"?"</div>
+                                <div className="space-y-1">
+                                    <div className="text-lg font-black uppercase tracking-tight text-slate-400">Match Commentary</div>
+                                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-300">Semantic analysis engine v1.0 offline</p>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>
             
             {/* Version Footer Padding (so it doesn't overlap the bottom nav) */}
             <div className="h-20" />
+        </div>
+    );
+};
+
+const FreezeIncidentsList = () => {
+    const [incidents, setIncidents] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        getFreezeStats().then(data => {
+            setIncidents(data || []);
+            setLoading(false);
+        });
+    }, []);
+
+    if (loading) return <div className="animate-pulse text-center p-12 text-[10px] font-black uppercase tracking-[0.3em] text-brand">Scanning for anomalies...</div>;
+
+    return (
+        <div className="space-y-6">
+            <h3 className="text-xl font-black uppercase tracking-tight text-slate-900 mb-4">Anomalous Activity Log</h3>
+            {incidents.length === 0 ? (
+                <div className="p-12 text-center text-slate-400 font-black uppercase tracking-widest border-2 border-dashed border-slate-200 rounded-3xl">No incidents detected in current cycle</div>
+            ) : (
+                <div className="space-y-4">
+                    {incidents.map((incident, i) => (
+                        <div key={i} className="bg-paper border-2 border-slate-100 p-6 rounded-3xl shadow-sm hover:shadow-md transition-all flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <div className="space-y-1">
+                                <div className="flex items-center gap-2">
+                                    <span className={`w-2 h-2 rounded-full ${incident.recovered ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                                    <div className="text-sm font-black uppercase tracking-tight text-slate-900">{incident.freeze_type}</div>
+                                </div>
+                                <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">Game: {incident.game_code} • {new Date(incident.created_at).toLocaleString()}</div>
+                            </div>
+                            <div className="bg-slate-50 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-500 border border-slate-100">
+                                Result: {incident.recovered ? 'RECOVERED' : 'ABORTED'}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
         </div>
     );
 };
