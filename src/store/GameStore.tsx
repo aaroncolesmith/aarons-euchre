@@ -3,7 +3,7 @@ import { GameState, Action, PlayerStats } from '../types/game';
 import { supabase } from '../lib/supabase';
 import { createDeck, dealHands, shuffleDeck } from '../utils/deck';
 import { shouldCallTrump, shouldGoAlone, getBestBid, getBotMove, getCardValue } from '../utils/rules';
-import { saveMultiplePlayerStats, getAllPlayerStats, getPlayersStats, mergeAllStats, submitDailyScore, syncUnsyncedDailies, LOCAL_STORAGE_KEY, clearLeaderboardStatsCache, refreshPlayerStatsFromEvents } from '../utils/supabaseStats';
+import { saveMultiplePlayerStats, getAllPlayerStats, getPlayersStats, mergeAllStats, submitDailyScore, syncUnsyncedDailies, LOCAL_STORAGE_KEY, clearLeaderboardStatsCache } from '../utils/supabaseStats';
 import { useHostElection } from '../utils/presence';
 import { createDailyRNG } from '../utils/rng';
 import { detectFreeze, applyRecovery, createHeartbeatSnapshot, logFreezeToCloud, HeartbeatState } from '../utils/heartbeat';
@@ -117,18 +117,13 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
             if (error) {
                 Logger.warn('[SERVER AUTH] Failed:', error);
-                // If it wasn't already applied optimistically, or we need a fallback:
-                if (['CREATE_TABLE', 'JOIN_TABLE'].includes(action.type)) {
-                    broadcastDispatch(actionWithId);
-                }
+                broadcastDispatch(actionWithId);
             } else if (shouldBootstrap && state.tableCode) {
                 bootstrappedTablesRef.current.add(state.tableCode);
             }
         } catch (err) {
             Logger.error('[SERVER AUTH] Error:', err);
-            if (['CREATE_TABLE', 'JOIN_TABLE'].includes(action.type)) {
-                broadcastDispatch(actionWithId);
-            }
+            broadcastDispatch(actionWithId);
         }
     };
 
@@ -272,11 +267,6 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         // Only the host (or solo daily player) syncs the authoritative state to the cloud
         if (!isHost) return;
 
-        // SKIP cloud sync for regular multi-player games (Server-Authoritative)
-        // This prevents the host from overwriting the server's sanitized snapshot with their local full-state
-        const isDaily = state.tableCode?.startsWith('DAILY-');
-        if (!isDaily) return;
-
         const timer = setTimeout(async () => {
             const syncToCloud = async () => {
                 await supabase
@@ -359,78 +349,42 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             // Skip manual stats saving for regular games (Server does this via Event Stream mapping)
             if (!isDaily) {
                 const refreshRegularStats = async () => {
-                    Logger.info(`[STATS] Forcing post-game stats refresh for ${state.tableCode}.`);
+                    Logger.info(`[STATS] Saving final regular-game stats for ${state.tableCode}.`);
 
                     try {
-                        await refreshPlayerStatsFromEvents();
                         clearLeaderboardStatsCache();
-
-                        let cloudStats = await getPlayersStats(involvedPlayerNames);
                         const baselineStats = matchStartCloudStatsRef.current[state.tableCode!] || {};
+                        if (!isHost) return;
 
-                        const serverDerivedStatsLookComplete = involvedPlayerNames.every((playerName) => {
-                            const seatIndex = state.players.findIndex(p => p.name === playerName);
-                            const player = seatIndex >= 0 ? state.players[seatIndex] : null;
-                            if (!player) return false;
-
-                            const baseline = baselineStats[playerName] || getEmptyStats();
-                            const cloud = cloudStats[playerName] || getEmptyStats();
-                            const isTeam1 = seatIndex === 0 || seatIndex === 2;
+                        const finalStats: Record<string, PlayerStats> = {};
+                        state.players.forEach((p, i) => {
+                            if (!p.name) return;
+                            const baseline = baselineStats[p.name] || getEmptyStats();
+                            const isTeam1 = i === 0 || i === 2;
                             const wonGame = isTeam1 ? state.scores.team1 >= 10 : state.scores.team2 >= 10;
 
-                            return (
-                                cloud.gamesPlayed >= baseline.gamesPlayed + 1 &&
-                                cloud.gamesWon >= baseline.gamesWon + (wonGame ? 1 : 0) &&
-                                cloud.handsPlayed >= baseline.handsPlayed + player.stats.handsPlayed &&
-                                cloud.handsWon >= baseline.handsWon + player.stats.handsWon &&
-                                cloud.tricksPlayed >= baseline.tricksPlayed + player.stats.tricksPlayed &&
-                                cloud.tricksTaken >= baseline.tricksTaken + player.stats.tricksTaken &&
-                                cloud.tricksWonTeam >= baseline.tricksWonTeam + player.stats.tricksWonTeam &&
-                                cloud.callsMade >= baseline.callsMade + player.stats.callsMade &&
-                                cloud.callsWon >= baseline.callsWon + player.stats.callsWon &&
-                                cloud.lonersAttempted >= baseline.lonersAttempted + player.stats.lonersAttempted &&
-                                cloud.lonersWon >= baseline.lonersWon + player.stats.lonersWon &&
-                                cloud.pointsScored >= baseline.pointsScored + player.stats.pointsScored &&
-                                cloud.euchresMade >= baseline.euchresMade + player.stats.euchresMade &&
-                                cloud.euchred >= baseline.euchred + player.stats.euchred &&
-                                cloud.sweeps >= baseline.sweeps + player.stats.sweeps &&
-                                cloud.swept >= baseline.swept + player.stats.swept
-                            );
+                            finalStats[p.name] = {
+                                gamesPlayed: (baseline.gamesPlayed || 0) + 1,
+                                gamesWon: (baseline.gamesWon || 0) + (wonGame ? 1 : 0),
+                                handsPlayed: (baseline.handsPlayed || 0) + p.stats.handsPlayed,
+                                handsWon: (baseline.handsWon || 0) + p.stats.handsWon,
+                                tricksPlayed: (baseline.tricksPlayed || 0) + p.stats.tricksPlayed,
+                                tricksTaken: (baseline.tricksTaken || 0) + p.stats.tricksTaken,
+                                tricksWonTeam: (baseline.tricksWonTeam || 0) + p.stats.tricksWonTeam,
+                                callsMade: (baseline.callsMade || 0) + p.stats.callsMade,
+                                callsWon: (baseline.callsWon || 0) + p.stats.callsWon,
+                                lonersAttempted: (baseline.lonersAttempted || 0) + p.stats.lonersAttempted,
+                                lonersWon: (baseline.lonersWon || 0) + p.stats.lonersWon,
+                                pointsScored: (baseline.pointsScored || 0) + p.stats.pointsScored,
+                                euchresMade: (baseline.euchresMade || 0) + p.stats.euchresMade,
+                                euchred: (baseline.euchred || 0) + p.stats.euchred,
+                                sweeps: (baseline.sweeps || 0) + p.stats.sweeps,
+                                swept: (baseline.swept || 0) + p.stats.swept,
+                            };
                         });
 
-                        if (!serverDerivedStatsLookComplete && isHost) {
-                            Logger.warn(`[STATS] Server-derived stats incomplete for ${state.tableCode}. Applying host fallback.`);
-
-                            const fallbackStats: Record<string, PlayerStats> = {};
-                            state.players.forEach((p, i) => {
-                                if (!p.name) return;
-                                const baseline = baselineStats[p.name] || cloudStats[p.name] || getEmptyStats();
-                                const isTeam1 = i === 0 || i === 2;
-                                const wonGame = isTeam1 ? state.scores.team1 >= 10 : state.scores.team2 >= 10;
-
-                                fallbackStats[p.name] = {
-                                    gamesPlayed: (baseline.gamesPlayed || 0) + 1,
-                                    gamesWon: (baseline.gamesWon || 0) + (wonGame ? 1 : 0),
-                                    handsPlayed: (baseline.handsPlayed || 0) + p.stats.handsPlayed,
-                                    handsWon: (baseline.handsWon || 0) + p.stats.handsWon,
-                                    tricksPlayed: (baseline.tricksPlayed || 0) + p.stats.tricksPlayed,
-                                    tricksTaken: (baseline.tricksTaken || 0) + p.stats.tricksTaken,
-                                    tricksWonTeam: (baseline.tricksWonTeam || 0) + p.stats.tricksWonTeam,
-                                    callsMade: (baseline.callsMade || 0) + p.stats.callsMade,
-                                    callsWon: (baseline.callsWon || 0) + p.stats.callsWon,
-                                    lonersAttempted: (baseline.lonersAttempted || 0) + p.stats.lonersAttempted,
-                                    lonersWon: (baseline.lonersWon || 0) + p.stats.lonersWon,
-                                    pointsScored: (baseline.pointsScored || 0) + p.stats.pointsScored,
-                                    euchresMade: (baseline.euchresMade || 0) + p.stats.euchresMade,
-                                    euchred: (baseline.euchred || 0) + p.stats.euchred,
-                                    sweeps: (baseline.sweeps || 0) + p.stats.sweeps,
-                                    swept: (baseline.swept || 0) + p.stats.swept,
-                                };
-                            });
-
-                            await saveMultiplePlayerStats(fallbackStats);
-                            cloudStats = await getPlayersStats(involvedPlayerNames);
-                        }
+                        await saveMultiplePlayerStats(finalStats);
+                        const cloudStats = await getPlayersStats(involvedPlayerNames);
 
                         const localStats = getGlobalStats();
                         const mergedStats = mergeAllStats(localStats, cloudStats);
