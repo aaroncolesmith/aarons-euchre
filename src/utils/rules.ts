@@ -170,6 +170,120 @@ const getOppositeSuit = (suit: string): string => {
     return map[suit] || '';
 };
 
+interface BotMoveOptions {
+    playedCardsThisHand?: Card[];
+}
+
+interface BotMoveContext {
+    hand: Card[];
+    currentTrick: { playerId: string; card: Card }[];
+    trump: Suit;
+    playerIds: string[];
+    myId: string;
+    trumpCallerIndex: number | null;
+    personality: BotPersonality;
+    validCards: Card[];
+    leadSuit: Suit | null;
+    myIndex: number;
+    partnerIndex: number;
+    partnerId: string;
+    isMaker: boolean;
+    isPartnerOfMaker: boolean;
+    isDefender: boolean;
+    partnerIsWinning: boolean;
+    isLastPlayer: boolean;
+    currentHighValue: number;
+    playedCardsThisHand: Card[];
+}
+
+interface CandidateScore {
+    card: Card;
+    score: number;
+    reasons: string[];
+}
+
+interface BotTacticRule {
+    id: string;
+    applies: (context: BotMoveContext) => boolean;
+    apply: (candidates: CandidateScore[], context: BotMoveContext) => void;
+}
+
+const getLeftBower = (trump: Suit): { suit: Suit; rank: Rank } => ({
+    suit: getOppositeSuit(trump) as Suit,
+    rank: 'J'
+});
+
+const hasCardBeenPlayed = (playedCards: Card[], target: { suit: Suit; rank: Rank }): boolean =>
+    playedCards.some(card => card.suit === target.suit && card.rank === target.rank);
+
+const addCandidateReason = (candidate: CandidateScore, reason: string) => {
+    if (!candidate.reasons.includes(reason)) {
+        candidate.reasons.push(reason);
+    }
+};
+
+const applyTacticRules = (candidates: CandidateScore[], context: BotMoveContext): CandidateScore[] => {
+    const rules: BotTacticRule[] = [
+        {
+            id: 'protected_left_lead',
+            applies: ctx => {
+                if (ctx.currentTrick.length !== 0) return false;
+
+                const leftBower = getLeftBower(ctx.trump);
+                const hasLeft = ctx.validCards.some(card => card.rank === leftBower.rank && card.suit === leftBower.suit);
+                if (!hasLeft) return false;
+
+                const rightPlayed = hasCardBeenPlayed(ctx.playedCardsThisHand, { suit: ctx.trump, rank: 'J' });
+                return !rightPlayed && ctx.validCards.length > 1;
+            },
+            apply: (ruleCandidates, ctx) => {
+                const leftBower = getLeftBower(ctx.trump);
+                ruleCandidates.forEach(candidate => {
+                    const isLeft = candidate.card.rank === leftBower.rank && candidate.card.suit === leftBower.suit;
+                    if (isLeft) {
+                        candidate.score -= 1200;
+                        addCandidateReason(candidate, 'Rule protected_left_lead: preserve Left until Right is gone');
+                    }
+                });
+            }
+        },
+        {
+            id: 'second_hand_low',
+            applies: ctx => {
+                if (ctx.currentTrick.length !== 1) return false;
+                if (!ctx.isDefender) return false;
+                return ctx.currentHighValue < 100;
+            },
+            apply: ruleCandidates => {
+                const lowestScore = Math.max(...ruleCandidates.map(candidate => candidate.score));
+                ruleCandidates.forEach(candidate => {
+                    if (candidate.score === lowestScore) {
+                        candidate.score += 250;
+                        addCandidateReason(candidate, 'Rule second_hand_low: conserve strength from second seat');
+                    } else {
+                        candidate.score -= 80;
+                    }
+                });
+            }
+        }
+    ];
+
+    rules.forEach(rule => {
+        if (rule.applies(context)) {
+            rule.apply(candidates, context);
+        }
+    });
+
+    return candidates;
+};
+
+const chooseTopCandidate = (candidates: CandidateScore[], fallbackReason: string): { card: Card; reasoning: string } => {
+    const sortedCandidates = [...candidates].sort((a, b) => b.score - a.score);
+    const winner = sortedCandidates[0];
+    const reasons = winner.reasons.length > 0 ? winner.reasons.join(' | ') : fallbackReason;
+    return { card: winner.card, reasoning: reasons };
+};
+
 export const shouldCallTrump = (
     hand: Card[],
     suit: Suit,
@@ -340,7 +454,8 @@ export const getBotMove = (
     playerIds: string[],
     myId: string,
     trumpCallerIndex: number | null,
-    personality: BotPersonality = { aggressiveness: 5, riskTolerance: 5, consistency: 5, archetype: 'Generic' }
+    personality: BotPersonality = { aggressiveness: 5, riskTolerance: 5, consistency: 5, archetype: 'Generic' },
+    options: BotMoveOptions = {}
 ): { card: Card; reasoning: string } => {
     const leadCard = currentTrick.length > 0 ? currentTrick[0].card : null;
     const leadSuit = leadCard ? getEffectiveSuit(leadCard, trump) : null;
@@ -369,26 +484,60 @@ export const getBotMove = (
     }
     const partnerIsWinning = currentHighId === partnerId;
     const isLastPlayer = currentTrick.length === 3;
+    const context: BotMoveContext = {
+        hand,
+        currentTrick,
+        trump,
+        playerIds,
+        myId,
+        trumpCallerIndex,
+        personality,
+        validCards,
+        leadSuit,
+        myIndex,
+        partnerIndex,
+        partnerId,
+        isMaker,
+        isPartnerOfMaker,
+        isDefender,
+        partnerIsWinning,
+        isLastPlayer,
+        currentHighValue,
+        playedCardsThisHand: options.playedCardsThisHand || []
+    };
 
     // --- STRATEGY: LEADING ---
     if (currentTrick.length === 0) {
+        const candidates: CandidateScore[] = validCards.map(card => ({
+            card,
+            score: getCardValue(card, trump, null),
+            reasons: []
+        }));
+
         // 1. If Maker or Partner of Maker: Draw Trump
         if (isMaker || isPartnerOfMaker) {
             const highTrumps = validCards.filter(c => getEffectiveSuit(c, trump) === trump)
                 .sort((a, b) => getCardValue(b, trump, null) - getCardValue(a, trump, null));
 
             if (highTrumps.length > 0 && (isMaker || highTrumps[0].rank === 'J')) {
-                return {
-                    card: highTrumps[0],
-                    reasoning: `Maker/Partner drawing trump: ${highTrumps[0].rank} of ${highTrumps[0].suit}`
-                };
+                candidates.forEach(candidate => {
+                    if (candidate.card.id === highTrumps[0].id) {
+                        candidate.score += 500;
+                        addCandidateReason(candidate, `Maker/Partner drawing trump: ${candidate.card.rank} of ${candidate.card.suit}`);
+                    }
+                });
             }
         }
 
         // 2. Lead strong non-trump Aces
         const nonTrumpAces = validCards.filter(c => c.rank === 'A' && getEffectiveSuit(c, trump) !== trump);
         if (nonTrumpAces.length > 0) {
-            return { card: nonTrumpAces[0], reasoning: 'Leading strong non-trump Ace' };
+            candidates.forEach(candidate => {
+                if (candidate.card.id === nonTrumpAces[0].id) {
+                    candidate.score += 300;
+                    addCandidateReason(candidate, 'Leading strong non-trump Ace');
+                }
+            });
         }
 
         // 3. Defenders: Lead through the maker (if maker is to our left)
@@ -398,27 +547,27 @@ export const getBotMove = (
             const weakCards = validCards.filter(c => getEffectiveSuit(c, trump) !== trump)
                 .sort((a, b) => RANK_VALUES[a.rank] - RANK_VALUES[b.rank]);
             if (weakCards.length > 0) {
-                return { card: weakCards[0], reasoning: 'Defender leading weak through maker' };
+                candidates.forEach(candidate => {
+                    if (candidate.card.id === weakCards[0].id) {
+                        candidate.score += 225;
+                        addCandidateReason(candidate, 'Defender leading weak through maker');
+                    }
+                });
             }
         }
 
-        // Default: Lowest non-trump or lowest trump if forced
-        const sortedCards = [...validCards].sort((a, b) => getCardValue(b, trump, null) - getCardValue(a, trump, null));
-        return { card: sortedCards[0], reasoning: 'Leading highest calculated card' };
+        return chooseTopCandidate(applyTacticRules(candidates, context), 'Leading highest calculated card');
     }
 
     // --- STRATEGY: SECOND HAND ---
     if (currentTrick.length === 1) {
-        // "Second Hand Low" - don't waste high cards if lead is low
-        const leadVal = getCardValue(currentTrick[0].card, trump, leadSuit);
-        if (isDefender && leadVal < 100) { // Off-suit lead
-            const lowCards = validCards.sort((a, b) => getCardValue(a, trump, leadSuit) - getCardValue(b, trump, leadSuit));
+        const candidates: CandidateScore[] = validCards.map(card => ({
+            card,
+            score: 200 - getCardValue(card, trump, leadSuit),
+            reasons: []
+        }));
 
-            // If we have the Right Bower, but lead is junk, maybe save it
-            if (validCards.some(c => getCardValue(c, trump, leadSuit) === 1000)) {
-                return { card: lowCards[0], reasoning: 'Second Hand Low: Saving Right Bower' };
-            }
-        }
+        return chooseTopCandidate(applyTacticRules(candidates, context), 'Second seat default: lowest valid card');
     }
 
     // --- STRATEGY: THIRD/FOURTH HAND ---

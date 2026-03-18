@@ -257,7 +257,7 @@ export const LandingPage = () => {
                                             </div>
 
                                             <div className="flex items-center gap-2 pl-4 border-l-2 border-paper-dim">
-                                                {!game.tableCode?.startsWith('DAILY-') && (
+                                                {(
                                                     <button
                                                         onClick={(e) => { e.stopPropagation(); handleDelete(game.tableCode); }}
                                                         className="p-2 text-ink-dim/50 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"

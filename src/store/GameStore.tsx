@@ -15,6 +15,16 @@ import { gameReducerFixed, INITIAL_STATE as ENGINE_INITIAL_STATE } from './engin
 import { getEmptyStats, BOT_PERSONALITIES, INITIAL_STATE_FUNC } from './reducers/utils';
 import { fetchPlayEvents } from '../utils/eventLogger';
 
+const getPlayedCardsThisHand = (eventLog: GameState['eventLog']) => {
+    const lastHandResultIndex = [...eventLog].reverse().findIndex(event => event.type === 'hand_result');
+    const startIndex = lastHandResultIndex === -1 ? 0 : eventLog.length - lastHandResultIndex;
+
+    return eventLog
+        .slice(startIndex)
+        .filter((event): event is Extract<GameState['eventLog'][number], { type: 'play' }> => event.type === 'play')
+        .map(event => event.card);
+};
+
 const INITIAL_STATE: GameState = {
     ...ENGINE_INITIAL_STATE,
     currentUser: typeof window !== 'undefined' ? localStorage.getItem('euchre_current_user') : null,
@@ -610,7 +620,17 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 const cardToDiscard = [...currentPlayer.hand].sort((a, b) => getCardValue(a, state.trump, null) - getCardValue(b, state.trump, null))[0];
                         serverDispatch({ type: 'DISCARD_CARD', payload: { playerIndex: state.currentPlayerIndex, cardId: cardToDiscard.id } });
             } else if (state.phase === 'playing') {
-                const result = getBotMove(currentPlayer.hand, state.currentTrick, state.trump!, state.players.map(p => p.id), currentPlayer.id, state.trumpCallerIndex, personality);
+                const playedCardsThisHand = getPlayedCardsThisHand(state.eventLog);
+                const result = getBotMove(
+                    currentPlayer.hand,
+                    state.currentTrick,
+                    state.trump!,
+                    state.players.map(p => p.id),
+                    currentPlayer.id,
+                    state.trumpCallerIndex,
+                    personality,
+                    { playedCardsThisHand }
+                );
                 serverDispatch({ type: 'PLAY_CARD', payload: { playerIndex: state.currentPlayerIndex, cardId: result.card.id, reasoning: result.reasoning } });
             }
         }, 1200);
