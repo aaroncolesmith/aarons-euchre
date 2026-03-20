@@ -120,11 +120,14 @@ export interface TrumpCallLog {
     dealer: string;
     cardPickedUp: string; // "n/a" if called in second round
     suitCalled: string;
+    isLoner: boolean;
+    round?: number;
     bowerCount: number;
     trumpCount: number;
     suitCount: number;
     handStrengthUpcard: number;
     handStrengthBestSuit: number;
+    handStrengthCalledTrump: number;
     handAfterDiscard: string; // Comma-separated card codes
     timestamp: number;
     gameId: string;

@@ -326,6 +326,7 @@ export async function saveTrumpCall(trumpCall: any): Promise<boolean> {
                 suit_count: trumpCall.suitCount || 0,
                 hand_strength_upcard: trumpCall.handStrengthUpcard || 0,
                 hand_strength_best_suit: trumpCall.handStrengthBestSuit || 0,
+                hand_strength_called_trump: trumpCall.handStrengthCalledTrump || 0,
                 hand_after_discard: trumpCall.handAfterDiscard || ''
             });
 
@@ -376,6 +377,7 @@ export async function getAllTrumpCalls(): Promise<any[]> {
                 suitCount: row.suit_count || 0,
                 handStrengthUpcard: row.hand_strength_upcard || 0,
                 handStrengthBestSuit: row.hand_strength_best_suit || 0,
+                handStrengthCalledTrump: row.hand_strength_called_trump || 0,
                 handAfterDiscard: row.hand_after_discard || '',
                 timestamp: row.created_at,
                 // Keep original fields for reference

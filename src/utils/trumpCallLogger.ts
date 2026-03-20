@@ -7,11 +7,14 @@ export interface TrumpCallLog {
     dealer: string;
     cardPickedUp: string; // "n/a" if called in second round
     suitCalled: 'Hearts' | 'Diamonds' | 'Clubs' | 'Spades';
+    isLoner: boolean;
+    round?: number;
     bowerCount: number;
     trumpCount: number;
     suitCount: number;
     handStrengthUpcard: number;
     handStrengthBestSuit: number;
+    handStrengthCalledTrump: number;
     handAfterDiscard: string; // Comma-separated card codes
     timestamp: number;
     gameId: string;
@@ -192,6 +195,7 @@ export function trumpCallsToCSV(logs: TrumpCallLog[]): string {
         'SUIT_COUNT',
         'HAND_STRENGTH_UPCARD',
         'HAND_STRENGTH_BEST_SUIT',
+        'HAND_STRENGTH_CALLED_TRUMP',
         'HAND_AFTER_DISCARD'
     ];
 
@@ -206,6 +210,7 @@ export function trumpCallsToCSV(logs: TrumpCallLog[]): string {
         log.suitCount.toString(),
         log.handStrengthUpcard.toFixed(1),
         log.handStrengthBestSuit.toFixed(1),
+        log.handStrengthCalledTrump.toFixed(1),
         log.handAfterDiscard
     ]);
 
@@ -251,9 +256,9 @@ export async function saveTrumpCallLog(log: TrumpCallLog): Promise<void> {
             playerName: log.whoCalled,
             seatIndex: 0, // We don't have this in TrumpCallLog, could add if needed
             suit: log.suitCalled.toLowerCase(),
-            isLoner: false, // Not tracked in current TrumpCallLog
+            isLoner: log.isLoner,
             pickedUp: log.cardPickedUp !== 'n/a',
-            round: log.cardPickedUp !== 'n/a' ? 1 : 2,
+            round: log.round || (log.cardPickedUp !== 'n/a' ? 1 : 2),
             topCard: log.cardPickedUp !== 'n/a' ? log.cardPickedUp : null,
             topCardSuit: null, // Could parse from cardPickedUp if needed
             topCardRank: null,  // Could parse from cardPickedUp if needed
@@ -266,6 +271,7 @@ export async function saveTrumpCallLog(log: TrumpCallLog): Promise<void> {
             suitCount: log.suitCount,
             handStrengthUpcard: log.handStrengthUpcard,
             handStrengthBestSuit: log.handStrengthBestSuit,
+            handStrengthCalledTrump: log.handStrengthCalledTrump,
             handAfterDiscard: log.handAfterDiscard
         });
     } catch (err) {
@@ -293,6 +299,7 @@ export function createTrumpCallLog(
     upcard: any | null,
     biddingRound: 1 | 2,
     gameId: string,
+    isLoner: boolean,
     handAfterPickup?: Card[] // Optional: dealer's hand AFTER picking up card (for round 1 dealer pickup)
 ): TrumpCallLog {
     const callerName = caller.name || 'Bot';
@@ -311,10 +318,11 @@ export function createTrumpCallLog(
     const bowerCount = countBowers(hand, suit);
     const trumpCount = countTrump(hand, suit);
     const suitCount = countSuit(hand, suit);
+    const handStrengthCalledTrump = calculateHandStrength(hand, normalizeSuit(suit)).total;
     const handStrengthBestSuit = getBestSuitHandStrength(hand);
     const handStrengthUpcard = upcard
         ? calculateHandStrength(hand, normalizeSuit(upcard.suit)).total
-        : calculateHandStrength(hand, normalizeSuit(suit)).total;
+        : handStrengthCalledTrump;
 
     // Format hand (sorted by suit and rank like UI)
     const handAfterDiscard = formatHand(hand, suit);
@@ -328,11 +336,14 @@ export function createTrumpCallLog(
         dealer,
         cardPickedUp,
         suitCalled: (suit.charAt(0).toUpperCase() + suit.slice(1)) as 'Hearts' | 'Diamonds' | 'Clubs' | 'Spades',
+        isLoner,
+        round: biddingRound,
         bowerCount,
         trumpCount,
         suitCount,
         handStrengthUpcard,
         handStrengthBestSuit,
+        handStrengthCalledTrump,
         handAfterDiscard,
         timestamp: Date.now(),
         gameId

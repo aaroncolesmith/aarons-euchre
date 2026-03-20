@@ -4,6 +4,7 @@ import { PlayerStats } from '../../types/game';
 import { clearLeaderboardStatsCache, getLeaderboardStats, getPlayersStats, mergeAllStats, LOCAL_STORAGE_KEY, refreshPlayerStatsFromEvents } from '../../utils/supabaseStats';
 import { getFreezeStats } from '../../utils/cloudFreezeLogger';
 import { TrumpCallsTable } from '../Stats/TrumpCallsTable';
+import { HandStrengthTable } from '../Stats/HandStrengthTable';
 import { DailyLeaderboard } from './DailyLeaderboard';
 import { LeagueTable } from '../Stats/LeagueTable';
 import { BotAuditView } from '../Table/BotAuditView';
@@ -11,7 +12,7 @@ import { BotAuditView } from '../Table/BotAuditView';
 export const StatsView = ({
     initialTab = 'me'
 }: {
-    initialTab?: 'me' | 'league' | 'daily_challenge' | 'trump_analytics' | 'bot_audit' | 'freeze_incidents' | 'state_management' | 'commentary';
+    initialTab?: 'me' | 'league' | 'daily_challenge' | 'trump_analytics' | 'hand_strength' | 'bot_audit' | 'freeze_incidents' | 'state_management' | 'commentary';
 }) => {
     const { state } = useGame();
     const [allStats, setAllStats] = useState<{ [name: string]: PlayerStats }>({});
@@ -104,7 +105,7 @@ export const StatsView = ({
 
                 {/* Tabs Navigation (Sticky/Fixed in flex-col) */}
                 <div className="flex overflow-x-auto no-scrollbar bg-paper">
-                    {(['me', 'league', 'daily_challenge', 'trump_analytics', 'bot_audit', 'freeze_incidents', 'state_management', 'commentary'] as const).map(tab => (
+                    {(['me', 'league', 'daily_challenge', 'trump_analytics', 'hand_strength', 'bot_audit', 'freeze_incidents', 'state_management', 'commentary'] as const).map(tab => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
@@ -151,6 +152,10 @@ export const StatsView = ({
 
                         {activeTab === 'trump_analytics' && (
                             <TrumpCallsTable />
+                        )}
+
+                        {activeTab === 'hand_strength' && (
+                            <HandStrengthTable />
                         )}
 
                         {activeTab === 'daily_challenge' && (

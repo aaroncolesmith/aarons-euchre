@@ -154,7 +154,8 @@ export const matchReducer = (state: GameState, action: Action): GameState | null
                         relationship,
                         state.upcard,
                         state.biddingRound,
-                        state.tableCode || 'unknown'
+                        state.tableCode || 'unknown',
+                        isLoner
                     );
 
                     import('../../utils/trumpCallLogger').then(({ saveTrumpCallLog }) => {
@@ -193,7 +194,8 @@ export const matchReducer = (state: GameState, action: Action): GameState | null
                 relationship,
                 null,
                 state.biddingRound,
-                state.tableCode || 'unknown'
+                state.tableCode || 'unknown',
+                isLoner
             );
 
             import('../../utils/trumpCallLogger').then(({ saveTrumpCallLog }) => {
@@ -283,6 +285,7 @@ export const matchReducer = (state: GameState, action: Action): GameState | null
                     state.upcard,
                     1,
                     state.tableCode || 'unknown',
+                    state.isLoner,
                     newHand
                 );
 

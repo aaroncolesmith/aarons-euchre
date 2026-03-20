@@ -45,8 +45,8 @@ export const TrumpCallsTable = () => {
     ).sort((a, b) => (b.upcardTotal / b.calls) - (a.upcardTotal / a.calls));
     
     const sorted = [...filtered].sort((a, b) => {
-        const aVal = a[sort.field];
-        const bVal = b[sort.field];
+        const aVal = a[sort.field] ?? '';
+        const bVal = b[sort.field] ?? '';
         if (aVal < bVal) return sort.desc ? 1 : -1;
         if (aVal > bVal) return sort.desc ? -1 : 1;
         return 0;
