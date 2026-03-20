@@ -589,7 +589,18 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             const personality = currentPlayer.personality || BOT_PERSONALITIES[currentPlayer.name || ''] || { archetype: 'Generic' };
             if (state.phase === 'bidding') {
                 if (state.biddingRound === 1 && state.upcard) {
-                    const result = shouldCallTrump(currentPlayer.hand, state.upcard.suit, personality, position, false, null);
+                    const result = shouldCallTrump(
+                        currentPlayer.hand,
+                        state.upcard.suit,
+                        personality,
+                        position,
+                        false,
+                        null,
+                        {
+                            scores: state.scores,
+                            myIndex: state.currentPlayerIndex
+                        }
+                    );
                     if (result.call) {
                         const lonerCheck = shouldGoAlone(currentPlayer.hand, state.upcard.suit, personality);
                         serverDispatch({
@@ -600,7 +611,17 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                         serverDispatch({ type: 'PASS_BID', payload: { playerIndex: state.currentPlayerIndex, reasoning: result.reasoning } });
                     }
                 } else if (state.biddingRound === 2) {
-                    const result = getBestBid(currentPlayer.hand.filter(c => state.upcard && c.suit !== state.upcard.suit), personality, position, true, state.upcard?.suit || null);
+                    const result = getBestBid(
+                        currentPlayer.hand.filter(c => state.upcard && c.suit !== state.upcard.suit),
+                        personality,
+                        position,
+                        true,
+                        state.upcard?.suit || null,
+                        {
+                            scores: state.scores,
+                            myIndex: state.currentPlayerIndex
+                        }
+                    );
                     if (result.suit) {
                         const lonerCheck = shouldGoAlone(currentPlayer.hand, result.suit, personality);
                         serverDispatch({

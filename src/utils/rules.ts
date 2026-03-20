@@ -174,6 +174,11 @@ interface BotMoveOptions {
     playedCardsThisHand?: Card[];
 }
 
+interface BidDecisionOptions {
+    scores?: { team1: number; team2: number };
+    myIndex?: number;
+}
+
 interface BotMoveContext {
     hand: Card[];
     currentTrick: { playerId: string; card: Card }[];
@@ -208,13 +213,33 @@ interface BotTacticRule {
     apply: (candidates: CandidateScore[], context: BotMoveContext) => void;
 }
 
-const getLeftBower = (trump: Suit): { suit: Suit; rank: Rank } => ({
-    suit: getOppositeSuit(trump) as Suit,
-    rank: 'J'
-});
+const getAllTrumpCards = (trump: Suit): Card[] => ([
+    { suit: trump, rank: 'J', id: `right-${trump}` },
+    { suit: getOppositeSuit(trump) as Suit, rank: 'J', id: `left-${trump}` },
+    { suit: trump, rank: 'A', id: `a-${trump}` },
+    { suit: trump, rank: 'K', id: `k-${trump}` },
+    { suit: trump, rank: 'Q', id: `q-${trump}` },
+    { suit: trump, rank: '10', id: `10-${trump}` },
+    { suit: trump, rank: '9', id: `9-${trump}` }
+]);
+
+const isTrumpCard = (card: Card, trump: Suit): boolean => getEffectiveSuit(card, trump) === trump;
 
 const hasCardBeenPlayed = (playedCards: Card[], target: { suit: Suit; rank: Rank }): boolean =>
     playedCards.some(card => card.suit === target.suit && card.rank === target.rank);
+
+const hasHigherOutstandingTrump = (card: Card, context: BotMoveContext): boolean => {
+    if (!isTrumpCard(card, context.trump)) return false;
+
+    const candidateValue = getCardValue(card, context.trump, context.trump);
+    return getAllTrumpCards(context.trump).some(trumpCard => {
+        if (getCardValue(trumpCard, context.trump, context.trump) <= candidateValue) return false;
+
+        const inHand = context.hand.some(held => held.rank === trumpCard.rank && held.suit === trumpCard.suit);
+        const alreadyPlayed = hasCardBeenPlayed(context.playedCardsThisHand, { suit: trumpCard.suit, rank: trumpCard.rank });
+        return !inHand && !alreadyPlayed;
+    });
+};
 
 const addCandidateReason = (candidate: CandidateScore, reason: string) => {
     if (!candidate.reasons.includes(reason)) {
@@ -225,24 +250,52 @@ const addCandidateReason = (candidate: CandidateScore, reason: string) => {
 const applyTacticRules = (candidates: CandidateScore[], context: BotMoveContext): CandidateScore[] => {
     const rules: BotTacticRule[] = [
         {
-            id: 'protected_left_lead',
+            id: 'protect_non_boss_trump_lead',
             applies: ctx => {
                 if (ctx.currentTrick.length !== 0) return false;
-
-                const leftBower = getLeftBower(ctx.trump);
-                const hasLeft = ctx.validCards.some(card => card.rank === leftBower.rank && card.suit === leftBower.suit);
-                if (!hasLeft) return false;
-
-                const rightPlayed = hasCardBeenPlayed(ctx.playedCardsThisHand, { suit: ctx.trump, rank: 'J' });
-                return !rightPlayed && ctx.validCards.length > 1;
+                return ctx.validCards.some(card => !isTrumpCard(card, ctx.trump));
             },
             apply: (ruleCandidates, ctx) => {
-                const leftBower = getLeftBower(ctx.trump);
                 ruleCandidates.forEach(candidate => {
-                    const isLeft = candidate.card.rank === leftBower.rank && candidate.card.suit === leftBower.suit;
-                    if (isLeft) {
+                    if (isTrumpCard(candidate.card, ctx.trump) && hasHigherOutstandingTrump(candidate.card, ctx)) {
                         candidate.score -= 1200;
-                        addCandidateReason(candidate, 'Rule protected_left_lead: preserve Left until Right is gone');
+                        addCandidateReason(candidate, 'Rule protect_non_boss_trump_lead: avoid leading vulnerable trump into higher outstanding trump');
+                    }
+                });
+            }
+        },
+        {
+            id: 'partner_called_trump_lead_ace',
+            applies: ctx => ctx.currentTrick.length === 0 && ctx.isPartnerOfMaker,
+            apply: (ruleCandidates, ctx) => {
+                ruleCandidates.forEach(candidate => {
+                    if (candidate.card.rank === 'A' && !isTrumpCard(candidate.card, ctx.trump)) {
+                        candidate.score += 650;
+                        addCandidateReason(candidate, 'Rule partner_called_trump_lead_ace: force pressure without stripping partner');
+                    }
+
+                    if (isTrumpCard(candidate.card, ctx.trump)) {
+                        candidate.score -= 250;
+                    }
+                });
+            }
+        },
+        {
+            id: 'opponents_called_trump_singleton_lead',
+            applies: ctx => ctx.currentTrick.length === 0 && ctx.isDefender,
+            apply: (ruleCandidates, ctx) => {
+                const suitCounts: Partial<Record<Suit, number>> = {};
+                ctx.hand.forEach(card => {
+                    const suit = getEffectiveSuit(card, ctx.trump);
+                    if (suit === ctx.trump) return;
+                    suitCounts[suit] = (suitCounts[suit] || 0) + 1;
+                });
+
+                ruleCandidates.forEach(candidate => {
+                    const effectiveSuit = getEffectiveSuit(candidate.card, ctx.trump);
+                    if (effectiveSuit !== ctx.trump && suitCounts[effectiveSuit] === 1) {
+                        candidate.score += 300;
+                        addCandidateReason(candidate, 'Rule opponents_called_trump_singleton_lead: create a void against the makers');
                     }
                 });
             }
@@ -251,8 +304,7 @@ const applyTacticRules = (candidates: CandidateScore[], context: BotMoveContext)
             id: 'second_hand_low',
             applies: ctx => {
                 if (ctx.currentTrick.length !== 1) return false;
-                if (!ctx.isDefender) return false;
-                return ctx.currentHighValue < 100;
+                return ctx.currentHighValue < 500;
             },
             apply: ruleCandidates => {
                 const lowestScore = Math.max(...ruleCandidates.map(candidate => candidate.score));
@@ -290,7 +342,8 @@ export const shouldCallTrump = (
     personality: BotPersonality = { aggressiveness: 5, riskTolerance: 5, consistency: 5, archetype: 'Generic' },
     position: number = 0, // 0: Seat 1, 1: Seat 2, 2: Seat 3, 3: Dealer
     isRound2: boolean = false,
-    turnedDownSuit: Suit | null = null
+    turnedDownSuit: Suit | null = null,
+    options: BidDecisionOptions = {}
 ): { call: boolean; reasoning: string; strength: number } => {
     const { total, reasoning } = calculateBibleHandStrength(hand, suit);
 
@@ -299,6 +352,9 @@ export const shouldCallTrump = (
     const trumpCards = hand.filter(c => c.suit === suit || (c.rank === 'J' && c.suit === oppositeSuit));
     const trumpCount = trumpCards.length;
     const hasRight = hand.some(c => c.rank === 'J' && c.suit === suit);
+    const myTeam = options.myIndex !== undefined ? (options.myIndex % 2 === 0 ? 'team1' : 'team2') : null;
+    const ourScore = myTeam && options.scores ? options.scores[myTeam] : null;
+    const oppScore = myTeam && options.scores ? options.scores[myTeam === 'team1' ? 'team2' : 'team1'] : null;
 
     // Thresholds based on Aggressiveness (Bible says 7.0 is standard)
     // Range: 5.0 (Hyper-Aggressive) to 9.0 (Conservative)
@@ -306,20 +362,44 @@ export const shouldCallTrump = (
 
     // Positional Adjustments
     // position: 1=S1, 2=S2 (Partner), 3=S3, 0=Dealer
-    let posReason = '';
+    const adjustmentReasons: string[] = [];
     if (position === 0) { // Dealer
         threshold -= 0.5;
-        posReason = 'Dealer bonus (-0.5 threshold)';
+        adjustmentReasons.push('Dealer bonus (-0.5 threshold)');
     } else if (position === 2) { // Dealer's Partner (Assist)
         threshold -= 1.0;
-        posReason = 'Assist bonus (-1.0 threshold)';
+        adjustmentReasons.push('Assist bonus (-1.0 threshold)');
     }
 
     // NEXT CALL logic: Seat 1 in Round 2 gets a bonus ONLY for the same color suit
     const isNextSuit = isRound2 && position === 1 && turnedDownSuit && getCardColor(suit) === getCardColor(turnedDownSuit);
     if (isNextSuit) {
         threshold -= 1.5;
-        posReason = 'Next Call bonus (-1.5 threshold)';
+        adjustmentReasons.push('Next Call bonus (-1.5 threshold)');
+    }
+
+    const isReverseNextSuit = isRound2 && position === 2 && turnedDownSuit && getCardColor(suit) !== getCardColor(turnedDownSuit);
+    if (isReverseNextSuit) {
+        threshold -= 1.0;
+        adjustmentReasons.push('Reverse Next bonus (-1.0 threshold)');
+    }
+
+    if (oppScore !== null && oppScore >= 8) {
+        threshold -= 0.8;
+        adjustmentReasons.push('Desperation mode (-0.8 threshold)');
+    }
+
+    if (!isRound2 && position === 1 && ourScore === 9 && oppScore !== null && oppScore >= 6) {
+        return {
+            call: true,
+            reasoning: [
+                `Strength: ${total.toFixed(1)} (Threshold bypassed)`,
+                reasoning,
+                'Donate: block dealer loner risk at 9-x',
+                personality.archetype
+            ].join(' | '),
+            strength: total
+        };
     }
 
     // MINIMUM TRUMP REQUIREMENT
@@ -335,7 +415,7 @@ export const shouldCallTrump = (
     const finalReasoning = [
         `Strength: ${total.toFixed(1)} (Threshold: ${threshold.toFixed(1)})`,
         reasoning,
-        posReason,
+        adjustmentReasons.join(' | '),
         fallbackReason,
         personality.archetype
     ].filter(Boolean).join(' | ');
@@ -408,7 +488,8 @@ export const getBestBid = (
     personality: BotPersonality,
     position: number,
     isRound2: boolean,
-    turnedDownSuit: Suit | null = null
+    turnedDownSuit: Suit | null = null,
+    options: BidDecisionOptions = {}
 ): { suit: Suit | null; reasoning: string; strength: number; bestSuitAnyway: Suit; bestStrengthAnyway: number; bestReasoningAnyway: string } => {
     const suits: Suit[] = (['hearts', 'diamonds', 'clubs', 'spades'] as Suit[]).filter(s => s !== turnedDownSuit);
     let bestSuit: Suit | null = null;
@@ -420,7 +501,7 @@ export const getBestBid = (
     let bestReasoningAnyway = '';
 
     suits.forEach(suit => {
-        const result = shouldCallTrump(hand, suit, personality, position, isRound2, turnedDownSuit);
+        const result = shouldCallTrump(hand, suit, personality, position, isRound2, turnedDownSuit, options);
 
         if (result.strength > bestStrengthAnyway) {
             bestStrengthAnyway = result.strength;
@@ -515,15 +596,15 @@ export const getBotMove = (
         }));
 
         // 1. If Maker or Partner of Maker: Draw Trump
-        if (isMaker || isPartnerOfMaker) {
+        if (isMaker) {
             const highTrumps = validCards.filter(c => getEffectiveSuit(c, trump) === trump)
                 .sort((a, b) => getCardValue(b, trump, null) - getCardValue(a, trump, null));
 
-            if (highTrumps.length > 0 && (isMaker || highTrumps[0].rank === 'J')) {
+            if (highTrumps.length > 0 && !hasHigherOutstandingTrump(highTrumps[0], context)) {
                 candidates.forEach(candidate => {
                     if (candidate.card.id === highTrumps[0].id) {
                         candidate.score += 500;
-                        addCandidateReason(candidate, `Maker/Partner drawing trump: ${candidate.card.rank} of ${candidate.card.suit}`);
+                        addCandidateReason(candidate, `Maker cashing boss trump: ${candidate.card.rank} of ${candidate.card.suit}`);
                     }
                 });
             }
