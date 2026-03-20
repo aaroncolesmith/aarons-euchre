@@ -324,6 +324,8 @@ export async function saveTrumpCall(trumpCall: any): Promise<boolean> {
                 bower_count: trumpCall.bowerCount || 0,
                 trump_count: trumpCall.trumpCount || 0,
                 suit_count: trumpCall.suitCount || 0,
+                hand_strength_upcard: trumpCall.handStrengthUpcard || 0,
+                hand_strength_best_suit: trumpCall.handStrengthBestSuit || 0,
                 hand_after_discard: trumpCall.handAfterDiscard || ''
             });
 
@@ -372,6 +374,8 @@ export async function getAllTrumpCalls(): Promise<any[]> {
                 bowerCount: row.bower_count || 0,
                 trumpCount: row.trump_count || 0,
                 suitCount: row.suit_count || 0,
+                handStrengthUpcard: row.hand_strength_upcard || 0,
+                handStrengthBestSuit: row.hand_strength_best_suit || 0,
                 handAfterDiscard: row.hand_after_discard || '',
                 timestamp: row.created_at,
                 // Keep original fields for reference

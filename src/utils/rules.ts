@@ -104,17 +104,17 @@ export const isValidPlay = (
 };
 
 /**
- * Calculate hand strength based on the "Bible" weighting system.
- * 
- * Bible Points:
+ * Calculate weighted hand strength for a target trump suit.
+ *
+ * Weights:
  * - Right Bower: 3.0
  * - Left Bower: 2.5
  * - Trump Ace: 2.0
  * - Trump K/Q/10/9: 1.0 - 0.5
  * - Off-Suit Ace: 1.0
- * - Void Bonus: +0.8 (creates ruffing opportunities)
+ * - Void Bonus: +0.8
  */
-export const calculateBibleHandStrength = (hand: Card[], suit: Suit): { total: number; reasoning: string } => {
+export const calculateHandStrength = (hand: Card[], suit: Suit): { total: number; reasoning: string } => {
     let score = 0;
     const reasons: string[] = [];
     const oppositeSuit = getOppositeSuit(suit);
@@ -345,7 +345,7 @@ export const shouldCallTrump = (
     turnedDownSuit: Suit | null = null,
     options: BidDecisionOptions = {}
 ): { call: boolean; reasoning: string; strength: number } => {
-    const { total, reasoning } = calculateBibleHandStrength(hand, suit);
+    const { total, reasoning } = calculateHandStrength(hand, suit);
 
     // CRITICAL: Count actual trumps (including Left Bower)
     const oppositeSuit = getOppositeSuit(suit);
@@ -356,7 +356,7 @@ export const shouldCallTrump = (
     const ourScore = myTeam && options.scores ? options.scores[myTeam] : null;
     const oppScore = myTeam && options.scores ? options.scores[myTeam === 'team1' ? 'team2' : 'team1'] : null;
 
-    // Thresholds based on Aggressiveness (Bible says 7.0 is standard)
+    // Thresholds based on aggressiveness. 7.0 is the baseline standard call threshold.
     // Range: 5.0 (Hyper-Aggressive) to 9.0 (Conservative)
     let threshold = 7.0 + (5 - personality.aggressiveness) * 0.4;
 
@@ -433,7 +433,7 @@ export const shouldGoAlone = (
     suit: Suit,
     personality: BotPersonality = { aggressiveness: 5, riskTolerance: 5, consistency: 5, archetype: 'Generic' }
 ): { goAlone: boolean; reasoning: string } => {
-    const { total } = calculateBibleHandStrength(hand, suit);
+    const { total } = calculateHandStrength(hand, suit);
 
     // Count trump cards including left bower
     const oppositeSuit = getOppositeSuit(suit);

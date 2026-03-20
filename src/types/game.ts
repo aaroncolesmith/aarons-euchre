@@ -123,6 +123,8 @@ export interface TrumpCallLog {
     bowerCount: number;
     trumpCount: number;
     suitCount: number;
+    handStrengthUpcard: number;
+    handStrengthBestSuit: number;
     handAfterDiscard: string; // Comma-separated card codes
     timestamp: number;
     gameId: string;

@@ -1,4 +1,5 @@
-import { Card } from '../types/game.ts';
+import { Card, Suit } from '../types/game.ts';
+import { calculateHandStrength } from './rules.ts';
 
 export interface TrumpCallLog {
     whoCalled: string;
@@ -9,9 +10,20 @@ export interface TrumpCallLog {
     bowerCount: number;
     trumpCount: number;
     suitCount: number;
+    handStrengthUpcard: number;
+    handStrengthBestSuit: number;
     handAfterDiscard: string; // Comma-separated card codes
     timestamp: number;
     gameId: string;
+}
+
+function normalizeSuit(suit: string): Suit {
+    return suit.toLowerCase() as Suit;
+}
+
+function getBestSuitHandStrength(hand: Card[]): number {
+    const suits: Suit[] = ['hearts', 'diamonds', 'clubs', 'spades'];
+    return Math.max(...suits.map((candidate) => calculateHandStrength(hand, candidate).total));
 }
 
 /**
@@ -178,6 +190,8 @@ export function trumpCallsToCSV(logs: TrumpCallLog[]): string {
         'BOWER_COUNT',
         'TRUMP_COUNT',
         'SUIT_COUNT',
+        'HAND_STRENGTH_UPCARD',
+        'HAND_STRENGTH_BEST_SUIT',
         'HAND_AFTER_DISCARD'
     ];
 
@@ -190,6 +204,8 @@ export function trumpCallsToCSV(logs: TrumpCallLog[]): string {
         log.bowerCount.toString(),
         log.trumpCount.toString(),
         log.suitCount.toString(),
+        log.handStrengthUpcard.toFixed(1),
+        log.handStrengthBestSuit.toFixed(1),
         log.handAfterDiscard
     ]);
 
@@ -248,6 +264,8 @@ export async function saveTrumpCallLog(log: TrumpCallLog): Promise<void> {
             bowerCount: log.bowerCount,
             trumpCount: log.trumpCount,
             suitCount: log.suitCount,
+            handStrengthUpcard: log.handStrengthUpcard,
+            handStrengthBestSuit: log.handStrengthBestSuit,
             handAfterDiscard: log.handAfterDiscard
         });
     } catch (err) {
@@ -293,6 +311,10 @@ export function createTrumpCallLog(
     const bowerCount = countBowers(hand, suit);
     const trumpCount = countTrump(hand, suit);
     const suitCount = countSuit(hand, suit);
+    const handStrengthBestSuit = getBestSuitHandStrength(hand);
+    const handStrengthUpcard = upcard
+        ? calculateHandStrength(hand, normalizeSuit(upcard.suit)).total
+        : calculateHandStrength(hand, normalizeSuit(suit)).total;
 
     // Format hand (sorted by suit and rank like UI)
     const handAfterDiscard = formatHand(hand, suit);
@@ -309,9 +331,10 @@ export function createTrumpCallLog(
         bowerCount,
         trumpCount,
         suitCount,
+        handStrengthUpcard,
+        handStrengthBestSuit,
         handAfterDiscard,
         timestamp: Date.now(),
         gameId
     };
 }
-
