@@ -27,7 +27,13 @@ export function getDailyChallengeDate(date: Date = new Date()): string {
         resultDate.setDate(resultDate.getDate() - 1);
     }
     
-    return resultDate.toISOString().split('T')[0];
+    // IMPORTANT: Do NOT use toISOString() here — it converts back to UTC,
+    // which will flip the date for PT evening times (e.g. 7 PM PT = 2 AM UTC next day).
+    // Instead, build the date string directly from the local PT date parts.
+    const year = resultDate.getFullYear();
+    const month = String(resultDate.getMonth() + 1).padStart(2, '0');
+    const day = String(resultDate.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
 }
 
 /**
