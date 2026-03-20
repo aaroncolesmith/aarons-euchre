@@ -3,6 +3,7 @@ import { useGame, getSavedGames, deleteActiveGame } from '../../store/GameStore'
 import { supabase } from '../../lib/supabase';
 import { fetchUserCloudGames, mergeLocalAndCloudGames } from '../../utils/cloudGames';
 import { hasUserPlayedDaily } from '../../utils/supabaseStats';
+import { getDailyChallengeDate, isDailyChallengeExpired } from '../../utils/dailyUtils';
 
 export const LandingPage = () => {
     const { state, dispatch } = useGame();
@@ -22,7 +23,7 @@ export const LandingPage = () => {
             setCloudGames(games);
 
             // Check if played daily
-            const dateString = new Date().toISOString().split('T')[0];
+            const dateString = getDailyChallengeDate();
             const played = await hasUserPlayedDaily(state.currentUser, dateString);
             setHasPlayedDaily(played);
         };
@@ -94,7 +95,7 @@ export const LandingPage = () => {
                             <h1 className="text-6xl font-black text-ink tracking-wide uppercase italic">
                                 EUCHRE
                             </h1>
-                            <span className="text-[10px] font-black text-brand-dim uppercase tracking-widest opacity-50">v1.76</span>
+                            <span className="text-[10px] font-black text-brand-dim uppercase tracking-widest opacity-50">v1.78</span>
                         </div>
                         <p className="text-xs font-bold text-brand tracking-[0.2em] mt-1 ml-1 uppercase">
                             Hello, {state.currentUser}
@@ -134,7 +135,8 @@ export const LandingPage = () => {
                         <button
                             disabled={hasPlayedDaily}
                             onClick={() => {
-                                const dateString = new Date().toISOString().split('T')[0];
+                                if (hasPlayedDaily) return;
+                                const dateString = getDailyChallengeDate();
                                 const tableCode = `DAILY-${dateString}-${state.currentUser}`;
                                 const existingDaily = savedGames.find(g => g.tableCode === tableCode);
                                 if (existingDaily) {
@@ -230,48 +232,70 @@ export const LandingPage = () => {
                         <div className="space-y-3 pb-4 max-h-[400px] overflow-y-auto custom-scrollbar pr-2">
                             {savedGames
                                 .filter(g => gameFilter === 'in-progress' ? g.phase !== 'game_over' : g.phase === 'game_over')
-                                .map(game => (
-                                    <div
-                                        key={game.tableCode}
-                                        className="group relative bg-paper border-2 border-dashed border-ink-dim hover:border-solid hover:border-brand rounded-xl p-4 transition-all hover:shadow-sketch-brand cursor-pointer"
-                                        onClick={() => dispatch({ type: 'LOAD_EXISTING_GAME', payload: { gameState: game } })}
-                                    >
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex-1">
-                                                <div className="flex items-center gap-2 mb-1">
-                                                    <div className="bg-brand/20 text-brand-dark text-[10px] font-black px-2 py-0.5 rounded border border-brand-dim uppercase tracking-wider">
-                                                        {game.tableCode}
-                                                    </div>
-                                                    <div className="text-[10px] font-bold text-ink-dim uppercase tracking-wider">
-                                                        {getTimeAgo(game)}
-                                                    </div>
-                                                </div>
-                                                <div className="text-lg font-black text-ink leading-tight mb-1">
-                                                    {game.tableName || 'Untitled Game'}
-                                                </div>
-                                                <div className="text-xs font-bold text-ink-dim flex items-center gap-3">
-                                                    <span className={game.scores.team1 >= 10 ? 'text-brand' : ''}>Team A: {game.scores.team1}</span>
-                                                    <span className="text-ink-dim/50">•</span>
-                                                    <span className={game.scores.team2 >= 10 ? 'text-brand' : ''}>Team B: {game.scores.team2}</span>
-                                                </div>
-                                            </div>
+                                .map(game => {
+                                    const isDaily = game.tableCode?.startsWith('DAILY-');
+                                    let isExpired = false;
+                                    if (isDaily) {
+                                        const dateString = game.tableCode!.split('-').slice(1, 4).join('-');
+                                        isExpired = isDailyChallengeExpired(dateString);
+                                    }
 
-                                            <div className="flex items-center gap-2 pl-4 border-l-2 border-paper-dim">
-                                                {!game.tableCode?.startsWith('DAILY-') && (
-                                                    <button
-                                                        onClick={(e) => { e.stopPropagation(); handleDelete(game.tableCode); }}
-                                                        className="p-2 text-ink-dim/50 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
-                                                    >
-                                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                                                    </button>
-                                                )}
-                                                <button className="bg-brand/10 text-brand hover:bg-brand hover:text-white border-2 border-brand-dim hover:border-brand p-2 rounded-lg transition-all">
-                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
-                                                </button>
+                                    return (
+                                        <div
+                                            key={game.tableCode}
+                                            className={`group relative bg-paper border-2 border-dashed border-ink-dim hover:border-solid hover:border-brand rounded-xl p-4 transition-all hover:shadow-sketch-brand cursor-pointer overflow-hidden ${isExpired ? 'opacity-70 bg-slate-50 border-slate-300' : ''}`}
+                                            onClick={() => {
+                                                if (isExpired && game.phase !== 'game_over') return;
+                                                dispatch({ type: 'LOAD_EXISTING_GAME', payload: { gameState: game } });
+                                            }}
+                                        >
+                                            {isExpired && game.phase !== 'game_over' && (
+                                                <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/40 backdrop-blur-[1px] pointer-events-none">
+                                                    <span className="text-4xl font-black text-ink/40 uppercase tracking-widest italic -rotate-12 select-none">
+                                                        expired
+                                                    </span>
+                                                </div>
+                                            )}
+
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex-1">
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <div className={`text-[10px] font-black px-2 py-0.5 rounded border uppercase tracking-wider ${isExpired ? 'bg-slate-200 text-slate-500 border-slate-300' : 'bg-brand/20 text-brand-dark border-brand-dim'}`}>
+                                                            {game.tableCode}
+                                                        </div>
+                                                        <div className="text-[10px] font-bold text-ink-dim uppercase tracking-wider">
+                                                            {getTimeAgo(game)}
+                                                        </div>
+                                                    </div>
+                                                    <div className="text-lg font-black text-ink leading-tight mb-1">
+                                                        {game.tableName || 'Untitled Game'}
+                                                    </div>
+                                                    <div className="text-xs font-bold text-ink-dim flex items-center gap-3">
+                                                        <span className={game.scores.team1 >= 10 ? 'text-brand' : ''}>Team A: {game.scores.team1}</span>
+                                                        <span className="text-ink-dim/50">•</span>
+                                                        <span className={game.scores.team2 >= 10 ? 'text-brand' : ''}>Team B: {game.scores.team2}</span>
+                                                    </div>
+                                                </div>
+
+                                                <div className="flex items-center gap-2 pl-4 border-l-2 border-paper-dim relative z-20">
+                                                    {(!game.tableCode?.startsWith('DAILY-') || (isExpired && game.phase !== 'game_over')) && (
+                                                        <button
+                                                            onClick={(e) => { e.stopPropagation(); handleDelete(game.tableCode); }}
+                                                            className="p-2 text-ink-dim/50 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                                                        >
+                                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                                        </button>
+                                                    )}
+                                                    {(!isExpired || game.phase === 'game_over') && (
+                                                        <button className="bg-brand/10 text-brand hover:bg-brand hover:text-white border-2 border-brand-dim hover:border-brand p-2 rounded-lg transition-all">
+                                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+                                                        </button>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                         </div>
                     </div>
                 )}
