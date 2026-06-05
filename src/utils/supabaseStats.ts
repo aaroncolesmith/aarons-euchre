@@ -125,36 +125,14 @@ export function mergeAllStats(localStats: Record<string, PlayerStats>, cloudStat
 }
 
 /**
- * Get all player stats from Supabase (global leaderboard)
+ * Get leaderboard stats with client-side TTL cache.
+ * Replaces the old unbounded getAllPlayerStats(); all callsites use this.
+ * Default limit covers realistic scale; StatsView passes 50 for display.
  */
-export async function getAllPlayerStats(): Promise<Record<string, PlayerStats>> {
-    try {
-        console.log('[SUPABASE STATS] Fetching all player stats...');
-        const { data, error } = await supabase
-            .from('player_stats')
-            .select('*');
-
-        if (error) {
-            console.error('[SUPABASE STATS] Error fetching stats:', error);
-            return {};
-        }
-
-        const stats: Record<string, PlayerStats> = {};
-        data?.forEach((row: any) => {
-            stats[row.player_name] = fromSnakeCase(row);
-        });
-
-        console.log(`[SUPABASE STATS] Loaded ${Object.keys(stats).length} player stats`);
-        return stats;
-    } catch (err) {
-        console.error('[SUPABASE STATS] Exception fetching stats:', err);
-        return {};
-    }
+export async function getAllPlayerStats(limit: number = 200, forceRefresh: boolean = false): Promise<Record<string, PlayerStats>> {
+    return getLeaderboardStats(limit, forceRefresh);
 }
 
-/**
- * Get leaderboard stats with caching and limit
- */
 export async function getLeaderboardStats(limit: number = 50, forceRefresh: boolean = false): Promise<Record<string, PlayerStats>> {
     try {
         const cachedRaw = !forceRefresh ? localStorage.getItem(LEADERBOARD_CACHE_KEY) : null;
@@ -169,6 +147,7 @@ export async function getLeaderboardStats(limit: number = 50, forceRefresh: bool
             .from('player_stats')
             .select('*')
             .order('hands_played', { ascending: false })
+            .order('games_played', { ascending: false })
             .limit(limit);
 
         if (error) {

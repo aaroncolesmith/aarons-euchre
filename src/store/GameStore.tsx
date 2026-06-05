@@ -3,7 +3,7 @@ import { GameState, Action, PlayerStats } from '../types/game';
 import { supabase } from '../lib/supabase';
 import { createDeck, dealHands, shuffleDeck } from '../utils/deck';
 import { shouldCallTrump, shouldGoAlone, getBestBid, getBotMove, getCardValue } from '../utils/rules';
-import { getAllPlayerStats, mergeAllStats, syncUnsyncedDailies, LOCAL_STORAGE_KEY } from '../utils/supabaseStats';
+import { getAllPlayerStats, mergeAllStats, syncUnsyncedDailies, clearLeaderboardStatsCache, LOCAL_STORAGE_KEY } from '../utils/supabaseStats';
 import { useHostElection } from '../utils/presence';
 import { createDailyRNG } from '../utils/rng';
 import Logger from '../utils/logger';
@@ -163,11 +163,27 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     const saveActiveGame = (state: GameState) => {
         if (!state.tableCode) return;
-        const saved = localStorage.getItem('euchre_active_games');
-        const games = saved ? JSON.parse(saved) : {};
-        // We save the full local state (with hands) to local storage
-        games[state.tableCode] = state;
-        localStorage.setItem('euchre_active_games', JSON.stringify(games));
+        try {
+            const saved = localStorage.getItem('euchre_active_games');
+            const games: Record<string, GameState> = saved ? JSON.parse(saved) : {};
+
+            games[state.tableCode] = state;
+
+            // Prune: remove completed games older than 3 days, and cap at 20 entries.
+            const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
+            const now = Date.now();
+            const pruned = Object.entries(games)
+                .filter(([, g]) => {
+                    const isOldCompleted = g.phase === 'game_over' && (now - (g.lastActive || 0)) > THREE_DAYS_MS;
+                    return !isOldCompleted;
+                })
+                .sort(([, a], [, b]) => (b.lastActive || 0) - (a.lastActive || 0))
+                .slice(0, 20);
+
+            localStorage.setItem('euchre_active_games', JSON.stringify(Object.fromEntries(pruned)));
+        } catch {
+            // Quota exceeded or parse error — best effort; don't crash the game.
+        }
     };
 
     const rehydrateGame = async (sanitizedState: GameState) => {
@@ -198,6 +214,20 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
 
     useEffect(() => {
+        // One-time prune of old completed games from before the saveActiveGame guard.
+        try {
+            const saved = localStorage.getItem('euchre_active_games');
+            if (saved) {
+                const games: Record<string, GameState> = JSON.parse(saved);
+                const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
+                const now = Date.now();
+                const pruned = Object.entries(games).filter(
+                    ([, g]) => !(g.phase === 'game_over' && (now - (g.lastActive || 0)) > THREE_DAYS_MS)
+                );
+                localStorage.setItem('euchre_active_games', JSON.stringify(Object.fromEntries(pruned)));
+            }
+        } catch { /* ignore */ }
+
         const savedUser = localStorage.getItem('euchre_current_user');
         if (savedUser) dispatch({ type: 'LOGIN', payload: { userName: savedUser } });
 
@@ -266,10 +296,12 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     // Persist active game to localStorage for fast local restore.
     // Cloud state is owned exclusively by the process-action edge function,
     // which writes a sanitized (hand-stripped) snapshot — never the full state.
+    // We only checkpoint on phase transitions (not every action) to avoid
+    // writing megabytes of state on every card play.
     useEffect(() => {
         if (!state.tableCode || state.phase === 'login' || state.phase === 'landing') return;
         saveActiveGame(state);
-    }, [state]);
+    }, [state.phase, state.tableCode, state.handsPlayed, state.scores]);
 
 
     // Handle Match Completion and Stats Saving
@@ -289,6 +321,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             lastGameStatsSavedRef.current = state.tableCode;
             // Refresh leaderboard display from cloud (stats may have just updated).
             const refreshDisplay = async () => {
+                clearLeaderboardStatsCache();
                 const cloudStats = await getAllPlayerStats();
                 const localStats = getGlobalStats();
                 const merged = mergeAllStats(localStats, cloudStats);
@@ -330,7 +363,8 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 Logger.error('[STATS] Daily stats sync failed', err);
             }
 
-            // Refresh leaderboard display
+            // Refresh leaderboard display (bust cache so new stats appear immediately)
+            clearLeaderboardStatsCache();
             const cloudStats = await getAllPlayerStats();
             const localStats = getGlobalStats();
             const merged = mergeAllStats(localStats, cloudStats);
@@ -576,12 +610,14 @@ export const getSavedGames = (): { [code: string]: GameState } => {
 };
 
 export const deleteActiveGame = async (tableCode: string) => {
-    const saved = localStorage.getItem('euchre_active_games');
-    if (saved) {
-        const games = JSON.parse(saved);
-        delete games[tableCode];
-        localStorage.setItem('euchre_active_games', JSON.stringify(games));
-    }
+    try {
+        const saved = localStorage.getItem('euchre_active_games');
+        if (saved) {
+            const games = JSON.parse(saved);
+            delete games[tableCode];
+            localStorage.setItem('euchre_active_games', JSON.stringify(games));
+        }
+    } catch { /* ignore quota / parse errors */ }
     
     // Attempt to soft-delete from Supabase if we have cloud access
     try {
