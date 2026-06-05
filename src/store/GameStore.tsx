@@ -3,7 +3,7 @@ import { GameState, Action, PlayerStats } from '../types/game';
 import { supabase } from '../lib/supabase';
 import { createDeck, dealHands, shuffleDeck } from '../utils/deck';
 import { shouldCallTrump, shouldGoAlone, getBestBid, getBotMove, getCardValue } from '../utils/rules';
-import { saveMultiplePlayerStats, getAllPlayerStats, getPlayersStats, mergeAllStats, submitDailyScore, syncUnsyncedDailies, LOCAL_STORAGE_KEY, clearLeaderboardStatsCache } from '../utils/supabaseStats';
+import { getAllPlayerStats, mergeAllStats, syncUnsyncedDailies, LOCAL_STORAGE_KEY } from '../utils/supabaseStats';
 import { useHostElection } from '../utils/presence';
 import { createDailyRNG } from '../utils/rng';
 import Logger from '../utils/logger';
@@ -12,7 +12,7 @@ import { APP_VERSION } from '../version';
 
 // Reducers
 import { gameReducerFixed, INITIAL_STATE as ENGINE_INITIAL_STATE } from './engine';
-import { getEmptyStats, BOT_PERSONALITIES, INITIAL_STATE_FUNC } from './reducers/utils';
+import { BOT_PERSONALITIES, INITIAL_STATE_FUNC } from './reducers/utils';
 import { fetchPlayEvents } from '../utils/eventLogger';
 
 const getPlayedCardsThisHand = (eventLog: GameState['eventLog']) => {
@@ -64,7 +64,6 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const lastBotDecisionRef = useRef<string | null>(null);
     const lastGameStatsSavedRef = useRef<string | null>(null);
     const bootstrappedTablesRef = useRef<Set<string>>(new Set());
-    const matchStartCloudStatsRef = useRef<Record<string, Record<string, PlayerStats>>>({});
     const { isHost, onlinePlayers } = useHostElection(state.tableCode, state.currentUser);
 
     // Enhanced dispatch that calls the authoritative server
@@ -160,11 +159,6 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const getGlobalStats = (): { [name: string]: PlayerStats } => {
         const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
         return saved ? JSON.parse(saved) : {};
-    };
-
-    const saveGlobalStats = async (stats: { [name: string]: PlayerStats }) => {
-        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(stats));
-        await saveMultiplePlayerStats(stats);
     };
 
     const saveActiveGame = (state: GameState) => {
@@ -278,164 +272,76 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }, [state]);
 
 
-    // Capture a cloud baseline at the start of each regular game so we can detect
-    // whether server-derived stats failed and safely apply a fallback at game over.
+    // Handle Match Completion and Stats Saving
+    // Regular games: stats are derived server-side from play_events via
+    //   refresh_player_stats_from_events(), triggered by the bot cascade (T-11).
+    //   No client write needed.
+    // Daily games: run client-side, so we send a SYNC_PLAYER_STATS action to
+    //   the edge function which atomically increments each player's career stats
+    //   using the service role key (bypasses anon-key RLS on player_stats).
     useEffect(() => {
-        const isRegularGame =
-            !!state.tableCode &&
-            !state.tableCode.startsWith('DAILY-') &&
-            state.phase !== 'login' &&
-            state.phase !== 'landing' &&
-            state.phase !== 'lobby';
+        if (state.phase !== 'game_over' || !state.tableCode) return;
+        if (lastGameStatsSavedRef.current === state.tableCode) return;
 
-        if (!isRegularGame || matchStartCloudStatsRef.current[state.tableCode!]) return;
-
-        const involvedPlayerNames = state.players.map(p => p.name).filter((n): n is string => !!n);
-        if (involvedPlayerNames.length !== 4) return;
-
-        const captureBaseline = async () => {
-            try {
-                const baseline = await getPlayersStats(involvedPlayerNames);
-                matchStartCloudStatsRef.current[state.tableCode!] = baseline;
-                Logger.info(`[STATS] Captured pregame baseline for ${state.tableCode}`);
-            } catch (err) {
-                Logger.error('[STATS] Failed to capture pregame baseline', err);
-            }
-        };
-
-        captureBaseline();
-    }, [state.tableCode, state.phase, state.players]);
-
-    // Handle Match Completion and Stats Saving (Authority Based)
-    useEffect(() => {
-        if (state.phase === 'game_over' && state.tableCode && lastGameStatsSavedRef.current !== state.tableCode) {
-            const isDaily = state.tableCode.startsWith('DAILY-');
-            const involvedPlayerNames = state.players.map(p => p.name).filter((n): n is string => !!n);
-            
-            // Skip manual stats saving for regular games (Server does this via Event Stream mapping)
-            if (!isDaily) {
-                const refreshRegularStats = async () => {
-                    Logger.info(`[STATS] Saving final regular-game stats for ${state.tableCode}.`);
-
-                    try {
-                        clearLeaderboardStatsCache();
-                        const baselineStats = matchStartCloudStatsRef.current[state.tableCode!] || {};
-                        if (!isHost) return;
-
-                        const finalStats: Record<string, PlayerStats> = {};
-                        state.players.forEach((p, i) => {
-                            if (!p.name) return;
-                            const baseline = baselineStats[p.name] || getEmptyStats();
-                            const isTeam1 = i === 0 || i === 2;
-                            const wonGame = isTeam1 ? state.scores.team1 >= 10 : state.scores.team2 >= 10;
-
-                            finalStats[p.name] = {
-                                gamesPlayed: (baseline.gamesPlayed || 0) + 1,
-                                gamesWon: (baseline.gamesWon || 0) + (wonGame ? 1 : 0),
-                                handsPlayed: (baseline.handsPlayed || 0) + p.stats.handsPlayed,
-                                handsWon: (baseline.handsWon || 0) + p.stats.handsWon,
-                                tricksPlayed: (baseline.tricksPlayed || 0) + p.stats.tricksPlayed,
-                                tricksTaken: (baseline.tricksTaken || 0) + p.stats.tricksTaken,
-                                tricksWonTeam: (baseline.tricksWonTeam || 0) + p.stats.tricksWonTeam,
-                                callsMade: (baseline.callsMade || 0) + p.stats.callsMade,
-                                callsWon: (baseline.callsWon || 0) + p.stats.callsWon,
-                                lonersAttempted: (baseline.lonersAttempted || 0) + p.stats.lonersAttempted,
-                                lonersWon: (baseline.lonersWon || 0) + p.stats.lonersWon,
-                                pointsScored: (baseline.pointsScored || 0) + p.stats.pointsScored,
-                                euchresMade: (baseline.euchresMade || 0) + p.stats.euchresMade,
-                                euchred: (baseline.euchred || 0) + p.stats.euchred,
-                                sweeps: (baseline.sweeps || 0) + p.stats.sweeps,
-                                swept: (baseline.swept || 0) + p.stats.swept,
-                            };
-                        });
-
-                        await saveMultiplePlayerStats(finalStats);
-                        const cloudStats = await getPlayersStats(involvedPlayerNames);
-
-                        const localStats = getGlobalStats();
-                        const mergedStats = mergeAllStats(localStats, cloudStats);
-
-                        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(mergedStats));
-                        dispatch({ type: 'LOAD_GLOBAL_STATS', payload: mergedStats });
-                    } catch (err) {
-                        Logger.error('[STATS] Regular post-game refresh failed', err);
-                    }
-
-                    lastGameStatsSavedRef.current = state.tableCode;
-                    delete matchStartCloudStatsRef.current[state.tableCode!];
-                };
-
-                refreshRegularStats();
-                return;
-            }
-
-            if (!isHost && !isDaily) {
-                // Don't set lastGameStatsSavedRef here, so we can retry if we become host
-                return;
-            }
-
-            const syncGlobalStats = async () => {
-                Logger.info(`[STATS] AUTHORITY (${state.currentUser}): Saving final match stats (DAILY)`);
-                
-                if (state.isDailyChallenge) {
-                    const date_string = state.tableCode!.split('-').slice(1, 4).join('-');
-                    const hero = state.players.find(p => p.name === state.currentUser)!;
-                    await submitDailyScore({
-                        date_string,
-                        player_name: hero.name!,
-                        team_points: state.scores.team1,
-                        team_tricks: hero.stats.tricksWonTeam || 0,
-                        individual_tricks: hero.stats.tricksTaken || 0,
-                        opp_points: state.scores.team2,
-                        opp_tricks: (state.handsPlayed * 5) - (hero.stats.tricksWonTeam || 0)
-                    });
-                }
-
-                // IMPORTANT: Fetch current stats from cloud before incrementing
-                // This prevents cross-device overwrites.
-                const cloudStats = await getPlayersStats(involvedPlayerNames);
+        const isDaily = state.tableCode.startsWith('DAILY-');
+        if (!isDaily) {
+            // Regular games: server already handled stats via the cascade. Mark done.
+            lastGameStatsSavedRef.current = state.tableCode;
+            // Refresh leaderboard display from cloud (stats may have just updated).
+            const refreshDisplay = async () => {
+                const cloudStats = await getAllPlayerStats();
                 const localStats = getGlobalStats();
+                const merged = mergeAllStats(localStats, cloudStats);
+                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(merged));
+                dispatch({ type: 'LOAD_GLOBAL_STATS', payload: merged });
+            };
+            refreshDisplay();
+            return;
+        }
 
-                state.players.forEach((p, i) => {
-                    if (!p.name) return;
-                    const playerTeam = (i === 0 || i === 2) ? 'team1' : 'team2';
-                    const isGameWinner = playerTeam === 'team1' ? state.scores.team1 >= 10 : state.scores.team2 >= 10;
-                    
-                    // Use cloud stats as base if available, then local, then empty
-                    const baseStats = cloudStats[p.name] || localStats[p.name] || getEmptyStats();
+        // Daily game: build per-player deltas and sync via edge function.
+        const syncDailyStats = async () => {
+            Logger.info(`[STATS] Syncing daily game stats for ${state.tableCode}`);
 
-                    localStats[p.name] = {
-                        gamesPlayed: (baseStats.gamesPlayed || 0) + 1,
-                        gamesWon: isGameWinner ? (baseStats.gamesWon || 0) + 1 : (baseStats.gamesWon || 0),
-                        handsPlayed: (baseStats.handsPlayed || 0) + p.stats.handsPlayed,
-                        handsWon: (baseStats.handsWon || 0) + p.stats.handsWon,
-                        tricksPlayed: (baseStats.tricksPlayed || 0) + p.stats.tricksPlayed,
-                        tricksTaken: (baseStats.tricksTaken || 0) + p.stats.tricksTaken,
-                        tricksWonTeam: (baseStats.tricksWonTeam || 0) + p.stats.tricksWonTeam,
-                        callsMade: (baseStats.callsMade || 0) + p.stats.callsMade,
-                        callsWon: (baseStats.callsWon || 0) + p.stats.callsWon,
-                        lonersAttempted: (baseStats.lonersAttempted || 0) + p.stats.lonersAttempted,
-                        lonersWon: (baseStats.lonersWon || 0) + p.stats.lonersWon,
-                        pointsScored: (baseStats.pointsScored || 0) + p.stats.pointsScored,
-                        euchresMade: (baseStats.euchresMade || 0) + p.stats.euchresMade,
-                        euchred: (baseStats.euchred || 0) + p.stats.euchred,
-                        sweeps: (baseStats.sweeps || 0) + p.stats.sweeps,
-                        swept: (baseStats.swept || 0) + p.stats.swept,
-                    } as PlayerStats;
+            const playerDeltas = state.players
+                .filter(p => p.name)
+                .map((p, i) => {
+                    const isTeam1 = i === 0 || i === 2;
+                    const wonGame = isTeam1
+                        ? state.scores.team1 >= 10
+                        : state.scores.team2 >= 10;
+                    return {
+                        name: p.name!,
+                        ...p.stats,
+                        gamesPlayed: 1,       // override — one game per session
+                        gamesWon: wonGame ? 1 : 0,
+                    };
                 });
 
-                try {
-                    await saveGlobalStats(localStats);
-                    Logger.info(`[STATS] Successfully synced stats for ${involvedPlayerNames.length} players to cloud`);
-                } catch (err) {
-                    Logger.error('[STATS] Global sync failed', err);
-                }
-                lastGameStatsSavedRef.current = state.tableCode!;
-            };
+            try {
+                await supabase.functions.invoke('process-action', {
+                    body: {
+                        tableCode: state.tableCode!,
+                        action: { type: 'SYNC_PLAYER_STATS', payload: { playerDeltas } }
+                    }
+                });
+                Logger.info(`[STATS] Daily stats synced for ${playerDeltas.length} players`);
+            } catch (err) {
+                Logger.error('[STATS] Daily stats sync failed', err);
+            }
 
-            syncGlobalStats();
-        }
-    }, [state.phase, state.tableCode, isHost]);
+            // Refresh leaderboard display
+            const cloudStats = await getAllPlayerStats();
+            const localStats = getGlobalStats();
+            const merged = mergeAllStats(localStats, cloudStats);
+            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(merged));
+            dispatch({ type: 'LOAD_GLOBAL_STATS', payload: merged });
+
+            lastGameStatsSavedRef.current = state.tableCode!;
+        };
+
+        syncDailyStats();
+    }, [state.phase, state.tableCode]);
 
     // Dealer Animation and Selection
     useEffect(() => {

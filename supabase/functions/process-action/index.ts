@@ -266,6 +266,65 @@ serve(async (req) => {
       });
     }
 
+    // ── Special action: SYNC_PLAYER_STATS ─────────────────────────────────────
+    // Atomic per-game stat increment for Daily Challenge games (which run
+    // client-side and don't pass through the normal game loop).  The payload
+    // contains each player's in-game delta; the DB increments atomically so
+    // concurrent games on different devices can't clobber each other.
+    if (rawAction.type === "SYNC_PLAYER_STATS") {
+      const { playerDeltas } = rawAction.payload as {
+        playerDeltas: Array<{
+          name: string;
+          gamesPlayed: number; gamesWon: number;
+          handsPlayed: number; handsWon: number;
+          tricksPlayed: number; tricksTaken: number; tricksWonTeam: number;
+          callsMade: number; callsWon: number;
+          lonersAttempted: number; lonersWon: number;
+          pointsScored: number; euchresMade: number; euchred: number;
+          sweeps: number; swept: number;
+        }>;
+      };
+
+      const errs: string[] = [];
+      for (const delta of playerDeltas) {
+        const { error } = await supabase.rpc("increment_player_stats", {
+          p_name:             delta.name,
+          p_games_played:     delta.gamesPlayed    || 0,
+          p_games_won:        delta.gamesWon        || 0,
+          p_hands_played:     delta.handsPlayed     || 0,
+          p_hands_won:        delta.handsWon        || 0,
+          p_tricks_played:    delta.tricksPlayed    || 0,
+          p_tricks_taken:     delta.tricksTaken     || 0,
+          p_tricks_won_team:  delta.tricksWonTeam   || 0,
+          p_calls_made:       delta.callsMade       || 0,
+          p_calls_won:        delta.callsWon        || 0,
+          p_loners_attempted: delta.lonersAttempted || 0,
+          p_loners_converted: delta.lonersWon       || 0,
+          p_points_scored:    delta.pointsScored    || 0,
+          p_euchres_made:     delta.euchresMade     || 0,
+          p_euchred:          delta.euchred         || 0,
+          p_sweeps:           delta.sweeps          || 0,
+          p_swept:            delta.swept           || 0,
+        });
+        if (error) {
+          Logger.error(`[SERVER] increment_player_stats error for ${delta.name}:`, error);
+          errs.push(`${delta.name}: ${error.message}`);
+        }
+      }
+
+      if (errs.length > 0) {
+        return new Response(JSON.stringify({ error: errs.join("; ") }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 500,
+        });
+      }
+
+      return new Response(JSON.stringify({ success: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
+
     // ── Load current state ─────────────────────────────────────────────────────
     let { data: authGame, error: authError } = await supabase
       .from("games_auth")

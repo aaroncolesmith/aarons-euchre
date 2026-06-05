@@ -596,31 +596,21 @@ export async function syncUnsyncedDailies(playerName: string): Promise<void> {
                         opp_tricks: (game.handsPlayed * 5) - (hero.stats.tricksWonTeam || 0)
                     });
 
-                    // 2. Push to Aggregate Player Stats
-                    const currentCloud = await getPlayersStats([playerName]);
-                    const base = currentCloud[playerName] || getEmptyStats();
-                    
-                    const updatedStats: PlayerStats = {
-                        gamesPlayed: (base.gamesPlayed || 0) + 1,
-                        gamesWon: isWinner ? (base.gamesWon || 0) + 1 : (base.gamesWon || 0),
-                        handsPlayed: (base.handsPlayed || 0) + hero.stats.handsPlayed,
-                        handsWon: (base.handsWon || 0) + hero.stats.handsWon,
-                        tricksPlayed: (base.tricksPlayed || 0) + hero.stats.tricksPlayed,
-                        tricksTaken: (base.tricksTaken || 0) + hero.stats.tricksTaken,
-                        tricksWonTeam: (base.tricksWonTeam || 0) + hero.stats.tricksWonTeam,
-                        callsMade: (base.callsMade || 0) + hero.stats.callsMade,
-                        callsWon: (base.callsWon || 0) + hero.stats.callsWon,
-                        lonersAttempted: (base.lonersAttempted || 0) + hero.stats.lonersAttempted,
-                        lonersWon: (base.lonersWon || 0) + hero.stats.lonersWon,
-                        pointsScored: (base.pointsScored || 0) + hero.stats.pointsScored,
-                        euchresMade: (base.euchresMade || 0) + hero.stats.euchresMade,
-                        euchred: (base.euchred || 0) + hero.stats.euchred,
-                        sweeps: (base.sweeps || 0) + hero.stats.sweeps,
-                        swept: (base.swept || 0) + hero.stats.swept,
+                    // 2. Push aggregate career stats via edge function (atomic increment,
+                    //    service-role key bypasses anon-key RLS on player_stats).
+                    const delta = {
+                        name: playerName,
+                        gamesPlayed: 1,
+                        gamesWon: isWinner ? 1 : 0,
+                        ...hero.stats,
                     };
-
-                    await savePlayerStats(playerName, updatedStats);
-                    console.log(`[SYNC] Successfully updated aggregate stats for ${playerName}`);
+                    await supabase.functions.invoke('process-action', {
+                        body: {
+                            tableCode: game.tableCode,
+                            action: { type: 'SYNC_PLAYER_STATS', payload: { playerDeltas: [delta] } }
+                        }
+                    });
+                    console.log(`[SYNC] Successfully synced aggregate stats for ${playerName}`);
                 }
             }
         }
