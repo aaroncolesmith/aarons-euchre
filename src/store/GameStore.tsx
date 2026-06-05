@@ -105,9 +105,12 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         };
 
         // --- OPTIMISTIC UI ---
-        // Apply locally immediately so the user sees the card move/bid happen
-        // The gameReducerFixed idempotency logic will ignore the server broadcast later.
-        if (!['CREATE_TABLE', 'JOIN_TABLE'].includes(action.type)) {
+        // Apply locally immediately so the user sees the card move/bid happen.
+        // SET_DEALER is excluded: the server enriches it with server-generated
+        // hands (T-10) so we must wait for the authoritative broadcast rather
+        // than applying a handless action that would trigger the reducer's
+        // random fallback and diverge from the server's deal.
+        if (!['CREATE_TABLE', 'JOIN_TABLE', 'SET_DEALER'].includes(action.type)) {
             dispatch(actionWithId);
         }
 
@@ -483,17 +486,24 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
                         if (shouldIGenerate) {
                             const isDaily = state.isDailyChallenge;
-                            const dailySeed = isDaily && state.tableCode ? `${state.tableCode.split('-').slice(1, 4).join('-')}-hand-${state.handsPlayed}` : undefined;
-                            const deck = shuffleDeck(createDeck(), isDaily ? createDailyRNG(dailySeed!) : undefined);
-                            const { hands, kitty } = dealHands(deck);
-                            serverDispatch({
-                                type: 'SET_DEALER',
-                                payload: {
-                                    dealerIndex: count % 4,
-                                    hands,
-                                    upcard: kitty[0]
-                                }
-                            });
+                            if (isDaily) {
+                                // Daily: generate locally so the seeded deck is deterministic
+                                const dailySeed = state.tableCode ? `${state.tableCode.split('-').slice(1, 4).join('-')}-hand-${state.handsPlayed}` : undefined;
+                                const deck = shuffleDeck(createDeck(), createDailyRNG(dailySeed!));
+                                const { hands, kitty } = dealHands(deck);
+                                serverDispatch({
+                                    type: 'SET_DEALER',
+                                    payload: { dealerIndex: count % 4, hands, upcard: kitty[0] }
+                                });
+                            } else {
+                                // Multiplayer: server generates the deck (T-10). Send only the
+                                // dealer index; the edge function enriches with hands before
+                                // broadcasting, preventing any client from rigging the deal.
+                                serverDispatch({
+                                    type: 'SET_DEALER',
+                                    payload: { dealerIndex: count % 4 }
+                                });
+                            }
                         }
                     }, 500);
                 }
@@ -502,59 +512,87 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
     }, [state.phase]);
 
-    // Handle transition to next hand
+    // Handle transition to next hand.
+    // For regular multiplayer games the server cascade (T-11) handles dealing,
+    // so this effect only runs for Daily Challenge and all-bot local games.
     useEffect(() => {
-        if (state.phase === 'waiting_for_next_deal') {
-            const nextDealer = state.players[state.dealerIndex];
+        if (state.phase !== 'waiting_for_next_deal') return;
 
-            const dealNewHand = () => {
-                const isDaily = state.isDailyChallenge;
-                const dailySeed = isDaily && state.tableCode ? `${state.tableCode.split('-').slice(1, 4).join('-')}-hand-${state.handsPlayed}` : undefined;
-                const deck = shuffleDeck(createDeck(), isDaily ? createDailyRNG(dailySeed!) : undefined);
-                const { hands, kitty } = dealHands(deck);
-                serverDispatch({
-                    type: 'SET_DEALER',
-                    payload: {
-                        dealerIndex: state.dealerIndex,
-                        hands,
-                        upcard: kitty[0]
-                    }
-                });
-            };
+        const isRegularMultiplayer =
+            !!state.tableCode &&
+            !state.tableCode.startsWith('DAILY-') &&
+            !state.players.every(p => p.isComputer);
 
-            if (nextDealer.name === state.currentUser) {
-                setTimeout(dealNewHand, 100);
-            } else if (nextDealer.isComputer && isHost) {
-                setTimeout(dealNewHand, 500);
-            }
+        if (isRegularMultiplayer) return; // server cascade owns this
+
+        const nextDealer = state.players[state.dealerIndex];
+
+        const dealNewHand = () => {
+            const isDaily = state.isDailyChallenge;
+            const dailySeed = isDaily && state.tableCode ? `${state.tableCode.split('-').slice(1, 4).join('-')}-hand-${state.handsPlayed}` : undefined;
+            const deck = shuffleDeck(createDeck(), isDaily ? createDailyRNG(dailySeed!) : undefined);
+            const { hands, kitty } = dealHands(deck);
+            serverDispatch({
+                type: 'SET_DEALER',
+                payload: { dealerIndex: state.dealerIndex, hands, upcard: kitty[0] }
+            });
+        };
+
+        if (nextDealer.name === state.currentUser) {
+            setTimeout(dealNewHand, 100);
+        } else if (nextDealer.isComputer && isHost) {
+            setTimeout(dealNewHand, 500);
         }
     }, [state.phase, state.dealerIndex, state.currentUser, isHost]);
 
-    // Trick/Hand Completion
+    // Trick/Hand Completion.
+    // For regular multiplayer games the server cascade (T-11) sends CLEAR_TRICK
+    // and FINISH_HAND, so the client effects only run for Daily and all-bot games.
     useEffect(() => {
-        if (state.phase === 'waiting_for_trick') {
-            if (!isHost && !state.players.every(p => p.isComputer)) return;
+        if (state.phase !== 'waiting_for_trick') return;
 
-            const timer = setTimeout(() => {
-                serverDispatch({ type: 'CLEAR_TRICK' });
-            }, 3000);
-            return () => clearTimeout(timer);
-        }
+        const isRegularMultiplayer =
+            !!state.tableCode &&
+            !state.tableCode.startsWith('DAILY-') &&
+            !state.players.every(p => p.isComputer);
+        if (isRegularMultiplayer) return;
+
+        if (!isHost && !state.players.every(p => p.isComputer)) return;
+
+        const timer = setTimeout(() => {
+            serverDispatch({ type: 'CLEAR_TRICK' });
+        }, 3000);
+        return () => clearTimeout(timer);
     }, [state.phase, state.players, isHost]);
 
     useEffect(() => {
-        if (state.phase === 'scoring') {
-            if (!isHost && !state.players.every(p => p.isComputer)) return;
+        if (state.phase !== 'scoring') return;
 
-            const timer = setTimeout(() => {
-                serverDispatch({ type: 'FINISH_HAND' });
-            }, 2000);
-            return () => clearTimeout(timer);
-        }
+        const isRegularMultiplayer =
+            !!state.tableCode &&
+            !state.tableCode.startsWith('DAILY-') &&
+            !state.players.every(p => p.isComputer);
+        if (isRegularMultiplayer) return;
+
+        if (!isHost && !state.players.every(p => p.isComputer)) return;
+
+        const timer = setTimeout(() => {
+            serverDispatch({ type: 'FINISH_HAND' });
+        }, 2000);
+        return () => clearTimeout(timer);
     }, [state.phase, state.players, isHost]);
 
-    // Bot Logic
+    // Bot Logic (client-side).
+    // For regular multiplayer games the server cascade (T-11) drives bot moves,
+    // so this effect is disabled for those games to prevent racing the server.
+    // It remains active for Daily Challenge and all-bot local games.
     useEffect(() => {
+        const isRegularMultiplayer =
+            !!state.tableCode &&
+            !state.tableCode.startsWith('DAILY-') &&
+            !state.players.every(p => p.isComputer);
+        if (isRegularMultiplayer) return;
+
         const currentPlayer = state.players[state.currentPlayerIndex];
         if (!currentPlayer || !currentPlayer.isComputer || ['game_over', 'scoring', 'waiting_for_trick', 'randomizing_dealer', 'landing', 'lobby'].includes(state.phase)) return;
         if (state.stepMode) return;
