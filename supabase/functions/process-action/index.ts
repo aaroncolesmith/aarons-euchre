@@ -33,6 +33,29 @@ serve(async (req) => {
         appVersion: APP_VERSION
     });
 
+    // ── Special action: SUBMIT_DAILY_SCORE ────────────────────────────────────
+    // Routed through the edge function so the service role key is used for the
+    // insert, allowing RLS to block direct client writes to this table.
+    if (action.type === 'SUBMIT_DAILY_SCORE') {
+      const score = action.payload;
+      const { error } = await supabase
+        .from('daily_challenge_scores')
+        .upsert(score, { onConflict: 'date_string,player_name' });
+
+      if (error) {
+        Logger.error('[SERVER] SUBMIT_DAILY_SCORE error:', error);
+        return new Response(JSON.stringify({ error: error.message }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 500,
+        });
+      }
+
+      return new Response(JSON.stringify({ success: true }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      });
+    }
+
     // 1. Fetch current FULL state from games_auth (Source of Truth)
     // ... rest of the code ...
     let { data: authGame, error: authError } = await supabase

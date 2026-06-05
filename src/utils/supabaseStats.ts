@@ -465,6 +465,8 @@ export const getBotDecisions = async (limit: number = 100) => {
 
 /**
  * Hand of the Day Scoring
+ * Routes through the process-action edge function so the service role key is
+ * used for the write — the anon key is blocked by RLS on daily_challenge_scores.
  */
 export async function submitDailyScore(score: {
     date_string: string;
@@ -476,11 +478,12 @@ export async function submitDailyScore(score: {
     opp_tricks: number;
 }): Promise<boolean> {
     try {
-        const { error } = await supabase
-            .from('daily_challenge_scores')
-            .upsert(score, {
-                onConflict: 'date_string,player_name'
-            });
+        const { error } = await supabase.functions.invoke('process-action', {
+            body: {
+                tableCode: `DAILY-${score.date_string}`,
+                action: { type: 'SUBMIT_DAILY_SCORE', payload: score }
+            }
+        });
 
         if (error) {
             console.error('[SUPABASE DAILY] Error saving daily score:', error);
