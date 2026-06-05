@@ -9,6 +9,7 @@ import { createDailyRNG } from '../utils/rng';
 import { detectFreeze, applyRecovery, createHeartbeatSnapshot, logFreezeToCloud, HeartbeatState } from '../utils/heartbeat';
 import Logger from '../utils/logger';
 import { getStableUserId } from '../utils/identity';
+import { APP_VERSION } from '../version';
 
 // Reducers
 import { gameReducerFixed, INITIAL_STATE as ENGINE_INITIAL_STATE } from './engine';
@@ -262,36 +263,18 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             Logger.setMetadata({
                 tableCode: state.tableCode || undefined,
                 userName: state.currentUser || undefined,
-                appVersion: '1.76'
+                appVersion: APP_VERSION
             });
         }
     }, [state.tableCode, state.currentUser]);
 
-    // Persist active game state (Host Only with Throttling)
+    // Persist active game to localStorage for fast local restore.
+    // Cloud state is owned exclusively by the process-action edge function,
+    // which writes a sanitized (hand-stripped) snapshot — never the full state.
     useEffect(() => {
         if (!state.tableCode || state.phase === 'login' || state.phase === 'landing') return;
-        
-        // Always save local game state immediately for responsiveness on own machine (LocalStorage only)
         saveActiveGame(state);
-
-        // Only the host (or solo daily player) syncs the authoritative state to the cloud
-        if (!isHost) return;
-
-        const timer = setTimeout(async () => {
-            const syncToCloud = async () => {
-                await supabase
-                    .from('games')
-                    .upsert({
-                        code: state.tableCode,
-                        state: state,
-                        updated_at: new Date().toISOString()
-                    }, { onConflict: 'code' });
-            };
-            syncToCloud();
-        }, 1000); // 1000ms debounce
-
-        return () => clearTimeout(timer);
-    }, [state, isHost]);
+    }, [state]);
 
     // Heartbeat Monitor (Freeze Recovery)
     useEffect(() => {

@@ -3,6 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1";
 // Note: We use the import map to resolve "src/" to the symlinked source directory
 import { gameReducerFixed, sanitizeState } from "src/store/engine.ts";
 import Logger from "src/utils/logger.ts";
+import { APP_VERSION } from "src/version.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -29,7 +30,7 @@ serve(async (req) => {
     Logger.setMetadata({
         tableCode,
         environment: 'server',
-        appVersion: '1.69'
+        appVersion: APP_VERSION
     });
 
     // 1. Fetch current FULL state from games_auth (Source of Truth)

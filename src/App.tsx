@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { LayoutGroup } from 'framer-motion';
 import { GameProvider, useGame } from './store/GameStore';
+import { APP_VERSION } from './version';
 import { LoginPage } from './components/Lobby/LoginPage';
 import { LandingPage } from './components/Lobby/LandingPage';
 import { LobbyView } from './components/Lobby/LobbyView';
@@ -114,7 +115,7 @@ function App() {
             {/* Version Footer */}
             <div className="fixed bottom-2 left-1/2 -translate-x-1/2 pointer-events-none opacity-30 z-[100]">
                 <div className="text-[10px] font-black uppercase tracking-[0.5em]">
-                    Euchre Engine v1.79
+                    Euchre Engine v{APP_VERSION}
                 </div>
             </div>
         </div>
