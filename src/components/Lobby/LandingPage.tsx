@@ -8,8 +8,14 @@ import { APP_VERSION } from '../../version';
 
 export const LandingPage = () => {
     const { state, dispatch } = useGame();
-    const [code, setCode] = useState('');
-    const [showJoin, setShowJoin] = useState(false);
+    const [showJoin, setShowJoin] = useState(() => {
+        const params = new URLSearchParams(window.location.search);
+        return !!params.get('join');
+    });
+    const [code, setCode] = useState(() => {
+        const params = new URLSearchParams(window.location.search);
+        return params.get('join') || '';
+    });
     const [_refreshKey, setRefreshKey] = useState(0);
     const [cloudGames, setCloudGames] = useState<any[]>([]);
     const [gameFilter, setGameFilter] = useState<'in-progress' | 'completed'>('in-progress');
@@ -63,6 +69,11 @@ export const LandingPage = () => {
 
     const handleJoinTable = async () => {
         if (!code) return;
+
+        // Clear invite param from URL so a page refresh doesn't re-join
+        if (window.location.search) {
+            window.history.replaceState({}, '', window.location.pathname);
+        }
 
         const { data } = await supabase
             .from('games')

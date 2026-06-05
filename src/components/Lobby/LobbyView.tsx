@@ -1,8 +1,19 @@
+import { useState } from 'react';
 import { useGame } from '../../store/GameStore';
 import { PlayerSeat } from '../common/PlayerSeat';
 
 export const LobbyView = () => {
     const { state, dispatch } = useGame();
+    const [copied, setCopied] = useState(false);
+
+    const handleCopyLink = () => {
+        if (!state.tableCode) return;
+        const url = `${window.location.origin}${window.location.pathname}?join=${state.tableCode}`;
+        navigator.clipboard.writeText(url).then(() => {
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        });
+    };
 
     return (
         <div className="flex-1 bg-paper rounded-[2rem] md:rounded-[3rem] border-4 border-brand shadow-sketch-brand relative flex flex-col w-full h-full overflow-hidden">
@@ -21,6 +32,12 @@ export const LobbyView = () => {
 
                 <div className="flex flex-col items-end gap-2">
                     <div className="flex gap-2">
+                        <button
+                            onClick={handleCopyLink}
+                            className="bg-paper hover:bg-brand/10 text-brand-dark px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border-2 border-brand transition-all shadow-[3px_3px_0px_0px_rgba(16,185,129,0.3)]"
+                        >
+                            {copied ? 'COPIED ✓' : 'INVITE LINK'}
+                        </button>
                         <button
                             onClick={() => dispatch({ type: 'SET_TAB', payload: { tab: 'stats' } })}
                             className="bg-paper hover:bg-brand/10 text-brand-dark px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border-2 border-brand transition-all shadow-[3px_3px_0px_0px_rgba(16,185,129,0.3)]"

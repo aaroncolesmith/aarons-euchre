@@ -10,10 +10,49 @@ interface GameOverProps {
     onExit: () => void;
 }
 
+function buildDailyShareText(state: GameState): string {
+    const dateStr = state.tableCode?.split('-').slice(1, 4).join('-') ?? '';
+    const userIdx = state.players.findIndex(p => p.name === state.currentUser);
+    const isTeam1 = userIdx === 0 || userIdx === 2;
+    const myScore = isTeam1 ? state.scores.team1 : state.scores.team2;
+    const oppScore = isTeam1 ? state.scores.team2 : state.scores.team1;
+    const won = myScore >= 10;
+
+    // Build per-hand emoji grid from history (chronological order)
+    const handEmojis = [...state.history]
+        .reverse()
+        .map(hand => {
+            const myTeamWon = isTeam1 ? hand.winningTeam === 1 : hand.winningTeam === 2;
+            return myTeamWon ? '🃏' : '💀';
+        })
+        .join('');
+
+    return [
+        `🃏 Aaron's Euchre — Hand of the Day ${dateStr}`,
+        `${won ? '🏆 WIN' : '❌ LOSS'} · ${myScore}–${oppScore}`,
+        handEmojis,
+        ``,
+        `aarons-euchre.vercel.app`,
+    ].join('\n');
+}
+
 export const GameOver: React.FC<GameOverProps> = ({ state, onPlayAgain, onExit }) => {
     const [showGameRecap, setShowGameRecap] = React.useState(false);
+    const [shareCopied, setShareCopied] = React.useState(false);
     const winner = state.scores.team1 >= 10 ? state.teamNames.team1 : state.teamNames.team2;
     const isTeam1Winner = state.scores.team1 >= 10;
+
+    const handleShare = () => {
+        const text = buildDailyShareText(state);
+        if (navigator.share) {
+            navigator.share({ text }).catch(() => {});
+        } else {
+            navigator.clipboard.writeText(text).then(() => {
+                setShareCopied(true);
+                setTimeout(() => setShareCopied(false), 2500);
+            });
+        }
+    };
 
     return (
         <div className="w-full h-full overflow-y-auto custom-scrollbar pb-24 animate-in fade-in duration-700 font-hand">
@@ -64,7 +103,13 @@ export const GameOver: React.FC<GameOverProps> = ({ state, onPlayAgain, onExit }
                                     </h2>
                                     <DailyLeaderboard hideHeader={true} />
                                 </div>
-                                <div className="flex justify-center pt-8">
+                                <div className="flex flex-col items-center gap-4 pt-4">
+                                    <button
+                                        onClick={handleShare}
+                                        className="w-full bg-amber-400 hover:bg-amber-500 text-ink font-black py-5 rounded-2xl text-xl border-4 border-ink shadow-sketch-ink transition-all active:scale-95 uppercase tracking-widest"
+                                    >
+                                        {shareCopied ? '✓ Copied to clipboard!' : '🃏 Share Score'}
+                                    </button>
                                     <button
                                         onClick={onExit}
                                         className="bg-white hover:bg-red-50 text-red-500 font-black py-4 px-16 rounded-2xl text-xl border-4 border-red-500 shadow-sketch-red transition-all active:scale-95 uppercase tracking-widest"
