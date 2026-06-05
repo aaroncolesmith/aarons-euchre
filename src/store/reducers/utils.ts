@@ -94,6 +94,7 @@ export const INITIAL_STATE_FUNC = (): GameState => ({
     stepMode: false,
     isBotThinking: false,
     lastActive: Date.now(),
+    isDailyChallenge: false,
     stateVersion: 0,
     processedActionIds: [],
     activeTab: 'home'

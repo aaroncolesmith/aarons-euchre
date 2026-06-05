@@ -27,11 +27,23 @@ export const systemReducer = (state: GameState, action: Action): GameState | nul
 
         case 'LOAD_EXISTING_GAME': {
             const loaded = action.payload.gameState;
+            if (!loaded) return state;
+
             const currentUser = state.currentUser;
             const isPlayerInGame = loaded.players?.some(p => p.name === currentUser);
+
+            // Reconstruct state starting from a fresh initial state
+            const baseState = INITIAL_STATE_FUNC();
+
+            // Ensure we don't accidentally load into a "stuck" login/landing phase
+            const phase = (loaded.phase === 'login' || loaded.phase === 'landing')
+                ? 'lobby'
+                : (loaded.phase || 'lobby');
+
             return {
-                ...INITIAL_STATE_FUNC(),
+                ...baseState,
                 ...loaded,
+                phase,
                 currentUser,
                 currentUserId: state.currentUserId || getStableUserId(currentUser, false),
                 currentViewPlayerName: isPlayerInGame ? currentUser : (loaded.currentViewPlayerName || currentUser),

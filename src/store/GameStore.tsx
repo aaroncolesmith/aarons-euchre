@@ -6,7 +6,6 @@ import { shouldCallTrump, shouldGoAlone, getBestBid, getBotMove, getCardValue } 
 import { saveMultiplePlayerStats, getAllPlayerStats, getPlayersStats, mergeAllStats, submitDailyScore, syncUnsyncedDailies, LOCAL_STORAGE_KEY, clearLeaderboardStatsCache } from '../utils/supabaseStats';
 import { useHostElection } from '../utils/presence';
 import { createDailyRNG } from '../utils/rng';
-import { detectFreeze, applyRecovery, createHeartbeatSnapshot, logFreezeToCloud, HeartbeatState } from '../utils/heartbeat';
 import Logger from '../utils/logger';
 import { getStableUserId } from '../utils/identity';
 import { APP_VERSION } from '../version';
@@ -64,7 +63,6 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const channelRef = useRef<any>(null);
     const lastBotDecisionRef = useRef<string | null>(null);
     const lastGameStatsSavedRef = useRef<string | null>(null);
-    const lastHeartbeatRef = useRef<HeartbeatState | null>(null);
     const bootstrappedTablesRef = useRef<Set<string>>(new Set());
     const matchStartCloudStatsRef = useRef<Record<string, Record<string, PlayerStats>>>({});
     const { isHost, onlinePlayers } = useHostElection(state.tableCode, state.currentUser);
@@ -279,34 +277,6 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         saveActiveGame(state);
     }, [state]);
 
-    // Heartbeat Monitor (Freeze Recovery)
-    useEffect(() => {
-        if (!state.tableCode || state.phase === 'login' || state.phase === 'landing' || state.phase === 'game_over') {
-            lastHeartbeatRef.current = null;
-            return;
-        }
-
-        // Only the host (or solo daily player) is responsible for recovery intervention
-        if (!isHost) return;
-
-        const interval = setInterval(async () => {
-            const currentSnapshot = createHeartbeatSnapshot(state);
-            const recovery = detectFreeze(currentSnapshot, lastHeartbeatRef.current);
-
-            if (recovery) {
-                // Apply recovery action locally (will be broadcasted by broadcastDispatch if implemented there, 
-                // but applyRecovery uses the provided dispatch which we should make sure is broadcastDispatch)
-                applyRecovery(recovery, broadcastDispatch);
-                
-                // Log to cloud
-                await logFreezeToCloud(state, recovery, true);
-            }
-
-            lastHeartbeatRef.current = currentSnapshot;
-        }, 10000); // Check every 10 seconds
-
-        return () => clearInterval(interval);
-    }, [state, isHost, broadcastDispatch]);
 
     // Capture a cloud baseline at the start of each regular game so we can detect
     // whether server-derived stats failed and safely apply a fallback at game over.

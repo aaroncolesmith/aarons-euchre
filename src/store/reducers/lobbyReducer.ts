@@ -1,5 +1,5 @@
 import { GameState, Action } from '../../types/game.ts';
-import { generateTableCode, generateTableName, createEmptyPlayer, getEmptyStats, BOT_PERSONALITIES, BOT_NAMES_POOL, getTeamName, shuffleArray } from './utils.ts';
+import { generateTableCode, generateTableName, createEmptyPlayer, getEmptyStats, BOT_PERSONALITIES, BOT_NAMES_POOL, getTeamName, shuffleArray, INITIAL_STATE_FUNC } from './utils.ts';
 import { getStableUserId } from '../../utils/identity.ts';
 
 export const lobbyReducer = (state: GameState, action: Action): GameState | null => {
@@ -8,7 +8,9 @@ export const lobbyReducer = (state: GameState, action: Action): GameState | null
             const code = generateTableCode();
             const name = generateTableName();
             return {
-                ...state,
+                ...INITIAL_STATE_FUNC(),
+                currentUser: state.currentUser,
+                currentUserId: state.currentUserId,
                 tableId: Math.random().toString(36).substr(2, 9),
                 tableName: name,
                 tableCode: code,
@@ -22,7 +24,9 @@ export const lobbyReducer = (state: GameState, action: Action): GameState | null
         case 'JOIN_TABLE': {
             const isAlreadyLoaded = state.tableCode === action.payload.code;
             return {
-                ...state,
+                ...INITIAL_STATE_FUNC(),
+                currentUser: state.currentUser,
+                currentUserId: state.currentUserId,
                 tableCode: action.payload.code,
                 tableName: isAlreadyLoaded ? state.tableName : 'The Royal Table',
                 phase: isAlreadyLoaded ? state.phase : 'lobby',

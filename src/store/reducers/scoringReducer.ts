@@ -34,7 +34,8 @@ export const scoringReducer = (state: GameState, action: Action): GameState | nu
 
             const isWinnerT1 = p1 > p2;
             const handCount = state.handsPlayed + 1;
-            const isGameOver = state.isDailyChallenge ? (handCount >= 4) : (newScores.team1 >= 10 || newScores.team2 >= 10);
+            const isActuallyDaily = state.isDailyChallenge && state.tableCode?.startsWith('DAILY-');
+            const isGameOver = isActuallyDaily ? (handCount >= 4) : (newScores.team1 >= 10 || newScores.team2 >= 10);
             const isTeam1 = (idx: number) => idx === 0 || idx === 2;
 
             const handResult: HandResult = {
