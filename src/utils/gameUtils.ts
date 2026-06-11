@@ -1,5 +1,6 @@
 export const generateTableCode = () => {
-    return Math.random().toString(36).substr(2, 6).toUpperCase();
+    const part = () => Math.floor(Math.random() * 900 + 100).toString();
+    return `${part()}-${part()}`;
 };
 
 export const generateTableName = () => {

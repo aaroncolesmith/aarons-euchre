@@ -16,12 +16,12 @@ export const matchReducer = (state: GameState, action: Action): GameState | null
             const isValidUpcard = upcard && upcard.suit && upcard.rank;
 
             if (!isValidHands || !isValidUpcard) {
-                const isPractice = !!state.tableCode?.startsWith('PRACTICE-');
-                const isSeeded = state.isDailyChallenge || isPractice;
+                const isEukle = !!state.tableCode?.startsWith('EUKLE-');
+                const isSeeded = state.isDailyChallenge || isEukle;
                 let seededSeed: string | undefined;
                 if (isSeeded && state.tableCode) {
-                    if (isPractice) {
-                        seededSeed = `practice-${state.tableCode.split('-')[1]}-${state.handsPlayed}`;
+                    if (isEukle) {
+                        seededSeed = `eukle-${state.tableCode.split('-')[1]}-${state.handsPlayed}`;
                     } else {
                         const dateStr = state.tableCode.split('-').slice(1, 4).join('-');
                         seededSeed = `hand-${getHandNumberFromDateString(dateStr)}-${state.handsPlayed}`;

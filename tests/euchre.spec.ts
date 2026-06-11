@@ -50,7 +50,7 @@ async function login(page: Page, username: string, testName: string) {
 
     await captureStep(page, '02_username_filled', testName);
 
-    const loginButton = page.getByRole('button', { name: /login/i });
+    const loginButton = page.getByRole('button', { name: /play|login/i });
     await loginButton.click();
     console.log(`🖱️  Clicked login button`);
 
@@ -88,10 +88,10 @@ async function joinTable(page: Page, tableCode: string, testName: string) {
 
     await captureStep(page, '04_before_join', testName);
 
-    // First click "JOIN EXISTING" to reveal the input
-    const showJoinButton = page.getByRole('button', { name: /join existing|private table/i });
+    // First click "JOIN TABLE" to reveal the input
+    const showJoinButton = page.getByRole('button', { name: /^join table$/i });
     await showJoinButton.click();
-    console.log(`🖱️  Clicked 'Join Existing' button`);
+    console.log(`🖱️  Clicked 'Join Table' button`);
 
     await logAndWait('Waiting for join form', 500);
 
@@ -101,7 +101,7 @@ async function joinTable(page: Page, tableCode: string, testName: string) {
 
     await captureStep(page, '05_table_code_filled', testName);
 
-    const joinButton = page.getByRole('button', { name: /join table/i });
+    const joinButton = page.getByRole('button', { name: /^join$/i });
     await joinButton.click();
     console.log(`🖱️  Clicked join table button`);
 
@@ -153,7 +153,7 @@ async function startMatch(page: Page, testName: string) {
 
     await captureStep(page, '11_before_start_match', testName);
 
-    const startButton = page.getByRole('button', { name: /start game/i }); // Button text is "START GAME"
+    const startButton = page.getByRole('button', { name: /start match|start game/i });
     await startButton.click();
     console.log(`🖱️  Clicked start match button`);
 
@@ -225,9 +225,9 @@ test.describe('Euchre Game Tests', () => {
         // Sit at seat 0
         await sitAtSeat(page, 0, testName);
 
-        // Add 3 bots
-        for (let i = 1; i <= 3; i++) {
-            await addBot(page, i, testName);
+        // Add 3 bots (always click first available ADD BOT — each fill removes one slot)
+        for (let i = 0; i < 3; i++) {
+            await addBot(page, 0, testName);
         }
 
         // Start match
@@ -273,9 +273,9 @@ test.describe('Euchre Game Tests', () => {
             await joinTable(page2, tableCode, `${testName}_p2`);
             await sitAtSeat(page2, 2, `${testName}_p2`);
 
-            // Player 1: Add bots and start
-            await addBot(page1, 1, `${testName}_p1`);
-            await addBot(page1, 3, `${testName}_p1`);
+            // Player 1: Add bots to remaining seats (always nth(0) as each fill removes a slot)
+            await addBot(page1, 0, `${testName}_p1`);
+            await addBot(page1, 0, `${testName}_p1`);
             await startMatch(page1, `${testName}_p1`);
 
             // Wait for player 2 to see the game start
@@ -312,8 +312,8 @@ test.describe('Euchre Game Tests', () => {
         const tableCode = await createTable(page, testName);
         await sitAtSeat(page, 0, testName);
 
-        for (let i = 1; i <= 3; i++) {
-            await addBot(page, i, testName);
+        for (let i = 0; i < 3; i++) {
+            await addBot(page, 0, testName);
         }
 
         await startMatch(page, testName);

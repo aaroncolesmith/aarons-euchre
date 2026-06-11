@@ -153,7 +153,7 @@ export const lobbyReducer = (state: GameState, action: Action): GameState | null
                 ...state,
                 isDailyChallenge: true,
                 tableId: `daily-${dateString}-${userName}`,
-                tableName: `Hand of the Day (${dateString})`,
+                tableName: `Eukle of the Day (${dateString})`,
                 tableCode: `DAILY-${dateString}-${userName}`,
                 currentViewPlayerName: userName,
                 players: dailyPlayers,
@@ -165,14 +165,14 @@ export const lobbyReducer = (state: GameState, action: Action): GameState | null
                     team2: getTeamName('Huber', 'Wooden')
                 },
                 activeTab: 'game',
-                logs: [`Welcome to the Hand of the Day for ${dateString}!`, ...state.logs]
+                logs: [`Welcome to the Eukle of the Day for ${dateString}!`, ...state.logs]
             };
         }
 
-        case 'START_PRACTICE_HAND': {
-            const { userName, handNumber } = action.payload;
+        case 'START_EUKLE': {
+            const { userName, eukleNumber } = action.payload;
             const botNames = ['Huber', 'J-Bock', 'Wooden'];
-            const practicePlayers = [
+            const euklePlayers = [
                 {
                     ...createEmptyPlayer(0),
                     name: userName,
@@ -193,11 +193,11 @@ export const lobbyReducer = (state: GameState, action: Action): GameState | null
             return {
                 ...state,
                 isDailyChallenge: false,
-                tableId: `practice-${handNumber}-${userName}`,
-                tableName: `Practice Hand #${handNumber}`,
-                tableCode: `PRACTICE-${handNumber}-${userName}`,
+                tableId: `eukle-${eukleNumber}-${userName}`,
+                tableName: `Eukle #${eukleNumber}`,
+                tableCode: `EUKLE-${eukleNumber}-${userName}`,
                 currentViewPlayerName: userName,
-                players: practicePlayers,
+                players: euklePlayers,
                 phase: 'waiting_for_next_deal',
                 dealerIndex: 0,
                 displayDealerIndex: 0,
@@ -206,7 +206,7 @@ export const lobbyReducer = (state: GameState, action: Action): GameState | null
                     team2: getTeamName('Huber', 'Wooden')
                 },
                 activeTab: 'game',
-                logs: [`Starting Practice Hand #${handNumber}.`, ...state.logs]
+                logs: [`Starting Eukle #${eukleNumber}.`, ...state.logs]
             };
         }
 

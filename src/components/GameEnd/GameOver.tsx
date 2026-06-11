@@ -28,7 +28,7 @@ function buildDailyShareText(state: GameState): string {
         .join('');
 
     return [
-        `🃏 Aaron's Euchre — Hand of the Day ${dateStr}`,
+        `🃏 Aaron's Euchre — Eukle of the Day ${dateStr}`,
         `${won ? '🏆 WIN' : '❌ LOSS'} · ${myScore}–${oppScore}`,
         handEmojis,
         ``,

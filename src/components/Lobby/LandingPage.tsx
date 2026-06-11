@@ -110,19 +110,19 @@ export const LandingPage = () => {
         }
     };
 
-    const startOrResumePractice = (handNumber: number) => {
-        const tableCode = `PRACTICE-${handNumber}-${state.currentUser}`;
+    const startOrResumePractice = (eukleNumber: number) => {
+        const tableCode = `EUKLE-${eukleNumber}-${state.currentUser}`;
         const existing = savedGames.find(g => g.tableCode === tableCode);
         if (existing) {
             dispatch({ type: 'LOAD_EXISTING_GAME', payload: { gameState: existing } });
         } else {
-            dispatch({ type: 'START_PRACTICE_HAND', payload: { userName: state.currentUser!, handNumber } });
+            dispatch({ type: 'START_EUKLE', payload: { userName: state.currentUser!, eukleNumber } });
         }
     };
 
     // Derive local practice game status from savedGames
-    const practiceStatus = (handNumber: number): 'not-started' | 'in-progress' | 'won' | 'lost' => {
-        const tableCode = `PRACTICE-${handNumber}-${state.currentUser}`;
+    const practiceStatus = (eukleNumber: number): 'not-started' | 'in-progress' | 'won' | 'lost' => {
+        const tableCode = `EUKLE-${eukleNumber}-${state.currentUser}`;
         const game = savedGames.find(g => g.tableCode === tableCode);
         if (!game) return 'not-started';
         if (game.phase !== 'game_over') return 'in-progress';
@@ -179,14 +179,14 @@ export const LandingPage = () => {
                         <div className="relative z-10">
                             <div className="flex items-start justify-between mb-1">
                                 <div className="text-[10px] font-black uppercase tracking-[0.3em] text-white/80">
-                                    {hasPlayedDaily ? 'Challenge Complete' : 'Daily Seeded Hand'}
+                                    {hasPlayedDaily ? 'Complete' : 'Daily Seeded Eukle'}
                                 </div>
                                 <div className="text-[10px] font-black uppercase tracking-widest text-white/60 tabular-nums">
                                     #{todayHandNum}
                                 </div>
                             </div>
                             <div className="text-3xl font-black uppercase text-white tracking-widest leading-none mb-3 group-hover:scale-[1.02] transition-transform origin-left">
-                                Hand of the Day
+                                Eukle of the Day
                             </div>
 
                             {hasPlayedDaily ? (
@@ -198,7 +198,7 @@ export const LandingPage = () => {
                                 </div>
                             ) : (
                                 <div className="text-[11px] text-white/90 font-bold uppercase tracking-wider">
-                                    Play today's seeded game — compete globally.
+                                    Play today's seeded Eukle — compete globally.
                                 </div>
                             )}
                         </div>
@@ -218,7 +218,7 @@ export const LandingPage = () => {
                         </div>
                     )}
 
-                    {/* Practice Hands toggle */}
+                    {/* Numbered Eukles toggle */}
                     <button
                         onClick={() => setShowPractice(v => !v)}
                         className="mt-3 flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-ink-dim hover:text-ink transition-colors"
@@ -226,7 +226,7 @@ export const LandingPage = () => {
                         <svg className={`w-3 h-3 transition-transform ${showPractice ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7" />
                         </svg>
-                        Practice Hands (100)
+                        Numbered Eukles (100)
                     </button>
 
                     {showPractice && (

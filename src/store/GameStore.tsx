@@ -98,7 +98,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             return;
         }
 
-        if (!state.tableCode || state.tableCode.startsWith('DAILY-') || state.tableCode.startsWith('PRACTICE-')) {
+        if (!state.tableCode || state.tableCode.startsWith('DAILY-') || state.tableCode.startsWith('EUKLE-')) {
             broadcastDispatch(action);
             return;
         }
@@ -350,10 +350,38 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         if (lastGameStatsSavedRef.current === state.tableCode) return;
 
         const isDaily = state.tableCode.startsWith('DAILY-');
-        const isPractice = state.tableCode.startsWith('PRACTICE-');
-        if (isPractice) {
-            // Practice games are local-only; no stats tracking.
-            lastGameStatsSavedRef.current = state.tableCode;
+        const isEukle = state.tableCode.startsWith('EUKLE-');
+        if (isEukle) {
+            // Eukle: submit score to eukle_scores (differentiated from daily stats).
+            const syncEukleScore = async () => {
+                const heroIdx = state.players.findIndex(p => p.name === state.currentUser);
+                if (heroIdx === -1) return;
+                const isTeam1 = heroIdx === 0 || heroIdx === 2;
+                const won = isTeam1 ? state.scores.team1 >= 10 : state.scores.team2 >= 10;
+                const eukleNumber = parseInt(state.tableCode!.split('-')[1], 10);
+                try {
+                    await supabase.functions.invoke('process-action', {
+                        body: {
+                            tableCode: state.tableCode!,
+                            action: {
+                                type: 'SUBMIT_EUKLE_SCORE',
+                                payload: {
+                                    player_name: state.currentUser,
+                                    eukle_number: eukleNumber,
+                                    won,
+                                    team_points: isTeam1 ? state.scores.team1 : state.scores.team2,
+                                    opp_points: isTeam1 ? state.scores.team2 : state.scores.team1,
+                                }
+                            }
+                        }
+                    });
+                    Logger.info(`[STATS] Eukle #${eukleNumber} score submitted`);
+                } catch (err) {
+                    Logger.error('[STATS] Eukle score submission failed', err);
+                }
+                lastGameStatsSavedRef.current = state.tableCode!;
+            };
+            syncEukleScore();
             return;
         }
         if (!isDaily) {
@@ -435,13 +463,13 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                         const shouldIGenerate = allBotsGame ? true : isHost;
 
                         if (shouldIGenerate) {
-                            const isPractice = !!state.tableCode?.startsWith('PRACTICE-');
-                            const isSeededLocal = state.isDailyChallenge || isPractice;
+                            const isEukle = !!state.tableCode?.startsWith('EUKLE-');
+                            const isSeededLocal = state.isDailyChallenge || isEukle;
                             if (isSeededLocal) {
-                                // Daily / Practice: generate locally so the seeded deck is deterministic
+                                // Daily / Eukle: generate locally so the seeded deck is deterministic
                                 let seed: string;
-                                if (isPractice) {
-                                    seed = `practice-${state.tableCode!.split('-')[1]}-${state.handsPlayed}`;
+                                if (isEukle) {
+                                    seed = `eukle-${state.tableCode!.split('-')[1]}-${state.handsPlayed}`;
                                 } else {
                                     const dateStr = state.tableCode?.split('-').slice(1, 4).join('-') ?? '';
                                     const handNum = dateStr ? getHandNumberFromDateString(dateStr) : 0;

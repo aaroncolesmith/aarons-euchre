@@ -278,6 +278,26 @@ serve(async (req) => {
       });
     }
 
+    // ── Special action: SUBMIT_EUKLE_SCORE ────────────────────────────────────
+    if (rawAction.type === "SUBMIT_EUKLE_SCORE") {
+      const { error } = await supabase
+        .from("eukle_scores")
+        .insert(rawAction.payload);
+
+      if (error) {
+        Logger.error("[SERVER] SUBMIT_EUKLE_SCORE error:", error);
+        return new Response(JSON.stringify({ error: error.message }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 500,
+        });
+      }
+
+      return new Response(JSON.stringify({ success: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
+
     // ── Special action: SYNC_PLAYER_STATS ─────────────────────────────────────
     // Atomic per-game stat increment for Daily Challenge games (which run
     // client-side and don't pass through the normal game loop).  The payload
