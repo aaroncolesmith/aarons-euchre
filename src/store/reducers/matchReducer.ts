@@ -1,6 +1,7 @@
 import { GameState, Action, GameEvent } from '../../types/game.ts';
 import { shuffleDeck, createDeck, dealHands, sortHand, trackTrumpCall, createTrumpCallLog, determineWinner, logPlayEvent, getEffectiveSuit, isValidPlay } from './utils.ts';
 import { createDailyRNG } from '../../utils/rng.ts';
+import { getHandNumberFromDateString } from '../../utils/dailyUtils.ts';
 export const matchReducer = (state: GameState, action: Action): GameState | null => {
     switch (action.type) {
         case 'SET_DEALER': {
@@ -16,7 +17,9 @@ export const matchReducer = (state: GameState, action: Action): GameState | null
 
             if (!isValidHands || !isValidUpcard) {
                 const isDaily = state.isDailyChallenge;
-                const dailySeed = isDaily && state.tableCode ? `${state.tableCode.replace('DAILY-', '')}-hand-${state.handsPlayed}` : undefined;
+                const dateStr = state.tableCode?.split('-').slice(1, 4).join('-') ?? '';
+                const handNum = dateStr ? getHandNumberFromDateString(dateStr) : 0;
+                const dailySeed = isDaily && state.tableCode ? `hand-${handNum}-${state.handsPlayed}` : undefined;
                 const deck = shuffleDeck(createDeck(), isDaily ? createDailyRNG(dailySeed!) : undefined);
                 const { hands: h, kitty: k } = dealHands(deck);
                 return {

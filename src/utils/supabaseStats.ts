@@ -455,12 +455,17 @@ export async function submitDailyScore(score: {
     individual_tricks: number;
     opp_points: number;
     opp_tricks: number;
+    hand_number?: number;
 }): Promise<boolean> {
+    const [y, m, d] = score.date_string.split('-').map(Number);
+    const hand_number = score.hand_number ??
+        Math.round((new Date(y, m - 1, d).getTime() - new Date(2026, 0, 1).getTime()) / 86400000);
+
     try {
         const { error } = await supabase.functions.invoke('process-action', {
             body: {
                 tableCode: `DAILY-${score.date_string}`,
-                action: { type: 'SUBMIT_DAILY_SCORE', payload: score }
+                action: { type: 'SUBMIT_DAILY_SCORE', payload: { ...score, hand_number } }
             }
         });
 
@@ -498,13 +503,18 @@ export async function getDailyLeaderboard(date_string: string | 'all') {
     }
 }
 
-export async function hasUserPlayedDaily(playerName: string, dateString: string): Promise<boolean> {
+export async function hasUserPlayedDaily(playerName: string, dateString: string, handNumber?: number): Promise<boolean> {
     try {
+        const [y, m, d] = dateString.split('-').map(Number);
+        const hand_number = handNumber ??
+            Math.round((new Date(y, m - 1, d).getTime() - new Date(2026, 0, 1).getTime()) / 86400000);
+
         const { data, error } = await supabase
             .from('daily_challenge_scores')
             .select('player_name')
             .eq('player_name', playerName)
-            .eq('date_string', dateString)
+            .or(`hand_number.eq.${hand_number},date_string.eq.${dateString}`)
+            .limit(1)
             .maybeSingle();
 
         if (error) {

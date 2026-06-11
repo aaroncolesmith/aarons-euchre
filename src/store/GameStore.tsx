@@ -6,6 +6,7 @@ import { shouldCallTrump, shouldGoAlone, getBestBid, getBotMove, getCardValue } 
 import { getAllPlayerStats, mergeAllStats, syncUnsyncedDailies, clearLeaderboardStatsCache, LOCAL_STORAGE_KEY } from '../utils/supabaseStats';
 import { useHostElection } from '../utils/presence';
 import { createDailyRNG } from '../utils/rng';
+import { getHandNumberFromDateString } from '../utils/dailyUtils';
 import Logger from '../utils/logger';
 import { getStableUserId } from '../utils/identity';
 import { APP_VERSION } from '../version';
@@ -64,6 +65,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const lastBotDecisionRef = useRef<string | null>(null);
     const lastGameStatsSavedRef = useRef<string | null>(null);
     const bootstrappedTablesRef = useRef<Set<string>>(new Set());
+    const appOpenLoggedRef = useRef(false);
     const { isHost, onlinePlayers } = useHostElection(state.tableCode, state.currentUser);
 
     // Enhanced dispatch that calls the authoritative server
@@ -251,6 +253,17 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 if (username) {
                     localStorage.setItem('euchre_current_user', username);
                     dispatch({ type: 'LOGIN', payload: { userName: username, userId: session.user.id } });
+                    // H-4: Log one APP_OPEN per session for DAU tracking
+                    if (!appOpenLoggedRef.current) {
+                        appOpenLoggedRef.current = true;
+                        supabase.from('play_events').insert({
+                            game_code: 'app',
+                            hand_number: 0,
+                            event_type: 'APP_OPEN',
+                            event_data: { version: APP_VERSION },
+                            player_name: username
+                        }).then();
+                    }
                 }
             }
         });
@@ -420,7 +433,9 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                             const isDaily = state.isDailyChallenge;
                             if (isDaily) {
                                 // Daily: generate locally so the seeded deck is deterministic
-                                const dailySeed = state.tableCode ? `${state.tableCode.split('-').slice(1, 4).join('-')}-hand-${state.handsPlayed}` : undefined;
+                                const dateStr = state.tableCode?.split('-').slice(1, 4).join('-') ?? '';
+                                const handNum = dateStr ? getHandNumberFromDateString(dateStr) : 0;
+                                const dailySeed = state.tableCode ? `hand-${handNum}-${state.handsPlayed}` : undefined;
                                 const deck = shuffleDeck(createDeck(), createDailyRNG(dailySeed!));
                                 const { hands, kitty } = dealHands(deck);
                                 serverDispatch({

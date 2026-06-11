@@ -37,9 +37,15 @@ function generateId(): string {
 /** Generate a fresh dealt hand (seeded for Daily Challenge games). */
 function dealForState(state: GameState, tableCode: string): { hands: Card[][]; upcard: Card } {
   const isDaily = state.isDailyChallenge;
-  const dailySeed = isDaily
-    ? `${tableCode.replace("DAILY-", "")}-hand-${state.handsPlayed}`
-    : undefined;
+  let dailySeed: string | undefined;
+  if (isDaily) {
+    const dateStr = tableCode.split("-").slice(1, 4).join("-");
+    const [y, m, d] = dateStr.split("-").map(Number);
+    const handNum = Math.round(
+      (new Date(y, m - 1, d).getTime() - new Date(2026, 0, 1).getTime()) / 86400000
+    );
+    dailySeed = `hand-${handNum}-${state.handsPlayed}`;
+  }
   const deck = shuffleDeck(createDeck(), isDaily ? createDailyRNG(dailySeed!) : undefined);
   const { hands, kitty } = dealHands(deck);
   return { hands, upcard: kitty[0] };
@@ -247,10 +253,16 @@ serve(async (req) => {
 
     // ── Special action: SUBMIT_DAILY_SCORE ─────────────────────────────────────
     if (rawAction.type === "SUBMIT_DAILY_SCORE") {
-      const score = rawAction.payload;
+      const scoreRaw = rawAction.payload;
+      // Ensure hand_number is set (compute from date_string if missing)
+      const hand_number = scoreRaw.hand_number ?? (() => {
+        const [y, m, d] = (scoreRaw.date_string as string).split("-").map(Number);
+        return Math.round((new Date(y, m - 1, d).getTime() - new Date(2026, 0, 1).getTime()) / 86400000);
+      })();
+      const score = { ...scoreRaw, hand_number };
       const { error } = await supabase
         .from("daily_challenge_scores")
-        .upsert(score, { onConflict: "date_string,player_name" });
+        .upsert(score, { onConflict: "hand_number,player_name" });
 
       if (error) {
         Logger.error("[SERVER] SUBMIT_DAILY_SCORE error:", error);

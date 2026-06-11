@@ -63,6 +63,21 @@ export function isDailyChallengeExpired(dateString: string, now: Date = new Date
  */
 export function getDailyChallengeTimeRemaining(): string {
     // Expiration is at (dateString + 1) 06:00:00 PT
-    
+
     return "Expires at 6:00 AM PT";
+}
+
+/** Day 0 = 2026-01-01 PT. Each hand number maps to one calendar day. */
+export const HAND_EPOCH = '2026-01-01';
+
+/** Convert a 'YYYY-MM-DD' date string to a hand number (days since epoch). */
+export function getHandNumberFromDateString(dateStr: string): number {
+    const [y, m, d] = dateStr.split('-').map(Number);
+    const epoch = new Date(2026, 0, 1).getTime();
+    return Math.round((new Date(y, m - 1, d).getTime() - epoch) / 86400000);
+}
+
+/** Today's hand number (PT-aware). */
+export function getTodayHandNumber(): number {
+    return getHandNumberFromDateString(getDailyChallengeDate());
 }
