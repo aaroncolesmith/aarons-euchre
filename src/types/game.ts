@@ -14,6 +14,7 @@ export type Action = (
     | { type: 'REMOVE_PLAYER'; payload: { seatIndex: number } }
     | { type: 'START_MATCH' }
     | { type: 'START_DAILY_CHALLENGE'; payload: { userName: string; dateString: string } }
+    | { type: 'START_PRACTICE_HAND'; payload: { userName: string; handNumber: number } }
     | { type: 'UPDATE_ANIMATION_DEALER'; payload: { index: number } }
     | { type: 'SET_DEALER'; payload: { dealerIndex: number; hands?: Card[][]; upcard?: Card } }
     | { type: 'MAKE_BID'; payload: { suit: Suit; callerIndex: number; isLoner: boolean; reasoning?: string; strength?: number } }

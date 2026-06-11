@@ -2,11 +2,12 @@ import { useState, useEffect } from 'react';
 import { useGame, getSavedGames, deleteActiveGame } from '../../store/GameStore';
 import { supabase } from '../../lib/supabase';
 import { fetchUserCloudGames, mergeLocalAndCloudGames } from '../../utils/cloudGames';
-import { hasUserPlayedDaily, getPlayerDailyStreak, getPlayerDailyHistory } from '../../utils/supabaseStats';
+import { hasUserPlayedDaily, getPlayerDailyStreak } from '../../utils/supabaseStats';
 import { getDailyChallengeDate, isDailyChallengeExpired, getTodayHandNumber, getDateStringFromHandNumber } from '../../utils/dailyUtils';
 import { APP_VERSION } from '../../version';
 
-const ARCHIVE_DAYS = 7;
+const PRACTICE_TOTAL = 100;
+const PRACTICE_PAGE = 10;
 
 export const LandingPage = () => {
     const { state, dispatch } = useGame();
@@ -24,8 +25,8 @@ export const LandingPage = () => {
     const [gameFilter, setGameFilter] = useState<'in-progress' | 'completed'>('in-progress');
     const [hasPlayedDaily, setHasPlayedDaily] = useState(false);
     const [streak, setStreak] = useState<{ current: number; longest: number }>({ current: 0, longest: 0 });
-    const [playedHandNums, setPlayedHandNums] = useState<Set<number>>(new Set());
-    const [showArchive, setShowArchive] = useState(false);
+    const [showPractice, setShowPractice] = useState(false);
+    const [practiceVisible, setPracticeVisible] = useState(PRACTICE_PAGE);
 
     const todayHandNum = getTodayHandNumber();
     const todayDateString = getDailyChallengeDate();
@@ -34,16 +35,14 @@ export const LandingPage = () => {
         const loadAll = async () => {
             if (!state.currentUser) return;
 
-            const [games, played, history, streakData] = await Promise.all([
+            const [games, played, streakData] = await Promise.all([
                 fetchUserCloudGames(state.currentUser),
                 hasUserPlayedDaily(state.currentUser, todayDateString, todayHandNum),
-                getPlayerDailyHistory(state.currentUser),
                 getPlayerDailyStreak(state.currentUser, todayHandNum),
             ]);
 
             setCloudGames(games);
             setHasPlayedDaily(played);
-            setPlayedHandNums(new Set(history));
             setStreak(streakData);
         };
         loadAll();
@@ -101,7 +100,7 @@ export const LandingPage = () => {
         }
     };
 
-    const startOrResumeDaily = (_handNum: number, dateStr: string) => {
+    const startOrResumeDaily = (dateStr: string) => {
         const tableCode = `DAILY-${dateStr}-${state.currentUser}`;
         const existing = savedGames.find(g => g.tableCode === tableCode);
         if (existing) {
@@ -111,14 +110,25 @@ export const LandingPage = () => {
         }
     };
 
-    // Archive: last ARCHIVE_DAYS hands before today
-    const archiveHandNums = Array.from({ length: ARCHIVE_DAYS }, (_, i) => todayHandNum - 1 - i);
+    const startOrResumePractice = (handNumber: number) => {
+        const tableCode = `PRACTICE-${handNumber}-${state.currentUser}`;
+        const existing = savedGames.find(g => g.tableCode === tableCode);
+        if (existing) {
+            dispatch({ type: 'LOAD_EXISTING_GAME', payload: { gameState: existing } });
+        } else {
+            dispatch({ type: 'START_PRACTICE_HAND', payload: { userName: state.currentUser!, handNumber } });
+        }
+    };
 
-    const formatHandDate = (handNum: number) => {
-        const ds = getDateStringFromHandNumber(handNum);
-        const [, m, d] = ds.split('-').map(Number);
-        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        return `${months[m - 1]} ${d}`;
+    // Derive local practice game status from savedGames
+    const practiceStatus = (handNumber: number): 'not-started' | 'in-progress' | 'won' | 'lost' => {
+        const tableCode = `PRACTICE-${handNumber}-${state.currentUser}`;
+        const game = savedGames.find(g => g.tableCode === tableCode);
+        if (!game) return 'not-started';
+        if (game.phase !== 'game_over') return 'in-progress';
+        const userIdx = game.players.findIndex((p: any) => p.name === state.currentUser);
+        const isTeam1 = userIdx === 0 || userIdx === 2;
+        return (isTeam1 ? game.scores.team1 : game.scores.team2) >= 10 ? 'won' : 'lost';
     };
 
     return (
@@ -157,7 +167,7 @@ export const LandingPage = () => {
                     <button
                         disabled={hasPlayedDaily}
                         onClick={() => {
-                            if (!hasPlayedDaily) startOrResumeDaily(todayHandNum, todayDateString);
+                            if (!hasPlayedDaily) startOrResumeDaily(todayDateString);
                         }}
                         className={`group w-full p-8 rounded-2xl border-4 border-ink shadow-sketch-ink-lg transition-all text-left relative overflow-hidden ${
                             hasPlayedDaily
@@ -208,48 +218,49 @@ export const LandingPage = () => {
                         </div>
                     )}
 
-                    {/* Archive toggle */}
+                    {/* Practice Hands toggle */}
                     <button
-                        onClick={() => setShowArchive(v => !v)}
+                        onClick={() => setShowPractice(v => !v)}
                         className="mt-3 flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-ink-dim hover:text-ink transition-colors"
                     >
-                        <svg className={`w-3 h-3 transition-transform ${showArchive ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className={`w-3 h-3 transition-transform ${showPractice ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7" />
                         </svg>
-                        Past Hands
+                        Practice Hands (100)
                     </button>
 
-                    {showArchive && (
+                    {showPractice && (
                         <div className="mt-2 space-y-1 animate-in slide-in-from-top-2 duration-200">
-                            {archiveHandNums.map(handNum => {
-                                const dateStr = getDateStringFromHandNumber(handNum);
-                                const done = playedHandNums.has(handNum);
-                                const localCode = `DAILY-${dateStr}-${state.currentUser}`;
-                                const localGame = savedGames.find(g => g.tableCode === localCode);
-                                const inProgress = localGame && localGame.phase !== 'game_over' && !done;
-
+                            {Array.from({ length: Math.min(practiceVisible, PRACTICE_TOTAL) }, (_, i) => i + 1).map(n => {
+                                const status = practiceStatus(n);
                                 return (
                                     <div
-                                        key={handNum}
+                                        key={n}
                                         className="flex items-center justify-between bg-paper border border-ink-dim/30 rounded-xl px-4 py-3"
                                     >
                                         <div className="flex items-center gap-3">
-                                            <span className="text-[10px] font-black text-ink-dim tabular-nums">#{handNum}</span>
-                                            <span className="text-xs font-bold text-ink">{formatHandDate(handNum)}</span>
-                                            {done && <span className="text-[9px] font-black text-brand uppercase tracking-widest">✓ Played</span>}
-                                            {inProgress && <span className="text-[9px] font-black text-amber-600 uppercase tracking-widest">In Progress</span>}
+                                            <span className="text-[10px] font-black text-ink-dim tabular-nums w-8">#{n}</span>
+                                            {status === 'won' && <span className="text-[9px] font-black text-brand uppercase tracking-widest">✓ Win</span>}
+                                            {status === 'lost' && <span className="text-[9px] font-black text-red-400 uppercase tracking-widest">✗ Loss</span>}
+                                            {status === 'in-progress' && <span className="text-[9px] font-black text-amber-600 uppercase tracking-widest">In Progress</span>}
                                         </div>
-                                        {!done && (
-                                            <button
-                                                onClick={() => startOrResumeDaily(handNum, dateStr)}
-                                                className="text-[10px] font-black text-brand hover:text-brand-dark uppercase tracking-widest transition-colors"
-                                            >
-                                                Play →
-                                            </button>
-                                        )}
+                                        <button
+                                            onClick={() => startOrResumePractice(n)}
+                                            className="text-[10px] font-black text-brand hover:text-brand-dark uppercase tracking-widest transition-colors"
+                                        >
+                                            {status === 'not-started' ? 'Play →' : status === 'in-progress' ? 'Resume →' : 'Replay →'}
+                                        </button>
                                     </div>
                                 );
                             })}
+                            {practiceVisible < PRACTICE_TOTAL && (
+                                <button
+                                    onClick={() => setPracticeVisible(v => Math.min(v + PRACTICE_PAGE, PRACTICE_TOTAL))}
+                                    className="w-full text-[10px] font-black uppercase tracking-widest text-ink-dim hover:text-ink py-2 transition-colors"
+                                >
+                                    Show more ({PRACTICE_TOTAL - practiceVisible} remaining)
+                                </button>
+                            )}
                         </div>
                     )}
                 </div>

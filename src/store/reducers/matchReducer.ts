@@ -16,11 +16,18 @@ export const matchReducer = (state: GameState, action: Action): GameState | null
             const isValidUpcard = upcard && upcard.suit && upcard.rank;
 
             if (!isValidHands || !isValidUpcard) {
-                const isDaily = state.isDailyChallenge;
-                const dateStr = state.tableCode?.split('-').slice(1, 4).join('-') ?? '';
-                const handNum = dateStr ? getHandNumberFromDateString(dateStr) : 0;
-                const dailySeed = isDaily && state.tableCode ? `hand-${handNum}-${state.handsPlayed}` : undefined;
-                const deck = shuffleDeck(createDeck(), isDaily ? createDailyRNG(dailySeed!) : undefined);
+                const isPractice = !!state.tableCode?.startsWith('PRACTICE-');
+                const isSeeded = state.isDailyChallenge || isPractice;
+                let seededSeed: string | undefined;
+                if (isSeeded && state.tableCode) {
+                    if (isPractice) {
+                        seededSeed = `practice-${state.tableCode.split('-')[1]}-${state.handsPlayed}`;
+                    } else {
+                        const dateStr = state.tableCode.split('-').slice(1, 4).join('-');
+                        seededSeed = `hand-${getHandNumberFromDateString(dateStr)}-${state.handsPlayed}`;
+                    }
+                }
+                const deck = shuffleDeck(createDeck(), isSeeded ? createDailyRNG(seededSeed!) : undefined);
                 const { hands: h, kitty: k } = dealHands(deck);
                 return {
                     ...state,

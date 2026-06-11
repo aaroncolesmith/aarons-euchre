@@ -169,6 +169,47 @@ export const lobbyReducer = (state: GameState, action: Action): GameState | null
             };
         }
 
+        case 'START_PRACTICE_HAND': {
+            const { userName, handNumber } = action.payload;
+            const botNames = ['Huber', 'J-Bock', 'Wooden'];
+            const practicePlayers = [
+                {
+                    ...createEmptyPlayer(0),
+                    name: userName,
+                    userId: getStableUserId(userName, false),
+                    isComputer: false,
+                    stats: getEmptyStats()
+                },
+                ...botNames.map((botName, i) => ({
+                    ...createEmptyPlayer(i + 1),
+                    name: botName,
+                    userId: getStableUserId(botName, true),
+                    isComputer: true,
+                    stats: getEmptyStats(),
+                    personality: BOT_PERSONALITIES[botName]
+                }))
+            ];
+
+            return {
+                ...state,
+                isDailyChallenge: false,
+                tableId: `practice-${handNumber}-${userName}`,
+                tableName: `Practice Hand #${handNumber}`,
+                tableCode: `PRACTICE-${handNumber}-${userName}`,
+                currentViewPlayerName: userName,
+                players: practicePlayers,
+                phase: 'waiting_for_next_deal',
+                dealerIndex: 0,
+                displayDealerIndex: 0,
+                teamNames: {
+                    team1: getTeamName(userName, 'J-Bock'),
+                    team2: getTeamName('Huber', 'Wooden')
+                },
+                activeTab: 'game',
+                logs: [`Starting Practice Hand #${handNumber}.`, ...state.logs]
+            };
+        }
+
         default:
             return null;
     }

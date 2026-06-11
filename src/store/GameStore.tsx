@@ -98,8 +98,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             return;
         }
 
-        if (!state.tableCode || state.tableCode.startsWith('DAILY-')) {
-            // Daily challenges are solo and local-first for now
+        if (!state.tableCode || state.tableCode.startsWith('DAILY-') || state.tableCode.startsWith('PRACTICE-')) {
             broadcastDispatch(action);
             return;
         }
@@ -351,6 +350,12 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         if (lastGameStatsSavedRef.current === state.tableCode) return;
 
         const isDaily = state.tableCode.startsWith('DAILY-');
+        const isPractice = state.tableCode.startsWith('PRACTICE-');
+        if (isPractice) {
+            // Practice games are local-only; no stats tracking.
+            lastGameStatsSavedRef.current = state.tableCode;
+            return;
+        }
         if (!isDaily) {
             // Regular games: server already handled stats via the cascade. Mark done.
             lastGameStatsSavedRef.current = state.tableCode;
@@ -430,13 +435,19 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                         const shouldIGenerate = allBotsGame ? true : isHost;
 
                         if (shouldIGenerate) {
-                            const isDaily = state.isDailyChallenge;
-                            if (isDaily) {
-                                // Daily: generate locally so the seeded deck is deterministic
-                                const dateStr = state.tableCode?.split('-').slice(1, 4).join('-') ?? '';
-                                const handNum = dateStr ? getHandNumberFromDateString(dateStr) : 0;
-                                const dailySeed = state.tableCode ? `hand-${handNum}-${state.handsPlayed}` : undefined;
-                                const deck = shuffleDeck(createDeck(), createDailyRNG(dailySeed!));
+                            const isPractice = !!state.tableCode?.startsWith('PRACTICE-');
+                            const isSeededLocal = state.isDailyChallenge || isPractice;
+                            if (isSeededLocal) {
+                                // Daily / Practice: generate locally so the seeded deck is deterministic
+                                let seed: string;
+                                if (isPractice) {
+                                    seed = `practice-${state.tableCode!.split('-')[1]}-${state.handsPlayed}`;
+                                } else {
+                                    const dateStr = state.tableCode?.split('-').slice(1, 4).join('-') ?? '';
+                                    const handNum = dateStr ? getHandNumberFromDateString(dateStr) : 0;
+                                    seed = `hand-${handNum}-${state.handsPlayed}`;
+                                }
+                                const deck = shuffleDeck(createDeck(), createDailyRNG(seed));
                                 const { hands, kitty } = dealHands(deck);
                                 serverDispatch({
                                     type: 'SET_DEALER',
