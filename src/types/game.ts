@@ -5,7 +5,7 @@ export type Color = 'red' | 'black';
 export type Action = (
     | { type: 'CREATE_TABLE'; payload: { userName: string } }
     | { type: 'JOIN_TABLE'; payload: { code: string; userName: string } }
-    | { type: 'LOGIN'; payload: { userName: string } }
+    | { type: 'LOGIN'; payload: { userName: string; userId?: string } }
     | { type: 'LOGOUT' }
     | { type: 'LOAD_EXISTING_GAME'; payload: { gameState: GameState } }
     | { type: 'SIT_PLAYER'; payload: { seatIndex: number; name: string } }

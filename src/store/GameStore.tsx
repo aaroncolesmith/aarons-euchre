@@ -70,7 +70,13 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const serverDispatch = async (action: Action) => {
         // Optimistically apply locally for smooth UI (Phase C: Optional)
         // However, LOGIN and local-only actions should stay local
-        if (['LOGIN', 'LOGOUT', 'LOAD_GLOBAL_STATS', 'CLEAR_HISTORY'].includes(action.type)) {
+        if (['LOGIN', 'LOAD_GLOBAL_STATS', 'CLEAR_HISTORY'].includes(action.type)) {
+            dispatch(action);
+            return;
+        }
+
+        if (action.type === 'LOGOUT') {
+            supabase.auth.signOut();
             dispatch(action);
             return;
         }
@@ -214,7 +220,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
 
     useEffect(() => {
-        // One-time prune of old completed games from before the saveActiveGame guard.
+        // One-time prune of old completed games.
         try {
             const saved = localStorage.getItem('euchre_active_games');
             if (saved) {
@@ -228,22 +234,38 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             }
         } catch { /* ignore */ }
 
-        const savedUser = localStorage.getItem('euchre_current_user');
-        if (savedUser) dispatch({ type: 'LOGIN', payload: { userName: savedUser } });
-
-        const init = async () => {
+        const loadStats = async (username: string | null) => {
             const localStats = getGlobalStats();
             const cloudStats = await getAllPlayerStats();
             const mergedStats = mergeAllStats(localStats, cloudStats);
             localStorage.setItem('euchre_global_stats_v4', JSON.stringify(mergedStats));
             dispatch({ type: 'LOAD_GLOBAL_STATS', payload: mergedStats });
-
-            // Self-healing: Sync any completed daily challenges that didn't make it to the cloud
-            if (savedUser) {
-                await syncUnsyncedDailies(savedUser);
-            }
+            if (username) await syncUnsyncedDailies(username);
         };
-        init();
+
+        // Restore session from Supabase (cross-device) or localStorage (legacy fallback).
+        // onAuthStateChange fires immediately with INITIAL_SESSION if a session exists.
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            if (session?.user) {
+                const username = session.user.user_metadata?.username as string | undefined;
+                if (username) {
+                    localStorage.setItem('euchre_current_user', username);
+                    dispatch({ type: 'LOGIN', payload: { userName: username, userId: session.user.id } });
+                }
+            }
+        });
+
+        // After listener is set up, check for no-session case and fall back to localStorage.
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            const username = session?.user?.user_metadata?.username as string | undefined;
+            if (!session) {
+                const savedUser = localStorage.getItem('euchre_current_user');
+                if (savedUser) dispatch({ type: 'LOGIN', payload: { userName: savedUser } });
+            }
+            loadStats(username || localStorage.getItem('euchre_current_user'));
+        });
+
+        return () => subscription.unsubscribe();
     }, []);
 
     // Multiplayer Sync Logic

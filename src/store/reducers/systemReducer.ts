@@ -12,12 +12,12 @@ export const systemReducer = (state: GameState, action: Action): GameState | nul
             const displayName = matchedUser
                 ? ['Aaron', 'Polina', 'Gray-Gray', 'Mimi', 'Micah', 'Cherrie', 'Peter-Playwright', 'TEST'][knownUsers.indexOf(matchedUser)]
                 : enteredName;
-            return { 
-                ...state, 
-                currentUser: displayName, 
-                currentUserId: getStableUserId(displayName, false),
-                phase: 'landing', 
-                activeTab: 'home' 
+            return {
+                ...state,
+                currentUser: displayName,
+                currentUserId: action.payload.userId || getStableUserId(displayName, false),
+                phase: 'landing',
+                activeTab: 'home'
             };
         }
 
