@@ -529,6 +529,48 @@ export async function hasUserPlayedDaily(playerName: string, dateString: string,
     }
 }
 
+/** All hand_numbers the player has completed, sorted descending. */
+export async function getPlayerDailyHistory(playerName: string): Promise<number[]> {
+    try {
+        const { data, error } = await supabase
+            .from('daily_challenge_scores')
+            .select('hand_number')
+            .eq('player_name', playerName)
+            .order('hand_number', { ascending: false });
+
+        if (error) throw error;
+        return (data || []).map((r: any) => r.hand_number).filter((n: any) => n != null);
+    } catch {
+        return [];
+    }
+}
+
+/** Current and longest daily-challenge streaks for a player. */
+export async function getPlayerDailyStreak(playerName: string, todayHandNum: number): Promise<{ current: number; longest: number }> {
+    const played = await getPlayerDailyHistory(playerName);
+    if (played.length === 0) return { current: 0, longest: 0 };
+
+    const handSet = new Set(played);
+
+    // Current: count backwards from today (grace: if today not yet played, start from yesterday)
+    const start = handSet.has(todayHandNum) ? todayHandNum : todayHandNum - 1;
+    let current = 0;
+    for (let n = start; n >= 0; n--) {
+        if (handSet.has(n)) current++;
+        else break;
+    }
+
+    // Longest: scan sorted ascending for longest consecutive run
+    const sorted = [...played].sort((a, b) => a - b);
+    let longest = 0, run = 0;
+    for (let i = 0; i < sorted.length; i++) {
+        run = (i > 0 && sorted[i] === sorted[i - 1] + 1) ? run + 1 : 1;
+        if (run > longest) longest = run;
+    }
+
+    return { current, longest };
+}
+
 /**
  * Rebuild aggregate player stats from event stream
  */

@@ -81,3 +81,13 @@ export function getHandNumberFromDateString(dateStr: string): number {
 export function getTodayHandNumber(): number {
     return getHandNumberFromDateString(getDailyChallengeDate());
 }
+
+/** Convert a hand number back to a 'YYYY-MM-DD' date string. */
+export function getDateStringFromHandNumber(handNumber: number): string {
+    const epoch = new Date(2026, 0, 1);
+    const target = new Date(epoch.getTime() + handNumber * 86400000);
+    const year = target.getFullYear();
+    const month = String(target.getMonth() + 1).padStart(2, '0');
+    const day = String(target.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
